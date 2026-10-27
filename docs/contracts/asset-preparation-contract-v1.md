@@ -398,6 +398,7 @@ ice3-tool validate <file.glb> [--report <file.json>]
 
 - Distribution index: OGC 3D Tiles 1.1 `tileset.json`.
 - Contents: ICE3 Prepared GLB Profile v1 files.
+- Every embedded GLB `bufferView` includes the mandatory `buffer: 0` index.
 - Supported v1 subset: explicit `children`, local Cartesian `box` or `sphere`,
   relative `content.uri`, finite 4x4 `transform`, and `REPLACE` refinement.
 - Unsupported v1 features: `region`, external tilesets, `implicitTiling`,
