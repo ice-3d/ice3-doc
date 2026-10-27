@@ -463,6 +463,26 @@ content; `whenIdle()` reports stability of the work set active when it was
 called. `whenComplete()` is not part of the contract because camera-driven
 residency must not imply global completion.
 
+### 19.1 LOD transition visibility
+
+Hierarchical LOD changes use a stable screen-space-error band. A coarse Tile
+refines when its error exceeds the configured limit. It coarsens only after the
+error falls below 75% of that limit, preventing camera movement near the
+threshold from repeatedly toggling representations.
+
+The current visible representation remains in the scene while the complete next
+visible representation is loaded off-scene. When every target Tile in the group
+is resident, the runtime publishes the new representation and removes the old
+one in the same scene mutation. Ancestor and descendant content must not be
+visible together, and a transition must not create an empty visible frame.
+Prefetched descendants remain hidden until they become the active target.
+
+If a required descendant fails, its fallback content replaces the whole
+overlapping target subtree; successful siblings are not mixed with an ancestor
+representation. `TILESET_READY` is emitted only after the first complete
+visible group is committed. These guarantees do not change the Tileset schema,
+Prepared GLB format, or `selectionId` identity.
+
 This stage establishes the frustum, retention, budget, commit throttling, and
 unload mechanisms reused by hierarchical LOD. Implicit tiling, external
 Tilesets, and runtime mesh simplification remain unsupported.
