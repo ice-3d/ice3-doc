@@ -50,7 +50,7 @@ git -C ../ice3-engine \
   switch -c feature/spatial-tileset-pipeline
 ```
 
-- [ ] Confirm all three repositories start clean:
+- [ ] Confirm all repositories start clean:
 
 ```bash
 git -C ../ice3-doc status --short
@@ -134,7 +134,7 @@ git -C ../ice3-doc \
 
 - [ ] **Step 2: Create the synthetic source helper**
 
-The helper must return a three-dimensional document with four separate triangle
+The helper must return a 3D document with four separate triangle
 meshes and nodes translated along x:
 
 ```ts
