@@ -486,10 +486,38 @@ Defaults:
 | `lodRatio` | 0.15 |
 | `lodMaxTriangles` | 250000 |
 | `lodMinUnitTriangles` | 8 |
+| `lodAllocation` | `proportional` |
+| `lodCurveSamples` | 8 |
 
 Coarse geometry is simplified per semantic device and material primitive.
 Devices are never merged into a shared selection identity, and per-device
-minimums take priority over the node's soft triangle cap.
+minimums take priority over the node's soft triangle cap in proportional mode.
+
+`lodAllocation` accepts:
+
+- `proportional`: every device receives the same configured ratio, with device
+  minimums applied. Existing output remains stable for identical input,
+  options, and tool version.
+- `adaptive`: each device receives a deterministic logarithmic simplification
+  curve. The allocator keeps only monotonic samples where additional actual
+  triangles reduce error, then spends the node budget on the largest
+  normalized marginal error reduction.
+
+The adaptive node budget is:
+
+```text
+min(lodMaxTriangles, proportional target total for that node)
+```
+
+This keeps adaptive and proportional comparisons under the same nominal node
+work. `lodMaxTriangles` remains an upper cap. If all devices at their minimum
+samples exceed that node budget, adaptive generation fails with
+`ICE3_TOOL_LOD_BUDGET_INVALID` and emits no partial output.
+
+`lodCurveSamples` must be an integer from `4` through `32`. Curve sample
+geometry is stored in the same bounded temporary workspace as normalized
+source geometry. One curve is cached per semantic device, concurrent spills
+use unique paths, and all temporary data is removed after success or failure.
 
 Prepared GLB node extras may include:
 
@@ -514,9 +542,27 @@ Temporary data and incomplete output directories are removed after success,
 failure, or cancellation.
 
 New tool diagnostics are `ICE3_TOOL_LOD_INVALID`,
-`ICE3_TOOL_LOD_UNSUPPORTED`, and `ICE3_TOOL_LOD_CLEANUP_FAILED`.
+`ICE3_TOOL_LOD_UNSUPPORTED`, `ICE3_TOOL_LOD_BUDGET_INVALID`, and
+`ICE3_TOOL_LOD_CLEANUP_FAILED`.
 The optional LOD simplifier is a toolchain dependency and is not part of the
 browser runtime or public package dependency graph.
+
+The partition report preserves existing coarse statistics and adds:
+
+```ts
+interface ICELodAdaptiveStats {
+  readonly allocationMode: 'proportional' | 'adaptive';
+  readonly adaptiveUnitCount: number;
+  readonly minimumUnitTriangleRatio: number;
+  readonly maximumUnitTriangleRatio: number;
+  readonly maximumErrorMeters: number;
+  readonly curveSampleCount: number;
+}
+```
+
+Adaptive generation changes only coarse geometry and error metadata. It does
+not add Tileset fields, alter `REPLACE`, change Prepared GLB framing, or move
+work into the browser runtime.
 
 Internal coarse content may use the standard Tileset `contents` array when it
 exceeds the configured chunk limit. Chunks are deterministic, never split an
