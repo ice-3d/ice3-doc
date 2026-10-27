@@ -517,3 +517,9 @@ New tool diagnostics are `ICE3_TOOL_LOD_INVALID`,
 `ICE3_TOOL_LOD_UNSUPPORTED`, and `ICE3_TOOL_LOD_CLEANUP_FAILED`.
 The optional LOD simplifier is a toolchain dependency and is not part of the
 browser runtime or public package dependency graph.
+
+Internal coarse content may use the standard Tileset `contents` array when it
+exceeds the configured chunk limit. Chunks are deterministic, never split an
+individual device, and retain stable semantic selection identities. The runtime
+loads all required chunks as one logical Tile and commits only the complete
+group.
