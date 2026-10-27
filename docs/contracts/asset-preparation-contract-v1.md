@@ -368,7 +368,7 @@ ice3-tool validate <file.glb> [--report <file.json>]
 
 - 自动为客户模型做最优优化。
 - 在运行时动态应用预算或执行优化。
-- 流式分区和网络调度策略。
+- 动态资源卸载和完整的视锥、屏幕空间误差网络调度策略。
 - 业务点位、告警和设备实时状态。
 - 精确预测所有 GPU 架构的显存占用。
 - 固化永久预算数字。
@@ -393,3 +393,21 @@ ice3-tool validate <file.glb> [--report <file.json>]
 6. 旁路报告可选且不是运行时依赖。
 7. 客户资产与敏感路径不进入契约示例、测试和报告。
 8. 跨仓库冻结样例和契约测试通过。
+
+## 18. Tileset distribution and partition diagnostics
+
+- Distribution index: OGC 3D Tiles 1.1 `tileset.json`.
+- Contents: ICE3 Prepared GLB Profile v1 files.
+- Supported v1 subset: explicit `children`, local Cartesian `box` or `sphere`,
+  relative `content.uri`, finite 4x4 `transform`, and `REPLACE` refinement.
+- Unsupported v1 features: `region`, external tilesets, `implicitTiling`,
+  non-Prepared GLB contents, and undeclared required extensions.
+- Partition output is published atomically as a directory.
+- ICE3-owned tile metadata lives under standard `extras.ice3`.
+- Tool diagnostics are `ICE3_TOOL_PARTITION_OPTIONS_INVALID`,
+  `ICE3_TOOL_PARTITION_EMPTY`, `ICE3_TOOL_PARTITION_UNSPLITTABLE`,
+  `ICE3_TOOL_PARTITION_OUTPUT_EXISTS`,
+  `ICE3_TOOL_TILESET_INVALID`, and `ICE3_TOOL_TILESET_WRITE_FAILED`.
+- Runtime diagnostics are `ICE3_TILESET_INVALID`, `ICE3_TILESET_UNSUPPORTED`,
+  `ICE3_TILESET_TILE_FAILED`, `ICE3_TILESET_DUPLICATE_ID`, and
+  `ICE3_TILESET_ABORTED`.
