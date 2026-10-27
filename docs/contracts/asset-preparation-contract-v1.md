@@ -569,3 +569,73 @@ exceeds the configured chunk limit. Chunks are deterministic, never split an
 individual device, and retain stable semantic selection identities. The runtime
 loads all required chunks as one logical Tile and commits only the complete
 group.
+
+## 21. Conservative semantic proxy generation
+
+`partition --lod --lod-allocation adaptive` accepts the optional
+`--semantic-proxy off|auto` switch. The default is `off`. `auto` is rejected
+before source processing unless both `--lod` and adaptive allocation are active;
+`off` preserves the existing adaptive output for identical input and options.
+
+Proxy generation is an offline toolchain operation over semantic device units.
+It samples unique source-mesh vertices and non-degenerate triangle centroids,
+fits OBB and cylinder candidates in mesh-local coordinates, and stores qualified
+geometry in the bounded temporary workspace. Principal axes are derived from the
+deduplicated surface vertices so asymmetric tessellation cannot rotate the axes
+of an otherwise symmetric device.
+
+An accepted candidate must satisfy all fixed limits:
+
+| Metric | Limit |
+| --- | ---: |
+| Normalized maximum surface deviation | `<= 0.05` |
+| Proxy volume / source local AABB volume | `<= 2.0` |
+| Source triangle reduction | `>= 8x` |
+
+Devices below 64 source triangles are ineligible. OBB uses 12 triangles and
+cylinder uses 64. Candidates that fail a limit, have unstable axes, or lack
+sufficient triangle reduction are rejected and remain on the existing QEM
+path. Accepted proxies and QEM samples compete under the same Tile triangle
+budget; a proxy receives no semantic budget bonus.
+
+A selected proxy replaces only the geometry of its source mesh in the Prepared
+GLB. It retains the source mesh-local coordinate system, node transforms, node
+IDs, and `selectionId` values. Shared source meshes continue to share one proxy,
+and proxy and QEM devices may coexist in one Tile and one coarse content group.
+The output remains a standard Prepared GLB with no proxy-specific extension,
+Tileset field, private asset format, or runtime API. Invalid selected proxy
+geometry fails the build instead of publishing a partial output.
+
+Material selection is deterministic: the dominant material is chosen by
+triangle count and then lowest source material index. Averaged vertex color is
+used only when every contributing primitive has vertex colors; otherwise the
+dominant material is retained. The proxy does not read textures or synthesize a
+new PBR material.
+
+The partition report adds:
+
+```ts
+interface ICESemanticProxyStats {
+  readonly semanticProxyAcceptedUnits: number;
+  readonly semanticProxyObbUnits: number;
+  readonly semanticProxyCylinderUnits: number;
+  readonly semanticProxyRejectedUnits: number;
+  readonly semanticProxySelectedContents: number;
+  readonly semanticProxyTriangles: number;
+  readonly semanticProxySavedTriangles: number;
+  readonly semanticProxyMaximumErrorMeters: number;
+}
+```
+
+Accepted, rejected, and kind counts use unique semantic units. Selected,
+triangle, and saved-triangle counts describe final coarse contents. The saved
+triangle count is the local device benefit before the adaptive allocator can
+reassign released budget to other devices; it is not an expected reduction in
+the final Tile total. Proxy reports contain no source paths, customer names,
+device names, previews, or geometry.
+
+The proxy workflow keeps the same compatibility boundary as the rest of the
+contract: runtime conversion remains forbidden, generated content is ordinary
+Prepared GLB, every GLB must pass validation, and existing Tileset behavior is
+unchanged. Enabling or disabling proxies must not change `selectionId` identity
+or node transforms.
