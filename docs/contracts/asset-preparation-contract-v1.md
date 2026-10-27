@@ -779,3 +779,37 @@ observation window, Chromium's active LOD work set rendered 1,472 ordinary
 Draw Calls versus 114 static batches while loading the same coarse work set.
 Static batching trades larger prepared bytes and longer offline builds for
 materially lower runtime submission cost.
+
+### 22.1 Optional adaptive runtime repacking
+
+`ICETilesetLoader` accepts `renderBatching.mode` with `asset`, `adaptive`, or
+`off`. The default is `asset`: use Prepared GLB batches without runtime
+repacking. `adaptive` enables idle-time generation; `off` disables adaptive
+planning and does not rewrite or unpack already prepared batches.
+
+Adaptive planning is permitted only when the camera and visible target set are
+stable. The runtime may merge compatible visible batch geometry across content
+boundaries for the current generation, but it must not change semantic
+selection IDs, Tileset bounds, `geometricError`, or `REPLACE` behavior.
+
+The implementation contract is:
+
+- Worker concurrency is bounded and defaults to
+  `min(4, max(1, hardwareConcurrency - 1))`.
+- Source ownership transfers through `ArrayBuffer` transfer lists exactly once.
+- Candidate uploads are split by `uploadBytesPerFrame`; no buffer larger than
+  the frame budget is accepted by that budget.
+- Candidate GPU geometry remains inactive until every chunk is prepared.
+- A single callback activates the completed generation. The runtime restores
+  the prior visible mesh/batch layout on camera motion, target change,
+  cancellation, or disposal.
+- Worker, transfer, upload, or activation failure leaves the previous active
+  generation unchanged and releases candidate resources.
+- Generation diagnostics are deduplicated per generation:
+  `ICE3_RENDER_BATCH_ADAPTIVE_STARTED`,
+  `ICE3_RENDER_BATCH_ADAPTIVE_COMPLETED`,
+  `ICE3_RENDER_BATCH_ADAPTIVE_CANCELLED`,
+  `ICE3_RENDER_BATCH_ADAPTIVE_FAILED`, and
+  `ICE3_RENDER_BATCH_MEMORY_REJECTED`.
+- `ICETilesetHandle.adaptiveStats` exposes only generation counters and batch
+  counts; it never exposes Worker, transferable, or GPU handles.
