@@ -440,6 +440,7 @@ The runtime defaults are:
 | `prefetchMarginRatio` | 0.10 |
 | `unloadMarginRatio` | 0.20 |
 | `maxCommitsPerFrame` | 1 |
+| `lodSettleDelayMs` | 180 |
 
 `maxResidentTiles` and `maxResidentBytes` are soft budgets. Visible completeness
 wins: a visible set larger than either budget continues loading and remains
@@ -476,6 +477,14 @@ is resident, the runtime publishes the new representation and removes the old
 one in the same scene mutation. Ancestor and descendant content must not be
 visible together, and a transition must not create an empty visible frame.
 Prefetched descendants remain hidden until they become the active target.
+
+Continuous camera motion does not publish repeated LOD group swaps. The active
+representation stays stable while the current view's next target group loads
+off-scene. A content-bearing coarse ancestor remains resident but hidden as a
+motion fallback when available. Entering motion may atomically switch to that
+fallback; the runtime publishes the final target group only after the camera has
+been stable for `lodSettleDelayMs`. Setting the delay to `0` disables the
+interaction stabilization window.
 
 If a required descendant fails, its fallback content replaces the whole
 overlapping target subtree; successful siblings are not mixed with an ancestor
