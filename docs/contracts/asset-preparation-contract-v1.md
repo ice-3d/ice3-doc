@@ -467,3 +467,54 @@ This stage establishes the frustum, retention, budget, commit throttling, and
 unload mechanisms that the following LOD stage will reuse. Generated LOD,
 parent-content refinement, implicit tiling, external Tilesets, and full
 screen-space-error scheduling are not part of this runtime version.
+
+## 20. Hierarchical LOD asset generation
+
+`partition --lod` enables coarse proxies without changing the standard Tileset
+shape:
+
+- fine leaves remain under `parts/`;
+- internal-node proxies are written under `coarse/`;
+- internal and leaf content are relative Prepared GLBs;
+- every node continues to use `REPLACE`;
+- `geometricError` is measured in world meters and is never derived from a
+  fixed LOD index or camera distance.
+
+Defaults:
+
+| Option | Default |
+| --- | ---: |
+| `lodRatio` | 0.15 |
+| `lodMaxTriangles` | 250000 |
+| `lodMinUnitTriangles` | 8 |
+
+Coarse geometry is simplified per semantic device and material primitive.
+Devices are never merged into a shared selection identity, and per-device
+minimums take priority over the node's soft triangle cap.
+
+Prepared GLB node extras may include:
+
+```json
+{
+  "ice3": {
+    "id": "lod:group-root/node/17",
+    "selectionId": "asset/node/17"
+  }
+}
+```
+
+`id` remains unique inside the GLB. `selectionId` can repeat across LOD
+contents to identify the same business device. Missing `selectionId` falls back
+to `id`, preserving existing assets.
+
+The source document is parsed once. Normalized device geometry is held in a
+bounded temporary workspace, spilling excess units to temporary binary files.
+Fine and coarse outputs are produced by the same build task. Every coarse proxy
+simplifies original normalized geometry rather than another coarse proxy.
+Temporary data and incomplete output directories are removed after success,
+failure, or cancellation.
+
+New tool diagnostics are `ICE3_TOOL_LOD_INVALID`,
+`ICE3_TOOL_LOD_UNSUPPORTED`, and `ICE3_TOOL_LOD_CLEANUP_FAILED`.
+The optional LOD simplifier is a toolchain dependency and is not part of the
+browser runtime or public package dependency graph.
