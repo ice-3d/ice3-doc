@@ -676,3 +676,106 @@ contract: runtime conversion remains forbidden, generated content is ordinary
 Prepared GLB, every GLB must pass validation, and existing Tileset behavior is
 unchanged. Enabling or disabling proxies must not change `selectionId` identity
 or node transforms.
+
+## 22. Static render batches and repeated geometry
+
+Static batching is an optional offline preprocessing step. The toolchain
+command defaults to `--render-batch off`; `--render-batch static` enables the
+feature without changing source parsing or adding a runtime dependency.
+Existing Prepared GLBs without batch metadata continue through the ordinary
+mesh path with unchanged bytes.
+
+A batched Prepared GLB still contains one JSON chunk and one BIN chunk. Batch
+metadata is stored at `asset.extras.ice3.batching`:
+
+```ts
+interface ICEPreparedBatching {
+  readonly version: '1.0';
+  readonly semanticIds: readonly string[];
+  readonly semanticNodeIds: readonly string[];
+  readonly semanticSelectionIds: readonly string[];
+  readonly batches: readonly {
+    readonly id: string;
+    readonly mesh: number;
+    readonly primitive: number;
+    readonly material: number;
+    readonly mode: 4;
+    readonly triangleCount: number;
+    readonly bounds: {
+      readonly min: readonly [number, number, number];
+      readonly max: readonly [number, number, number];
+    };
+  }[];
+}
+```
+
+The three semantic arrays have equal lengths. `semanticNodeIds` reference the
+Prepared GLB node namespace and must match the corresponding node's
+`selectionId`. Every batch triangle primitive declares an `UNSIGNED_INT`
+`SCALAR` attribute named `_ICE3_SEMANTIC_INDEX`; every value indexes the
+semantic arrays. Invalid metadata, bounds, primitive references, or semantic
+indices fail with `ICE3_ASSET_BATCH_INVALID`.
+
+Only triangle geometry is statically batched in version 1.0. Source geometry
+may share a batch when its effective output material state, vertex-color mode,
+and edge state are identical. World transforms are baked into batch vertices.
+Semantic nodes remain as query-only identity carriers, and each Tile receives
+render-only batch nodes with IDs unique across the unified Tileset scene.
+
+The partition report adds:
+
+```ts
+interface ICRenderBatchStats {
+  readonly renderBatchMode: 'off' | 'static';
+  readonly renderBatchInputPrimitives: number;
+  readonly renderBatchCount: number;
+  readonly renderBatchTriangles: number;
+  readonly renderBatchBytes: number;
+  readonly renderBatchFallbackPrimitives: number;
+  readonly renderBatchDrawReduction: number;
+}
+```
+
+`renderBatchDrawReduction` is
+`(inputPrimitives - batchCount) / max(1, inputPrimitives)`. Reports contain
+aggregate counts only and never include customer names, source paths, semantic
+labels, or geometry.
+
+Runtime compatibility rules:
+
+- Batch nodes use batch geometry once and preserve the existing `selectionId`
+  returned by GPU picking.
+- Repeated ordinary meshes with the same geometry and material object are
+  submitted through one instanced draw; geometry stays in one GPU buffer.
+- Each instance carries a stable semantic index used by picking and highlight.
+- Instance-buffer allocation failure falls back to ordinary mesh draws and
+  increments `renderer.instancingFallbacks`; the runtime emits a deduplicated
+  warning with `ICE3_RENDER_INSTANCING_FALLBACK`.
+- LOD replacement remains atomic per Tile. Batching does not change
+  `geometricError`, `REPLACE` behavior, or semantic identity.
+
+Measured on a controlled industrial Prepared GLB with edges disabled and
+identical partition settings:
+
+| Metric | Ordinary mesh path | Static batches |
+| --- | ---: | ---: |
+| Source triangles | 16,939,337 | 16,939,337 |
+| Input drawable primitives | 1,472 | 1,472 |
+| Runtime Draw Calls | 1,472 | 662 |
+| Draw reduction | 0% | 55.03% |
+| Output bytes | 406,072,056 | 476,678,116 |
+| Build wall clock | 22.68 s | 40.77 s |
+| Peak resident memory | 4.64 GiB | 3.42 GiB |
+| Selection identities | 261 | 261 |
+| Page errors / failed requests | 0 / 0 | 0 / 0 |
+
+With proportional LOD enabled under the same settings, the complete output
+contains 108 GLBs and 107 Tiles. Its aggregate batch report covers 9,984 input
+drawable primitives across fine and coarse content with 2,079 output batches,
+for a reported reduction of 79.18%. Every GLB validates, all 261 semantic
+selection identities match the ordinary output, and Chromium and WebKit report
+zero page errors or failed requests. In an identical camera and 45-second
+observation window, Chromium's active LOD work set rendered 1,472 ordinary
+Draw Calls versus 114 static batches while loading the same coarse work set.
+Static batching trades larger prepared bytes and longer offline builds for
+materially lower runtime submission cost.
