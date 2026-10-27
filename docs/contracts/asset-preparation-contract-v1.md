@@ -464,9 +464,8 @@ called. `whenComplete()` is not part of the contract because camera-driven
 residency must not imply global completion.
 
 This stage establishes the frustum, retention, budget, commit throttling, and
-unload mechanisms that the following LOD stage will reuse. Generated LOD,
-parent-content refinement, implicit tiling, external Tilesets, and full
-screen-space-error scheduling are not part of this runtime version.
+unload mechanisms reused by hierarchical LOD. Implicit tiling, external
+Tilesets, and runtime mesh simplification remain unsupported.
 
 ## 20. Hierarchical LOD asset generation
 
