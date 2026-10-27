@@ -7,6 +7,10 @@ engine and its surrounding tools.
 
 - [Asset Preparation Contract v1](docs/contracts/asset-preparation-contract-v1.md)
 
+## Implementation plans
+
+- [Asset Preparation Contract v1 implementation](docs/superpowers/plans/2026-10-27-asset-preparation-contract.md)
+
 Repository-specific implementation guides remain in their owning repositories.
 Cross-repository formats, compatibility rules, shared metrics, and diagnostic
 codes belong here.
