@@ -472,11 +472,14 @@ error falls below 75% of that limit, preventing camera movement near the
 threshold from repeatedly toggling representations.
 
 The current visible representation remains in the scene while the complete next
-visible representation is loaded off-scene. When every target Tile in the group
-is resident, the runtime publishes the new representation and removes the old
-one in the same scene mutation. Ancestor and descendant content must not be
-visible together, and a transition must not create an empty visible frame.
-Prefetched descendants remain hidden until they become the active target.
+visible representation is loaded off-scene. The runtime publishes the deepest
+complete coverage frontier: a parent is replaced only when every visible child
+branch under it has a resident child representation. Newly available coarse
+branches therefore replace their ancestor progressively instead of waiting for
+all final leaf targets in the view. Each replacement removes the old level in the
+same scene mutation. Ancestor and descendant content must not be visible together,
+and a transition must not create an empty visible frame. Prefetched descendants
+remain hidden until they become part of the active coverage frontier.
 
 Continuous camera motion does not publish repeated LOD group swaps. The active
 representation stays stable while the current view's next target group loads
@@ -626,6 +629,11 @@ cylinder uses 64. Candidates that fail a limit, have unstable axes, or lack
 sufficient triangle reduction are rejected and remain on the existing QEM
 path. Accepted proxies and QEM samples compete under the same Tile triangle
 budget; a proxy receives no semantic budget bonus.
+
+OBB candidates additionally require a source-bounds aspect ratio no greater
+than `8:1`. Highly elongated equipment such as conveyors keeps QEM geometry
+because a plain box loses too much visible structure. This aspect limit does not
+apply to cylinder candidates.
 
 A selected proxy replaces only the geometry of its source mesh in the Prepared
 GLB. It retains the source mesh-local coordinate system, node transforms, node
