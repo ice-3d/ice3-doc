@@ -1491,6 +1491,6 @@ git switch main
 git merge --ff-only docs/asset-contract-implementation-plan
 ```
 
-After all three repositories are green on `main`, restart the M1 preview and
+After all repositories are green on `main`, restart the M1 preview and
 verify the local synthetic fixture and the locally supplied model without
 committing or screenshotting customer content.

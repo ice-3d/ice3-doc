@@ -2,7 +2,7 @@
 
 | 项目 | 内容 |
 | --- | --- |
-| 状态 | 待用户评审 |
+| 状态 | 已确认 |
 | 版本 | 1.0 |
 | 日期 | 2026-10-27 |
 | 适用范围 | ICE3 引擎、工具链、CLI、未来的资产工具 UI 和 CI |
@@ -368,7 +368,7 @@ ice3-tool validate <file.glb> [--report <file.json>]
 
 - 自动为客户模型做最优优化。
 - 在运行时动态应用预算或执行优化。
-- 动态资源卸载和完整的视锥、屏幕空间误差网络调度策略。
+- 屏幕空间误差 LOD 选择、隐式分块和外部 Tileset 调度。
 - 业务点位、告警和设备实时状态。
 - 精确预测所有 GPU 架构的显存占用。
 - 固化永久预算数字。
@@ -410,5 +410,60 @@ ice3-tool validate <file.glb> [--report <file.json>]
   `ICE3_TOOL_PARTITION_OUTPUT_EXISTS`,
   `ICE3_TOOL_TILESET_INVALID`, and `ICE3_TOOL_TILESET_WRITE_FAILED`.
 - Runtime diagnostics are `ICE3_TILESET_INVALID`, `ICE3_TILESET_UNSUPPORTED`,
-  `ICE3_TILESET_TILE_FAILED`, `ICE3_TILESET_DUPLICATE_ID`, and
-  `ICE3_TILESET_ABORTED`.
+  `ICE3_TILESET_TILE_FAILED`, `ICE3_TILESET_DUPLICATE_ID`,
+  `ICE3_TILESET_ABORTED`, `ICE3_TILESET_CAMERA_REQUIRED`, and
+  `ICE3_TILESET_RESIDENT_BUDGET_EXCEEDED`.
+
+## 19. Adaptive Tileset runtime behavior
+
+The distribution remains a standard explicit-tree OGC 3D Tiles 1.1 Tileset.
+The runtime combines the current perspective camera and viewport with partition
+bounds to maintain these camera-relative sets:
+
+- `visible`: partitions intersecting the strict view frustum.
+- `prefetch`: partitions in the expanded prefetch margin outside the strict
+  frustum.
+- `retain`: loaded or candidate partitions inside a wider unload margin.
+
+The wider retention margin creates hysteresis so small camera movement does not
+repeatedly load and unload the same partition. When a partition stops being
+retained, or is displaced by budget pressure outside the visible set, the runtime
+removes it from the unified scene and releases its decoded cache entry.
+
+The runtime defaults are:
+
+| Option | Default |
+| --- | ---: |
+| `maxConcurrentTiles` | 2 |
+| `maxResidentTiles` | 24 |
+| `maxResidentBytes` | 256 MiB |
+| `prefetchMarginRatio` | 0.10 |
+| `unloadMarginRatio` | 0.20 |
+| `maxCommitsPerFrame` | 1 |
+
+`maxResidentTiles` and `maxResidentBytes` are soft budgets. Visible completeness
+wins: a visible set larger than either budget continues loading and remains
+resident, while the runtime emits one deduplicated
+`ICE3_TILESET_RESIDENT_BUDGET_EXCEEDED` warning. Offscreen prefetch is suppressed
+while the budget is exceeded. `residentBytes` counts prepared position, index,
+edge, and color buffers and must not be presented as driver-reported GPU usage.
+
+Every partition is represented by one removable container in the unified scene,
+including identity-transform partitions. Before disposal, the runtime checks
+whether the active selection belongs to that container and clears it first. A
+stale request result is discarded before scene commit and its cache is released.
+Successful partitions are committed at most `maxCommitsPerFrame` per animation
+frame.
+
+The handle exposes `pending`, `loading`, `loaded`, `failed`, and `evicted` tile
+states plus aggregate work-set statistics. It emits `TILESET_TILE_LOADING`,
+`TILESET_TILE_LOADED`, `TILESET_TILE_FAILED`, `TILESET_TILE_UNLOADED`,
+`TILESET_READY`, and `TILESET_IDLE`. `whenReady()` reports the first visible
+content; `whenIdle()` reports stability of the work set active when it was
+called. `whenComplete()` is not part of the contract because camera-driven
+residency must not imply global completion.
+
+This stage establishes the frustum, retention, budget, commit throttling, and
+unload mechanisms that the following LOD stage will reuse. Generated LOD,
+parent-content refinement, implicit tiling, external Tilesets, and full
+screen-space-error scheduling are not part of this runtime version.
