@@ -813,3 +813,29 @@ The implementation contract is:
   `ICE3_RENDER_BATCH_MEMORY_REJECTED`.
 - `ICETilesetHandle.adaptiveStats` exposes only generation counters and batch
   counts; it never exposes Worker, transferable, or GPU handles.
+
+### 22.2 GPU residency and transition stability
+
+CPU-resident Tiles own their GPU geometry from successful commit until actual
+Tile unload. Visibility, frustum membership, and temporary LOD coverage changes
+must not independently evict those buffers.
+
+The runtime compatibility rules are:
+
+- Upload every retained Tile's complete geometry before making that Tile
+  visible.
+- Keep the current complete visible coverage during camera motion until the next
+  LOD cut is complete and GPU-ready.
+- Reuse non-owned geometry for at least 60 inactive frames before eligible for
+  eviction.
+- Use byte-budgeted least-recently-used eviction for non-owned geometry; the
+  default geometry budget is 768 MiB.
+- Keep the default resident limit at 64 Tiles and 768 MiB so a 54-Tile,
+  469 MB controlled industrial working set can remain stable.
+- Expose cumulative `gpuUploads` and `gpuEvictions` diagnostics alongside
+  `gpuBytes`. Re-entering already resident content must not increase either
+  counter.
+
+Eviction is permitted only when a Tile is unloaded, a non-owned resource exceeds
+its inactivity window, or the GPU budget requires removing an unpinned
+least-recently-used resource. Context loss remains a full-device reset.
