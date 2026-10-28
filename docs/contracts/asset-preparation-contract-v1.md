@@ -826,6 +826,9 @@ The runtime compatibility rules are:
   visible.
 - Keep the current complete visible coverage during camera motion until the next
   LOD cut is complete and GPU-ready.
+- Use a full-asset-radius retention halo by default, so camera movement alone
+  does not unload Resident Tiles; resident count and byte budgets remain the
+  final memory limits.
 - Reuse non-owned geometry for at least 60 inactive frames before eligible for
   eviction.
 - Use byte-budgeted least-recently-used eviction for non-owned geometry; the
