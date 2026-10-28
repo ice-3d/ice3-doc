@@ -597,7 +597,7 @@ In `createGeometryWorkspace.ts`:
 - Increase the encoded header from 8 bytes to 12 bytes: position bytes, index bytes, color bytes.
 - Include color bytes in the workspace memory limit.
 - Copy colors after indices when spilling.
-- Decode and validate color length as either three or four floats per vertex when present.
+- Decode and validate color length as either 3 or 4 floats per vertex when present.
 - Return a defensive copy for the in-memory path.
 
 - [ ] **Step 4: Run focused tests**
@@ -802,7 +802,7 @@ export async function createLodUnitCurve(
 
 - [ ] **Step 4: Add a color-preserving test**
 
-Extend the curve test to read every sampled geometry and assert that any geometry with colors has exactly three or four color components per vertex and finite values.
+Extend the curve test to read every sampled geometry and assert that any geometry with colors has exactly 3 or 4 color components per vertex and finite values.
 
 ```ts
 for (const sample of curve.samples) {

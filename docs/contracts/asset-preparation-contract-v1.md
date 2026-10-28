@@ -709,7 +709,7 @@ interface ICEPreparedBatching {
 }
 ```
 
-The three semantic arrays have equal lengths. `semanticNodeIds` reference the
+The 3 semantic arrays have equal lengths. `semanticNodeIds` reference the
 Prepared GLB node namespace and must match the corresponding node's
 `selectionId`. Every batch triangle primitive declares an `UNSIGNED_INT`
 `SCALAR` attribute named `_ICE3_SEMANTIC_INDEX`; every value indexes the

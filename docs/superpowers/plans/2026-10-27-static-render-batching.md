@@ -113,7 +113,7 @@ Expected: FAIL because `batching` is unsupported.
 Accept only:
 
 - `version === '1.0'`.
-- Three semantic arrays with equal finite lengths.
+- 3 semantic arrays with equal finite lengths.
 - Unique non-empty semantic, node, and selection IDs.
 - Unique non-negative mesh and primitive indices within bounds.
 - Unique material indices within bounds.
