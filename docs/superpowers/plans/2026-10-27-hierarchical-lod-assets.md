@@ -6,7 +6,7 @@
 
 **Architecture:** 扩展 Prepared GLB 的节点身份，使视觉节点可以按 LOD 命名而选择身份保持稳定。工具链先规范化设备几何到受控工作区，再在同一空间树构建任务中生成细模叶子和粗模内部节点，最后原子发布标准 Tileset。
 
-**Tech Stack:** TypeScript 7, Node.js 24 LTS, node-test, `meshoptimizer@1.3.0`, OGC 3D Tiles 1.1, ICE3 Prepared GLB
+**Tech Stack:** TypeScript 7, Node.js 24 LTS, Node.js test runner, `meshoptimizer@1.3.0`, OGC 3D Tiles 1.1, ICE3 Prepared GLB
 
 **Spec:** `ice3-doc/docs/superpowers/specs/2026-10-27-hierarchical-lod-design.md`
 
@@ -155,7 +155,7 @@ cd ../ice3-toolchain
 npm test -- tests/output/buildPreparedGLB.test.ts
 
 cd ../ice3-engine
-npx node-test run packages/assets/tests/GLBReader.test.ts \
+npm test -- packages/assets/tests/GLBReader.test.ts \
   packages/runtime/tests/AssetSceneBuilder.test.ts
 ```
 
@@ -198,7 +198,7 @@ npm test -- tests/output/buildPreparedGLB.test.ts tests/output/validatePreparedG
 
 cd ../ice3-engine
 npm run typecheck
-npx node-test run packages/assets/tests/GLBReader.test.ts \
+npm test -- packages/assets/tests/GLBReader.test.ts \
   packages/runtime/tests/AssetSceneBuilder.test.ts
 npm test
 ```
@@ -276,7 +276,8 @@ Expected: `meshoptimizer` appears only in `@ice3/toolchain-core` dependencies.
 Create `tests/lod/simplifyGeometry.test.ts`:
 
 ```ts
-import { expect, test } from 'node-test';
+import { test } from 'node:test';
+import { expect } from 'expect';
 import { simplifyGeometry } from '../../packages/toolchain-core/src/lod/simplifyGeometry.js';
 
 const grid = (cells = 8) => {
@@ -344,7 +345,7 @@ test('preserves already-minimal geometry', async () => {
 - [ ] **Step 3: Run RED**
 
 ```bash
-npx node-test run tests/lod/simplifyGeometry.test.ts
+npm test -- tests/lod/simplifyGeometry.test.ts
 ```
 
 Expected: FAIL because `simplifyGeometry` does not exist.
@@ -382,7 +383,7 @@ const scale = MeshoptSimplifier.getScale(positions, 3);
 - [ ] **Step 5: Verify GREEN**
 
 ```bash
-npx node-test run tests/lod/simplifyGeometry.test.ts
+npm test -- tests/lod/simplifyGeometry.test.ts
 npm run typecheck
 npm test
 ```
@@ -438,7 +439,8 @@ export function createGeometryWorkspace(
 
 ```ts
 import { existsSync } from 'node:fs';
-import { expect, test } from 'node-test';
+import { test } from 'node:test';
+import { expect } from 'expect';
 import { createGeometryWorkspace } from '../../packages/toolchain-core/src/lod/createGeometryWorkspace.js';
 
 test('reads a unit after spilling it outside the output directory', async () => {
@@ -466,7 +468,7 @@ workspace temporary root no longer exists.
 - [ ] **Step 2: Run RED**
 
 ```bash
-npx node-test run tests/lod/createGeometryWorkspace.test.ts
+npm test -- tests/lod/createGeometryWorkspace.test.ts
 ```
 
 Expected: FAIL because the workspace does not exist.
@@ -484,7 +486,7 @@ Expected: FAIL because the workspace does not exist.
 - [ ] **Step 4: Verify GREEN**
 
 ```bash
-npx node-test run tests/lod/createGeometryWorkspace.test.ts
+npm test -- tests/lod/createGeometryWorkspace.test.ts
 npm run typecheck
 ```
 
@@ -552,7 +554,8 @@ them to each Prepared GLB's embedded contract stats.
 - [ ] **Step 1: Write failing target-allocation tests**
 
 ```ts
-import { expect, test } from 'node-test';
+import { test } from 'node:test';
+import { expect } from 'expect';
 import { allocateLodTargets } from '../../packages/toolchain-core/src/lod/allocateLodTargets.js';
 
 const unit = (index: number, triangleCount: number) => ({
@@ -628,7 +631,7 @@ Also generate a second coarse node from the same source and assert:
 - [ ] **Step 3: Run RED**
 
 ```bash
-npx node-test run tests/lod/allocateLodTargets.test.ts \
+npm test -- tests/lod/allocateLodTargets.test.ts \
   tests/partition/lodGeneration.test.ts
 ```
 
@@ -654,7 +657,7 @@ Do not call `partitionAsset` recursively and do not simplify a child coarse GLB.
 - [ ] **Step 5: Verify GREEN**
 
 ```bash
-npx node-test run tests/lod/allocateLodTargets.test.ts \
+npm test -- tests/lod/allocateLodTargets.test.ts \
   tests/partition/lodGeneration.test.ts
 npm run typecheck
 npm test
@@ -739,7 +742,7 @@ test('rejects a parent error lower than a child error', () => {
 - [ ] **Step 2: Run RED**
 
 ```bash
-npx node-test run tests/partition/tileset.test.ts \
+npm test -- tests/partition/tileset.test.ts \
   tests/partition/lodGeneration.test.ts
 ```
 
@@ -759,7 +762,7 @@ and parent content is omitted.
 - [ ] **Step 4: Verify GREEN**
 
 ```bash
-npx node-test run tests/partition/tileset.test.ts \
+npm test -- tests/partition/tileset.test.ts \
   tests/partition/lodGeneration.test.ts
 npm test
 ```
@@ -834,7 +837,7 @@ temporary workspace are absent.
 - [ ] **Step 2: Run RED**
 
 ```bash
-npx node-test run tests/cli/commands.test.ts
+npm test -- tests/cli/commands.test.ts
 ```
 
 Expected: FAIL because the CLI rejects the LOD flags.
@@ -853,7 +856,7 @@ Expected: FAIL because the CLI rejects the LOD flags.
 - [ ] **Step 4: Verify GREEN**
 
 ```bash
-npx node-test run tests/cli/commands.test.ts
+npm test -- tests/cli/commands.test.ts
 npm run typecheck
 npm test
 ```

@@ -6,7 +6,7 @@
 
 **Architecture:** A pure core frustum and runtime work-set planner decide which tiles are visible, useful for prefetch, or safe to evict. The Tileset handle owns bounded network and commit queues, keeps every partition under a removable container, and recalculates the work set after camera or viewport changes.
 
-**Tech Stack:** TypeScript 7, Node.js 24 LTS, WebGL2, node-test, Playwright, OGC 3D Tiles 1.1, ICE3 core/runtime packages.
+**Tech Stack:** TypeScript 7, Node.js 24 LTS, WebGL2, Node.js test runner, Playwright, OGC 3D Tiles 1.1, ICE3 core/runtime packages.
 
 **Spec:** `ice3-doc/docs/superpowers/specs/2026-10-27-adaptive-tileset-scheduler-design.md`
 
@@ -60,7 +60,8 @@ export class ICEFrustum {
 Create `packages/core/tests/ICEFrustum.test.ts`:
 
 ```ts
-import { expect, test } from 'node-test';
+import { test } from 'node:test';
+import { expect } from 'expect';
 import { ICEFrustum } from '../src/culling/ICEFrustum';
 import { ICEPerspectiveCamera } from '../src/camera/ICEPerspectiveCamera';
 
@@ -114,7 +115,7 @@ test('handles flat and point bounds deterministically', () => {
 ```bash
 cd ../ice3-engine
 nvm use
-npx node-test run packages/core/tests/ICEFrustum.test.ts
+npm test -- packages/core/tests/ICEFrustum.test.ts
 ```
 
 Expected: FAIL because `ICEFrustum` does not exist.
@@ -141,7 +142,7 @@ Export from `packages/core/src/index.ts`.
 - [ ] **Step 4: Verify GREEN**
 
 ```bash
-npx node-test run packages/core/tests/ICEFrustum.test.ts
+npm test -- packages/core/tests/ICEFrustum.test.ts
 npm test
 ```
 
@@ -202,7 +203,8 @@ export class ICETilesetScheduler {
 Create a helper that produces tiles on x = 0, 100, 200:
 
 ```ts
-import { expect, test } from 'node-test';
+import { test } from 'node:test';
+import { expect } from 'expect';
 import { ICEPerspectiveCamera } from '@ice3/core';
 import type { ICETilesetTile } from '@ice3/assets';
 import { ICETilesetScheduler } from '../src/asset/ICETilesetScheduler';
@@ -307,7 +309,7 @@ test('changes the visible set when the viewport aspect changes', () => {
 - [ ] **Step 2: Run RED**
 
 ```bash
-npx node-test run packages/runtime/tests/TilesetScheduler.test.ts
+npm test -- packages/runtime/tests/TilesetScheduler.test.ts
 ```
 
 Expected: FAIL because scheduler does not exist.
@@ -333,7 +335,7 @@ Implement:
 - [ ] **Step 4: Verify GREEN**
 
 ```bash
-npx node-test run packages/runtime/tests/TilesetScheduler.test.ts
+npm test -- packages/runtime/tests/TilesetScheduler.test.ts
 npm test
 ```
 
@@ -381,7 +383,7 @@ it('clears one cached URL without clearing another', async () => {
 - [ ] **Step 2: Run RED**
 
 ```bash
-npx node-test run packages/runtime/tests/AssetLoader.test.ts -t "clears one"
+npm test -- packages/runtime/tests/AssetLoader.test.ts -t "clears one"
 ```
 
 Expected: FAIL because `clear` ignores the URL argument and fetch is called four
@@ -406,7 +408,7 @@ clear(url?: string): void {
 - [ ] **Step 4: Verify GREEN and commit**
 
 ```bash
-npx node-test run packages/runtime/tests/AssetLoader.test.ts
+npm test -- packages/runtime/tests/AssetLoader.test.ts
 npm test
 git add packages/runtime/src/asset/ICEAssetLoader.ts \
   packages/runtime/tests/AssetLoader.test.ts
@@ -467,7 +469,7 @@ it('uses one removable container per committed partition', async () => {
 - [ ] **Step 2: Run RED**
 
 ```bash
-npx node-test run packages/runtime/tests/TilesetLoader.test.ts -t "removable container"
+npm test -- packages/runtime/tests/TilesetLoader.test.ts -t "removable container"
 ```
 
 Expected: FAIL because identity-transform partitions are currently added as
@@ -513,7 +515,7 @@ waiter.
 - [ ] **Step 5: Verify GREEN**
 
 ```bash
-npx node-test run packages/runtime/tests/TilesetLoader.test.ts
+npm test -- packages/runtime/tests/TilesetLoader.test.ts
 npm run typecheck
 npm test
 ```
@@ -705,7 +707,7 @@ it('keeps an offscreen prefetch failure local to that tile', async () => {
 - [ ] **Step 2: Run RED**
 
 ```bash
-npx node-test run packages/runtime/tests/TilesetLoader.test.ts \
+npm test -- packages/runtime/tests/TilesetLoader.test.ts \
   -t "leaves it|older idle|resident budget|offscreen prefetch"
 ```
 
@@ -769,7 +771,7 @@ Update API docs, package exports, the example, and all tests to use
 - [ ] **Step 8: Verify GREEN**
 
 ```bash
-npx node-test run packages/runtime/tests/TilesetLoader.test.ts
+npm test -- packages/runtime/tests/TilesetLoader.test.ts
 npm run typecheck
 npm test
 ```

@@ -6,7 +6,7 @@
 
 **Architecture:** 通用查询器遍历当前统一场景，按语义选择身份去重并选择最精细代表节点。引擎暴露只读查询快照；拾取和射线返回同一快照格式；相机控制器只接收查询结果的世界包围盒。
 
-**Tech Stack:** TypeScript 7, Node.js 24 LTS, WebGL2, node-test, Playwright, ICE3 core/runtime
+**Tech Stack:** TypeScript 7, Node.js 24 LTS, WebGL2, Node.js test runner, Playwright, ICE3 core/runtime
 
 **Spec:** `ice3-doc/docs/superpowers/specs/2026-10-27-lod-refinement-and-scene-api-design.md`
 
@@ -120,7 +120,7 @@ test('applies visibility, bounds, and deterministic limit', () => {
 - [ ] **Step 2: Run RED**
 
 ```bash
-npx node-test run packages/runtime/tests/SceneQuery.test.ts
+npm test -- packages/runtime/tests/SceneQuery.test.ts
 ```
 
 Expected: FAIL because the query module does not exist.
@@ -136,7 +136,7 @@ Expected: FAIL because the query module does not exist.
 - [ ] **Step 4: Verify GREEN**
 
 ```bash
-npx node-test run packages/runtime/tests/SceneQuery.test.ts
+npm test -- packages/runtime/tests/SceneQuery.test.ts
 npm run typecheck
 ```
 
@@ -204,7 +204,7 @@ it('returns an empty query before scene configuration', () => {
 - [ ] **Step 2: Run RED**
 
 ```bash
-npx node-test run packages/runtime/tests/EngineLifecycle.test.ts
+npm test -- packages/runtime/tests/EngineLifecycle.test.ts
 ```
 
 Expected: FAIL because the public methods do not exist.
@@ -219,7 +219,7 @@ Expected: FAIL because the public methods do not exist.
 - [ ] **Step 4: Verify GREEN**
 
 ```bash
-npx node-test run packages/runtime/tests/EngineLifecycle.test.ts
+npm test -- packages/runtime/tests/EngineLifecycle.test.ts
 npm run typecheck
 npm test
 ```
@@ -278,7 +278,7 @@ it('returns no item for an empty pick', () => {
 - [ ] **Step 2: Run RED**
 
 ```bash
-npx node-test run packages/runtime/tests/SelectionGesture.test.ts
+npm test -- packages/runtime/tests/SelectionGesture.test.ts
 ```
 
 Expected: FAIL because `pickItem` does not exist.
@@ -292,7 +292,7 @@ Expected: FAIL because `pickItem` does not exist.
 - [ ] **Step 4: Verify GREEN**
 
 ```bash
-npx node-test run packages/runtime/tests/SelectionGesture.test.ts
+npm test -- packages/runtime/tests/SelectionGesture.test.ts
 npm run test:e2e -- --project=chromium tests/e2e/m1.spec.ts
 ```
 
@@ -360,7 +360,7 @@ it('rejects a zero or nonfinite direction', () => {
 - [ ] **Step 2: Run RED**
 
 ```bash
-npx node-test run packages/runtime/tests/SceneRaycaster.test.ts
+npm test -- packages/runtime/tests/SceneRaycaster.test.ts
 ```
 
 Expected: FAIL because raycasting does not exist.
@@ -375,7 +375,7 @@ Expected: FAIL because raycasting does not exist.
 - [ ] **Step 4: Verify GREEN**
 
 ```bash
-npx node-test run packages/runtime/tests/SceneRaycaster.test.ts \
+npm test -- packages/runtime/tests/SceneRaycaster.test.ts \
   packages/runtime/tests/SceneQuery.test.ts
 npm run typecheck
 npm test
@@ -447,7 +447,7 @@ test('focus ignores invalid padding', () => {
 - [ ] **Step 2: Run RED**
 
 ```bash
-npx node-test run packages/runtime/tests/OrbitController.test.ts
+npm test -- packages/runtime/tests/OrbitController.test.ts
 ```
 
 Expected: FAIL because focus does not exist.
@@ -462,7 +462,7 @@ Expected: FAIL because focus does not exist.
 - [ ] **Step 4: Verify GREEN**
 
 ```bash
-npx node-test run packages/runtime/tests/OrbitController.test.ts \
+npm test -- packages/runtime/tests/OrbitController.test.ts \
   packages/runtime/tests/LodLoader.test.ts
 npm run test:e2e -- --project=chromium tests/e2e/m1.spec.ts
 npm run test:e2e -- --project=webkit tests/e2e/m1.spec.ts

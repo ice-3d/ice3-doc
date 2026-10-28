@@ -6,7 +6,7 @@
 
 **Architecture:** The toolchain fits a proxy from source mesh geometry, accepts it only when surface deviation, volume inflation, and triangle reduction all pass fixed thresholds, and stores the candidate in the bounded workspace. Adaptive LOD compares that mesh replacement with primitive QEM samples; the Prepared GLB builder swaps mesh geometry without changing nodes or selection IDs.
 
-**Tech Stack:** Node.js 24 LTS, TypeScript 7, ESM, npm workspaces, node-test 5, Prepared GLB, OGC 3D Tiles 1.1
+**Tech Stack:** Node.js 24 LTS, TypeScript 7, ESM, npm workspaces, Node.js built-in test runner, `expect`, `tsx`, Prepared GLB, OGC 3D Tiles 1.1
 
 **Spec:** `../ice3-doc/docs/superpowers/specs/2026-10-27-semantic-industrial-proxy-design.md`
 
@@ -82,7 +82,8 @@ function collectFitSamples(
 - [ ] **Step 1: Write the failing sample test**
 
 ```ts
-import { expect, test } from 'node-test';
+import { test } from 'node:test';
+import { expect } from 'expect';
 import { collectFitSamples } from '../../../packages/toolchain-core/src/lod/semanticProxy/collectFitSamples.js';
 
 test('collects unique vertices, triangle centroids, areas, and bounds', () => {
@@ -133,7 +134,7 @@ Run:
 cd ../ice3-toolchain
 source "$HOME/.nvm/nvm.sh"
 nvm use 24
-npx node-test run tests/lod/semanticProxy/collectFitSamples.test.ts
+npm test -- tests/lod/semanticProxy/collectFitSamples.test.ts
 ```
 
 Expected: FAIL because the proxy modules do not exist.
@@ -226,7 +227,7 @@ index.
 Run:
 
 ```bash
-npx node-test run tests/lod/semanticProxy/collectFitSamples.test.ts
+npm test -- tests/lod/semanticProxy/collectFitSamples.test.ts
 npm run typecheck
 ```
 
@@ -281,7 +282,8 @@ function fitProxyGeometry(
 - [ ] **Step 1: Write failing OBB and cylinder tests**
 
 ```ts
-import { expect, test } from 'node-test';
+import { test } from 'node:test';
+import { expect } from 'expect';
 import { fitProxyGeometry } from '../../../packages/toolchain-core/src/lod/semanticProxy/fitProxyGeometry.js';
 
 test('fits an oriented box with twelve triangles', () => {
@@ -353,7 +355,7 @@ test('rejects an isotropic or zero covariance fit', () => {
 Run:
 
 ```bash
-npx node-test run tests/lod/semanticProxy/fitProxyGeometry.test.ts
+npm test -- tests/lod/semanticProxy/fitProxyGeometry.test.ts
 ```
 
 Expected: FAIL because the fitting module does not exist.
@@ -447,7 +449,7 @@ export {
 Run:
 
 ```bash
-npx node-test run tests/lod/semanticProxy/fitProxyGeometry.test.ts
+npm test -- tests/lod/semanticProxy/fitProxyGeometry.test.ts
 npm run typecheck
 ```
 
@@ -509,7 +511,8 @@ readonly materialIndex?: number;
 - [ ] **Step 1: Write failing acceptance and fallback tests**
 
 ```ts
-import { expect, test } from 'node-test';
+import { test } from 'node:test';
+import { expect } from 'expect';
 import { createGeometryWorkspace } from '../../../packages/toolchain-core/src/lod/createGeometryWorkspace.js';
 import { createSemanticProxy } from '../../../packages/toolchain-core/src/lod/semanticProxy/createSemanticProxy.js';
 
@@ -731,7 +734,7 @@ test('retains an averaged color when every primitive has vertex colors', async (
 Run:
 
 ```bash
-npx node-test run tests/lod/semanticProxy/createSemanticProxy.test.ts
+npm test -- tests/lod/semanticProxy/createSemanticProxy.test.ts
 ```
 
 Expected: FAIL because the proxy evaluation modules do not exist.
@@ -830,7 +833,7 @@ Also export the quality result type from `evaluateProxy.ts`.
 Run:
 
 ```bash
-npx node-test run tests/lod/semanticProxy/createSemanticProxy.test.ts \
+npm test -- tests/lod/semanticProxy/createSemanticProxy.test.ts \
   tests/lod/semanticProxy/fitProxyGeometry.test.ts
 npm run typecheck
 ```
@@ -910,7 +913,7 @@ Assert:
 Run:
 
 ```bash
-npx node-test run tests/output/buildPreparedGLB.test.ts -t "mesh override"
+npm test -- tests/output/buildPreparedGLB.test.ts -t "mesh override"
 ```
 
 Expected: FAIL because the option is unknown.
@@ -964,7 +967,7 @@ instead of publishing a partial GLB.
 Run:
 
 ```bash
-npx node-test run tests/output/buildPreparedGLB.test.ts \
+npm test -- tests/output/buildPreparedGLB.test.ts \
   tests/output/validatePreparedGLB.test.ts
 npm run typecheck
 ```
@@ -1093,7 +1096,7 @@ expect(nodes.every((node) => (
 Run:
 
 ```bash
-npx node-test run tests/partition/lodGeneration.test.ts -t "semantic proxy"
+npm test -- tests/partition/lodGeneration.test.ts -t "semantic proxy"
 ```
 
 Expected: FAIL because proxy integration is absent.
@@ -1199,7 +1202,7 @@ Include proxy placements in `adaptiveMetrics` and apply proxy statistics only wh
 Run:
 
 ```bash
-npx node-test run tests/lod/allocateAdaptiveLod.test.ts \
+npm test -- tests/lod/allocateAdaptiveLod.test.ts \
   tests/lod/createLodUnitCurve.test.ts \
   tests/partition/lodGeneration.test.ts
 npm run typecheck
@@ -1256,7 +1259,7 @@ Invalid combinations must exit `1`, print the relevant option name, and leave no
 Run:
 
 ```bash
-npx node-test run tests/cli/commands.test.ts -t "semantic-proxy"
+npm test -- tests/cli/commands.test.ts -t "semantic-proxy"
 ```
 
 Expected: FAIL because the option is unknown.
@@ -1334,7 +1337,7 @@ Describe the fixed quality thresholds and QEM fallback.
 Run:
 
 ```bash
-npx node-test run tests/cli/commands.test.ts
+npm test -- tests/cli/commands.test.ts
 npm run typecheck
 ```
 
