@@ -380,7 +380,7 @@ Add non-selectable site infrastructure:
 - Control building and utility building.
 - Perimeter fencing and a small number of access walkways.
 
-Pipe routes must connect adjacent process stages in the 2D reference flow. Add the three return routes:
+Pipe routes must connect adjacent process stages in the 2D reference flow. Add the 3 return routes:
 
 - Filter backwash to distribution well.
 - Sludge thickener supernatant to distribution well.
@@ -581,7 +581,7 @@ async function inspectWastewaterArtifacts(
 ): Promise<ICEWWTPArtifactSummary>;
 ```
 
-- Consumes: Task 3 prepared GLB.
+- Consumes: Task 3 source GLB's original geometry. Prepared output contains generated edge primitives and is not a valid second partition input.
 - Produces: loadable Tileset with multiple fine partitions and multiple coarse chunks.
 
 - [ ] **Step 1: Write failing artifact tests**
@@ -626,11 +626,11 @@ Expected: FAIL because Tiled artifacts and inspection helper do not exist.
 
 - [ ] **Step 3: Add splitting and LOD generation to the build script**
 
-Run the partition CLI after prepared validation:
+Run the partition CLI on the validated source GLB after prepared validation:
 
 ```bash
 node packages/cli/dist/main.js partition \
-  "$staging/prepared/wastewater-plant.glb" \
+  "$staging/source/wastewater-plant.glb" \
   --output "$staging/tiled" \
   --asset-id ice3-virtual-wwtp \
   --max-triangles 20000 \

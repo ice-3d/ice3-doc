@@ -231,7 +231,8 @@ examples/m1/assets/wastewater-plant/
 
 - `source` 是生成器直接输出的标准 GLB。
 - `prepared` 是经过现有预处理工具生成的运行时资产。
-- `tiled` 是 prepared 资产经过空间拆分和 LOD 生成后的 Tileset。
+- `tiled` 是 source 资产的原始几何经过空间拆分和 LOD 生成后的 Tileset。
+- 空间拆分直接消费 source，避免把 prepared 中生成的边线图元当作模型三角形再次拆分；切出的每个运行时片段仍由现有流程输出 prepared profile。
 - 粗模必须实际生成并按照 `coarse-chunk-max-bytes` 分块。
 - 所有产物均为虚构数据，可以进入版本库。
 - 生成报告不写入客户路径或本机临时目录。
@@ -243,7 +244,7 @@ examples/m1/assets/wastewater-plant/
 1. 执行生成器，输出 source GLB。
 2. 使用预处理工具验证 source。
 3. 生成单文件 prepared GLB。
-4. 以 prepared 模型执行空间拆分。
+4. 以 source 的原始几何执行空间拆分。
 5. 同时生成 LOD 粗模。
 6. 对粗模应用明确的分块字节上限。
 7. 根据资产预算选择静态离屏合批。
