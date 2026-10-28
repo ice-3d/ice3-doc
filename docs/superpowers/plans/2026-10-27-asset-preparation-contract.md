@@ -6,7 +6,7 @@
 
 **Architecture:** Toolchain computes canonical metrics and embeds a small runtime contract in each prepared GLB, then optionally writes a deterministic sidecar report for CI and UI use. The engine validates and exposes the embedded contract while continuing to reject assets that require runtime conversion; the report is never required at runtime.
 
-**Tech Stack:** TypeScript, Node.js 24, ESM, npm workspaces, GLB, node-test, Playwright
+**Tech Stack:** TypeScript, Node.js 24, ESM, npm workspaces, GLB, Node.js test runner, Playwright
 
 **Spec:** `docs/contracts/asset-preparation-contract-v1.md`
 
@@ -101,7 +101,8 @@
 Create `tests/output/assetContract.test.ts`:
 
 ```ts
-import { expect, test } from 'node-test';
+import { test } from 'node:test';
+import { expect } from 'expect';
 import {
   ICE_ASSET_CONTRACT_VERSION,
   contractStats,
@@ -157,7 +158,7 @@ stats object so the test reflects the new canonical shape.
 Run:
 
 ```bash
-npx node-test run tests/output/assetContract.test.ts tests/output/buildPreparedGLB.test.ts
+npm test -- tests/output/assetContract.test.ts tests/output/buildPreparedGLB.test.ts
 ```
 
 Expected: FAIL because the contract module and `built.metrics` do not exist.
@@ -260,7 +261,7 @@ initially be `0`; Task 3 finalizes byte metrics after packing.
 Run:
 
 ```bash
-npx node-test run tests/output/assetContract.test.ts tests/output/buildPreparedGLB.test.ts
+npm test -- tests/output/assetContract.test.ts tests/output/buildPreparedGLB.test.ts
 npm run typecheck
 ```
 
@@ -298,7 +299,8 @@ git commit -m "feat(toolchain): define asset contract metrics"
 Create `tests/output/evaluateAssetBudget.test.ts`:
 
 ```ts
-import { expect, test } from 'node-test';
+import { test } from 'node:test';
+import { expect } from 'expect';
 import {
   BUDGET_PROFILES,
   evaluateAssetBudget,
@@ -350,7 +352,7 @@ test('rejects malformed custom budget profiles', () => {
 Run:
 
 ```bash
-npx node-test run tests/output/evaluateAssetBudget.test.ts
+npm test -- tests/output/evaluateAssetBudget.test.ts
 ```
 
 Expected: FAIL because the module does not exist.
@@ -436,7 +438,7 @@ array, known metric IDs, finite nonnegative integers for both limits, and
 Run:
 
 ```bash
-npx node-test run tests/output/evaluateAssetBudget.test.ts
+npm test -- tests/output/evaluateAssetBudget.test.ts
 npm run typecheck
 ```
 
@@ -554,7 +556,7 @@ const readProfile = (bytes: Uint8Array): Record<string, unknown> => {
 Run:
 
 ```bash
-npx node-test run tests/output/buildPreparedGLB.test.ts tests/output/validatePreparedGLB.test.ts
+npm test -- tests/output/buildPreparedGLB.test.ts tests/output/validatePreparedGLB.test.ts
 ```
 
 Expected: FAIL because the GLB does not contain contract, preparation, or budget fields.
@@ -711,7 +713,7 @@ Validation must:
 Run:
 
 ```bash
-npx node-test run tests/output/buildPreparedGLB.test.ts tests/output/validatePreparedGLB.test.ts
+npm test -- tests/output/buildPreparedGLB.test.ts tests/output/validatePreparedGLB.test.ts
 npm run typecheck
 ```
 
@@ -845,7 +847,7 @@ test('build writes a report and fails hard budgets before publishing GLB', async
 Run:
 
 ```bash
-npx node-test run tests/output/createAssetReport.test.ts tests/cli/commands.test.ts
+npm test -- tests/output/createAssetReport.test.ts tests/cli/commands.test.ts
 ```
 
 Expected: FAIL because report generation and CLI flags do not exist.
@@ -965,7 +967,7 @@ new Set([
 Run:
 
 ```bash
-npx node-test run tests/output/createAssetReport.test.ts tests/cli/commands.test.ts
+npm test -- tests/output/createAssetReport.test.ts tests/cli/commands.test.ts
 npm run typecheck
 npm run verify
 ```
@@ -1051,7 +1053,7 @@ test('loads legacy assets without a contract', () => {
 Run:
 
 ```bash
-npx node-test run packages/assets/tests/GLBReader.test.ts
+npm test -- packages/assets/tests/GLBReader.test.ts
 ```
 
 Expected: FAIL because the contract snapshot does not exist.
@@ -1120,7 +1122,7 @@ emit `contractVersion`, extended `stats`, `preparation`, and `budget`; the
 Run:
 
 ```bash
-npx node-test run packages/assets
+npm test -- packages/assets
 npm run typecheck
 ```
 
@@ -1203,7 +1205,7 @@ test('emits a warning when loading a legacy asset', async () => {
 Run:
 
 ```bash
-npx node-test run packages/runtime/tests/AssetLoader.test.ts \
+npm test -- packages/runtime/tests/AssetLoader.test.ts \
   packages/runtime/tests/EngineLifecycle.test.ts
 ```
 
@@ -1287,7 +1289,7 @@ this.engine.reportDiagnostic(
 Run:
 
 ```bash
-npx node-test run packages/runtime packages/renderer
+npm test -- packages/runtime packages/renderer
 npm run typecheck
 ```
 

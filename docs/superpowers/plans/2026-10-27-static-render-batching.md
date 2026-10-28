@@ -6,7 +6,7 @@
 
 **Architecture:** The toolchain bakes static node transforms into material-specific batches and emits standard GLB geometry with a compact semantic index. The runtime builds query-only semantic nodes plus render batches, submits one draw per compatible batch, and maps per-vertex semantic indices back to stable selection IDs for picking and highlighting.
 
-**Tech Stack:** Node.js 24 LTS, TypeScript 7, ESM, npm workspaces, node-test 5, WebGL2, OGC 3D Tiles 1.1, Prepared GLB
+**Tech Stack:** Node.js 24 LTS, TypeScript 7, ESM, npm workspaces, Node.js built-in test runner, `expect`, `tsx`, WebGL2, OGC 3D Tiles 1.1, Prepared GLB
 
 **Spec:** `../ice3-doc/docs/superpowers/specs/2026-10-27-industrial-render-batching-design.md`
 
@@ -103,7 +103,7 @@ Run:
 ```bash
 cd ../ice3-engine
 source ~/.nvm/nvm.sh && nvm use 24
-npx node-test run packages/assets/tests/ICEGLBReader.test.ts
+npm test -- packages/assets/tests/ICEGLBReader.test.ts
 ```
 
 Expected: FAIL because `batching` is unsupported.
@@ -131,7 +131,7 @@ Expected error code for all cases: `ICE3_ASSET_BATCH_INVALID`.
 - [ ] **Step 5: Run focused tests and typecheck**
 
 ```bash
-npx node-test run packages/assets/tests/ICEGLBReader.test.ts packages/assets/tests/ICEProfileValidator.test.ts
+npm test -- packages/assets/tests/ICEGLBReader.test.ts packages/assets/tests/ICEProfileValidator.test.ts
 npm run typecheck
 ```
 
@@ -233,7 +233,7 @@ expect(result.meshes[0]!.semanticIndices.length)
 ```bash
 cd ../ice3-toolchain
 source ~/.nvm/nvm.sh && nvm use 24
-npx node-test run tests/output/buildRenderBatches.test.ts
+npm test -- tests/output/buildRenderBatches.test.ts
 ```
 
 Expected: FAIL because the builder does not exist.
@@ -258,7 +258,7 @@ With `off`, existing output bytes remain unchanged. With `static`, replace drawa
 - [ ] **Step 6: Run focused tests and typecheck**
 
 ```bash
-npx node-test run tests/output/buildRenderBatches.test.ts tests/output/buildPreparedGLB.test.ts
+npm test -- tests/output/buildRenderBatches.test.ts tests/output/buildPreparedGLB.test.ts
 npm run typecheck
 ```
 
@@ -327,7 +327,7 @@ expect(result.stats).toMatchObject({
 - [ ] **Step 2: Verify RED**
 
 ```bash
-npx node-test run tests/cli/commands.test.ts
+npm test -- tests/cli/commands.test.ts
 ```
 
 Expected: FAIL because the option is unknown.
@@ -349,7 +349,7 @@ Verify deterministic batch counts and that `renderBatchDrawReduction` equals:
 - [ ] **Step 5: Run tests and typecheck**
 
 ```bash
-npx node-test run tests/cli/commands.test.ts tests/partition/lodGeneration.test.ts
+npm test -- tests/cli/commands.test.ts tests/partition/lodGeneration.test.ts
 npm run typecheck
 ```
 
@@ -420,7 +420,7 @@ expect(built.scene.findByID('semantic-render:node:0')).toBeUndefined();
 - [ ] **Step 2: Verify RED**
 
 ```bash
-npx node-test run packages/runtime/tests/AssetSceneBuilder.test.ts
+npm test -- packages/runtime/tests/AssetSceneBuilder.test.ts
 ```
 
 Expected: FAIL because semantic nodes have no selection identity and batches do not exist.
@@ -442,7 +442,7 @@ For batched snapshots:
 - [ ] **Step 5: Run focused tests**
 
 ```bash
-npx node-test run packages/core/tests/NodeIdentity.test.ts packages/runtime/tests/AssetSceneBuilder.test.ts packages/runtime/tests/SceneQuery.test.ts
+npm test -- packages/core/tests/NodeIdentity.test.ts packages/runtime/tests/AssetSceneBuilder.test.ts packages/runtime/tests/SceneQuery.test.ts
 npm run typecheck
 ```
 
@@ -502,7 +502,7 @@ expect(draws[0]!.batch.selectionIds).toHaveLength(100);
 - [ ] **Step 2: Verify RED**
 
 ```bash
-npx node-test run packages/renderer/tests/WebGL2GeometryBatch.test.ts
+npm test -- packages/renderer/tests/WebGL2GeometryBatch.test.ts
 ```
 
 Expected: FAIL because batch collection is absent.
@@ -518,7 +518,7 @@ Add `renderedBatches` to internal renderer statistics without exposing GPU objec
 - [ ] **Step 5: Run renderer tests and browser tests**
 
 ```bash
-npx node-test run packages/renderer/tests/WebGL2GeometryBatch.test.ts packages/renderer/tests/BackendContract.test.ts
+npm test -- packages/renderer/tests/WebGL2GeometryBatch.test.ts packages/renderer/tests/BackendContract.test.ts
 npx playwright test tests/e2e/m1.spec.ts --project=chromium --project=webkit
 npm run typecheck
 ```
@@ -574,7 +574,7 @@ expect(semanticSelectionId(batch, 2)).toBeUndefined();
 - [ ] **Step 2: Verify RED**
 
 ```bash
-npx node-test run packages/runtime/tests/Projection.test.ts
+npm test -- packages/runtime/tests/Projection.test.ts
 ```
 
 Expected: FAIL because batched picking mapping is unavailable.
@@ -599,7 +599,7 @@ Use the existing coarse-to-fine browser flow:
 - [ ] **Step 6: Run tests**
 
 ```bash
-npx node-test run packages/runtime/tests/Projection.test.ts
+npm test -- packages/runtime/tests/Projection.test.ts
 npx playwright test tests/e2e/m1.spec.ts --project=chromium --project=webkit
 npm run verify
 ```
@@ -651,7 +651,7 @@ Build four nodes using one geometry and four distinct matrices. Assert one insta
 - [ ] **Step 2: Verify RED**
 
 ```bash
-npx node-test run packages/renderer/tests/WebGL2InstanceBatch.test.ts
+npm test -- packages/renderer/tests/WebGL2InstanceBatch.test.ts
 ```
 
 Expected: FAIL because instance batches are absent.
@@ -667,7 +667,7 @@ If a geometry has only one instance, use the ordinary batch path. If instance-bu
 - [ ] **Step 5: Run tests and typecheck**
 
 ```bash
-npx node-test run packages/renderer/tests/WebGL2InstanceBatch.test.ts packages/runtime/tests/AssetSceneBuilder.test.ts
+npm test -- packages/renderer/tests/WebGL2InstanceBatch.test.ts packages/runtime/tests/AssetSceneBuilder.test.ts
 npm run typecheck
 ```
 

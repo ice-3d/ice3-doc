@@ -6,7 +6,7 @@
 
 **Architecture:** 纯选择器从完整 Tileset 树计算目标切面和最近粗模回退。句柄保留当前覆盖切面，分帧准备候选内容，必要替代内容齐备后再移除父粗模。现有视锥、预算、缓存和场景容器继续复用。
 
-**Tech Stack:** TypeScript 7, Node.js 24 LTS, WebGL2, node-test, Playwright, OGC 3D Tiles 1.1, ICE3 core/assets/runtime
+**Tech Stack:** TypeScript 7, Node.js 24 LTS, WebGL2, Node.js test runner, Playwright, OGC 3D Tiles 1.1, ICE3 core/assets/runtime
 
 **Spec:** `ice3-doc/docs/superpowers/specs/2026-10-27-hierarchical-lod-design.md`
 
@@ -111,7 +111,7 @@ test('rejects a tile whose error is above its parent', () => {
 ```bash
 source "$HOME/.nvm/nvm.sh"
 nvm use 24
-npx node-test run packages/assets/tests/TilesetReader.test.ts
+npm test -- packages/assets/tests/TilesetReader.test.ts
 ```
 
 Expected: FAIL because internal content is rejected and `root` is absent.
@@ -127,7 +127,7 @@ Expected: FAIL because internal content is rejected and `root` is absent.
 - [ ] **Step 4: Verify GREEN**
 
 ```bash
-npx node-test run packages/assets/tests/TilesetReader.test.ts
+npm test -- packages/assets/tests/TilesetReader.test.ts
 npm test
 ```
 
@@ -181,7 +181,8 @@ export class ICELodSelector {
 - [ ] **Step 1: Write failing selector tests**
 
 ```ts
-import { expect, test } from 'node-test';
+import { test } from 'node:test';
+import { expect } from 'expect';
 import { ICEPerspectiveCamera } from '@ice3/core';
 import type { ICETilesetTile } from '@ice3/assets';
 import { ICELodSelector } from '../src/asset/ICELodSelector';
@@ -260,7 +261,7 @@ Add tests for:
 - [ ] **Step 2: Run RED**
 
 ```bash
-npx node-test run packages/runtime/tests/LodSelector.test.ts
+npm test -- packages/runtime/tests/LodSelector.test.ts
 ```
 
 Expected: FAIL because `ICELodSelector` does not exist.
@@ -289,7 +290,7 @@ Traversal:
 - [ ] **Step 4: Verify GREEN**
 
 ```bash
-npx node-test run packages/runtime/tests/LodSelector.test.ts
+npm test -- packages/runtime/tests/LodSelector.test.ts
 npm run typecheck
 npm test
 ```
@@ -365,7 +366,7 @@ it('rejects an invalid SSE threshold', () => {
 - [ ] **Step 2: Run RED**
 
 ```bash
-npx node-test run packages/runtime/tests/TilesetLoader.test.ts
+npm test -- packages/runtime/tests/TilesetLoader.test.ts
 ```
 
 Expected: FAIL because the option and stats do not exist.
@@ -381,7 +382,7 @@ Expected: FAIL because the option and stats do not exist.
 - [ ] **Step 4: Verify GREEN**
 
 ```bash
-npx node-test run packages/runtime/tests/TilesetLoader.test.ts
+npm test -- packages/runtime/tests/TilesetLoader.test.ts
 npm run typecheck
 ```
 
@@ -464,7 +465,7 @@ it('discards stale refinement when the camera leaves', async () => {
 - [ ] **Step 2: Run RED**
 
 ```bash
-npx node-test run packages/runtime/tests/LodLoader.test.ts
+npm test -- packages/runtime/tests/LodLoader.test.ts
 ```
 
 Expected: FAIL because the current loader removes/commits content without a
@@ -486,7 +487,7 @@ coverage cut.
 - [ ] **Step 4: Verify GREEN**
 
 ```bash
-npx node-test run packages/runtime/tests/LodLoader.test.ts \
+npm test -- packages/runtime/tests/LodLoader.test.ts \
   packages/runtime/tests/TilesetLoader.test.ts
 npm run typecheck
 npm test
@@ -557,7 +558,7 @@ it('stops optional refinement when the budget is reached', async () => {
 - [ ] **Step 2: Run RED**
 
 ```bash
-npx node-test run packages/runtime/tests/LodLoader.test.ts
+npm test -- packages/runtime/tests/LodLoader.test.ts
 ```
 
 Expected: FAIL because selection is currently cleared by container unload and
@@ -575,7 +576,7 @@ budget handling is not cut-aware.
 - [ ] **Step 4: Verify GREEN**
 
 ```bash
-npx node-test run packages/runtime/tests/LodLoader.test.ts \
+npm test -- packages/runtime/tests/LodLoader.test.ts \
   packages/runtime/tests/TilesetLoader.test.ts
 npm run typecheck
 npm test

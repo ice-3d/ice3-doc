@@ -6,7 +6,7 @@
 
 **Architecture:** The toolchain analyzes mesh nodes as atomic semantic units, recursively partitions them by world-space bounds, emits a Prepared GLB per leaf, and writes an explicit 3D Tiles 1.1 tree. A minimal public Tileset runtime loader validates the supported standard subset, schedules partition downloads with bounded concurrency, and commits each completed scene fragment atomically.
 
-**Tech Stack:** TypeScript 7, Node.js 24 LTS, npm workspaces, node-test, Playwright, Webpack, glTF 2.0, OGC 3D Tiles 1.1, Ajv with the official 3D Tiles JSON Schema bundle.
+**Tech Stack:** TypeScript 7, Node.js 24 LTS, npm workspaces, Node.js test runner, Playwright, Webpack, glTF 2.0, OGC 3D Tiles 1.1, Ajv with the official 3D Tiles JSON Schema bundle.
 
 **Spec:** `ice3-doc/docs/superpowers/specs/2026-10-27-spatial-tileset-pipeline-design.md`
 
@@ -280,7 +280,8 @@ writeFileSync(process.argv[2], JSON.stringify(document, null, 2));
 Create `analyzePartitionUnits.test.ts`:
 
 ```ts
-import { expect, test } from 'node-test';
+import { test } from 'node:test';
+import { expect } from 'expect';
 import { analyzePartitionUnits } from '../../packages/toolchain-core/src/partition/analyzePartitionUnits.js';
 import { createPartitionSource } from './createPartitionSource.js';
 
@@ -319,7 +320,7 @@ Run:
 
 ```bash
 nvm use
-npx node-test run tests/partition/analyzePartitionUnits.test.ts
+npm test -- tests/partition/analyzePartitionUnits.test.ts
 ```
 
 Expected: FAIL because `analyzePartitionUnits.ts` does not exist.
@@ -344,7 +345,7 @@ Export the module from `packages/toolchain-core/src/index.ts`.
 - [ ] **Step 6: Run the focused test and the toolchain unit suite**
 
 ```bash
-npx node-test run tests/partition/analyzePartitionUnits.test.ts
+npm test -- tests/partition/analyzePartitionUnits.test.ts
 npm test
 ```
 
@@ -390,7 +391,8 @@ export function createPartitionPlan(
 - [ ] **Step 1: Write failing planner tests**
 
 ```ts
-import { expect, test } from 'node-test';
+import { test } from 'node:test';
+import { expect } from 'expect';
 import { analyzePartitionUnits } from '../../packages/toolchain-core/src/partition/analyzePartitionUnits.js';
 import { createPartitionPlan } from '../../packages/toolchain-core/src/partition/createPartitionPlan.js';
 import { createPartitionSource } from './createPartitionSource.js';
@@ -434,7 +436,7 @@ test('stops at one indivisible unit when centers coincide', () => {
 - [ ] **Step 2: Run the tests and confirm RED**
 
 ```bash
-npx node-test run tests/partition/createPartitionPlan.test.ts
+npm test -- tests/partition/createPartitionPlan.test.ts
 ```
 
 Expected: FAIL because `createPartitionPlan.ts` does not exist.
@@ -456,7 +458,7 @@ Implement:
 - [ ] **Step 4: Verify GREEN**
 
 ```bash
-npx node-test run tests/partition/createPartitionPlan.test.ts
+npm test -- tests/partition/createPartitionPlan.test.ts
 npm test
 ```
 
@@ -498,7 +500,8 @@ export interface ICEBuildSelection {
 - [ ] **Step 1: Write the failing fragment test**
 
 ```ts
-import { expect, test } from 'node-test';
+import { test } from 'node:test';
+import { expect } from 'expect';
 import { buildPreparedGLB } from '../../packages/toolchain-core/src/output/buildPreparedGLB.js';
 import { validatePreparedGLB } from '../../packages/toolchain-core/src/output/validatePreparedGLB.js';
 import { createPartitionSource } from '../partition/createPartitionSource.js';
@@ -540,10 +543,10 @@ test('builds one selected node with a baked world transform and stable ID', () =
 - [ ] **Step 2: Run RED**
 
 ```bash
-npx node-test run tests/output/buildPreparedGLBFragment.test.ts
+npm test -- tests/output/buildPreparedGLBFragment.test.ts
 ```
 
-Expected: TypeScript/node-test failure because `ICEBuildOptions.selection` does not
+Expected: TypeScript/test failure because `ICEBuildOptions.selection` does not
 exist and all source nodes are still emitted.
 
 - [ ] **Step 3: Extract shared node-matrix helpers**
@@ -589,7 +592,7 @@ In `buildPreparedGLB.ts`:
 - [ ] **Step 5: Verify GREEN**
 
 ```bash
-npx node-test run tests/output/buildPreparedGLBFragment.test.ts
+npm test -- tests/output/buildPreparedGLBFragment.test.ts
 npm test
 ```
 
@@ -670,7 +673,8 @@ import { readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import Ajv2020 from 'ajv/dist/2020.js';
 import addFormats from 'ajv-formats';
-import { expect, test } from 'node-test';
+import { test } from 'node:test';
+import { expect } from 'expect';
 import {
   createTilesetDocument,
   type ICEFinishedTile,
@@ -757,7 +761,7 @@ test('validates against the official OGC schema bundle', () => {
 - [ ] **Step 3: Run RED**
 
 ```bash
-npx node-test run tests/partition/tileset.test.ts
+npm test -- tests/partition/tileset.test.ts
 ```
 
 Expected: FAIL because the writer does not exist.
@@ -780,7 +784,7 @@ Implement:
 - [ ] **Step 5: Verify GREEN and commit**
 
 ```bash
-npx node-test run tests/partition/tileset.test.ts
+npm test -- tests/partition/tileset.test.ts
 npm test
 git add package.json package-lock.json \
   packages/toolchain-core/src/partition/tileset.ts \
@@ -840,7 +844,8 @@ export function partitionAsset(
 - [ ] **Step 1: Write failing orchestration tests**
 
 ```ts
-import { expect, test } from 'node-test';
+import { test } from 'node:test';
+import { expect } from 'expect';
 import { partitionAsset } from '../../packages/toolchain-core/src/partition/partitionAsset.js';
 import { validatePreparedGLB } from '../../packages/toolchain-core/src/output/validatePreparedGLB.js';
 import { createPartitionSource } from './createPartitionSource.js';
@@ -897,7 +902,7 @@ test('produces byte-identical files and Tileset for identical inputs', () => {
 - [ ] **Step 2: Run RED**
 
 ```bash
-npx node-test run tests/partition/partitionAsset.test.ts
+npm test -- tests/partition/partitionAsset.test.ts
 ```
 
 Expected: FAIL because `partitionAsset.ts` does not exist.
@@ -925,7 +930,7 @@ Implement:
 - [ ] **Step 4: Verify GREEN**
 
 ```bash
-npx node-test run tests/partition/partitionAsset.test.ts
+npm test -- tests/partition/partitionAsset.test.ts
 npm test
 ```
 
@@ -1030,7 +1035,7 @@ const writePartitionGLTF = (path: string): void => {
 - [ ] **Step 2: Run RED**
 
 ```bash
-npx node-test run tests/cli/commands.test.ts -t partition
+npm test -- tests/cli/commands.test.ts -t partition
 ```
 
 Expected: FAIL because `partition` is an unknown command and its options are not
@@ -1064,7 +1069,7 @@ ice3-tool partition <source> --output <directory> --asset-id <id>
 - [ ] **Step 4: Exercise success and failure**
 
 ```bash
-npx node-test run tests/cli/commands.test.ts
+npm test -- tests/cli/commands.test.ts
 npm run verify
 ```
 
@@ -1120,7 +1125,8 @@ spheres into the engine's y-up bounds.
 - [ ] **Step 1: Write failing parser tests**
 
 ```ts
-import { expect, test } from 'node-test';
+import { test } from 'node:test';
+import { expect } from 'expect';
 import { readTileset } from '../src/ICETilesetReader';
 
 const tileset = (contentUri = 'parts/part-000.glb') => JSON.stringify({
@@ -1175,7 +1181,7 @@ test('rejects region and implicit tiling before fetching tile content', () => {
 
 ```bash
 nvm use
-npx node-test run packages/assets/tests/TilesetReader.test.ts
+npm test -- packages/assets/tests/TilesetReader.test.ts
 ```
 
 Expected: FAIL because `ICETilesetReader.ts` does not exist.
@@ -1205,7 +1211,7 @@ Implement:
 - [ ] **Step 4: Verify GREEN and commit**
 
 ```bash
-npx node-test run packages/assets/tests/TilesetReader.test.ts
+npm test -- packages/assets/tests/TilesetReader.test.ts
 npm test
 git add packages/assets/src packages/assets/tests/TilesetReader.test.ts
 git commit -m "feat(assets): parse supported 3D Tiles"
@@ -1291,7 +1297,9 @@ synthetic Tileset in the engine repository.
 - [ ] **Step 2: Write failing runtime tests**
 
 ```ts
-import { expect, it, vi } from 'node-test';
+import { it } from 'node:test';
+import { expect } from 'expect';
+import * as mockApi from 'jest-mock';
 import {
   ICE3,
   ICEPerspectiveCamera,
@@ -1437,7 +1445,7 @@ it('aborts pending work and disposes its scene idempotently', async () => {
 - [ ] **Step 3: Run RED**
 
 ```bash
-npx node-test run packages/runtime/tests/TilesetLoader.test.ts
+npm test -- packages/runtime/tests/TilesetLoader.test.ts
 ```
 
 Expected: FAIL because `ICETilesetLoader` does not exist.
@@ -1473,7 +1481,7 @@ Implement:
 - [ ] **Step 5: Verify GREEN**
 
 ```bash
-npx node-test run packages/runtime/tests/TilesetLoader.test.ts
+npm test -- packages/runtime/tests/TilesetLoader.test.ts
 npm test
 ```
 

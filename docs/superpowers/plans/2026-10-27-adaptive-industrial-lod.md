@@ -6,7 +6,7 @@
 
 **Architecture:** The toolchain generates a bounded simplification curve for each semantic unit, stores sampled geometry in the existing temporary workspace, and greedily allocates a Tile's triangle budget to the highest marginal error reduction. Adaptive mode is opt-in in this phase; the existing proportional allocator remains byte-for-byte compatible.
 
-**Tech Stack:** Node.js 24 LTS, TypeScript 7, ESM, npm workspaces, node-test 5, Prepared GLB, OGC 3D Tiles 1.1, `meshoptimizer` simplifier
+**Tech Stack:** Node.js 24 LTS, TypeScript 7, ESM, npm workspaces, Node.js built-in test runner, `expect`, `tsx`, Prepared GLB, OGC 3D Tiles 1.1, `meshoptimizer` simplifier
 
 **Spec:** `../ice3-doc/docs/superpowers/specs/2026-10-27-adaptive-industrial-lod-design.md`
 
@@ -78,7 +78,8 @@ function createLodSampleSchedule(options: {
 - [ ] **Step 1: Write the failing schedule tests**
 
 ```ts
-import { expect, test } from 'node-test';
+import { test } from 'node:test';
+import { expect } from 'expect';
 import { createLodSampleSchedule } from '../../packages/toolchain-core/src/lod/createLodSampleSchedule.js';
 
 test('builds deterministic logarithmic samples including both endpoints', () => {
@@ -120,7 +121,7 @@ Run:
 cd ../ice3-toolchain
 source "$HOME/.nvm/nvm.sh"
 nvm use 24
-npx node-test run tests/lod/createLodSampleSchedule.test.ts
+npm test -- tests/lod/createLodSampleSchedule.test.ts
 ```
 
 Expected: FAIL because the module and exported function do not exist.
@@ -204,7 +205,7 @@ export type {
 Run:
 
 ```bash
-npx node-test run tests/lod/createLodSampleSchedule.test.ts
+npm test -- tests/lod/createLodSampleSchedule.test.ts
 npm run typecheck
 ```
 
@@ -279,7 +280,8 @@ function allocateAdaptiveLod(
 - [ ] **Step 1: Write failing allocator tests**
 
 ```ts
-import { expect, test } from 'node-test';
+import { test } from 'node:test';
+import { expect } from 'expect';
 import {
   allocateAdaptiveLod,
   type ICELodUnitCurve,
@@ -361,7 +363,7 @@ test('skips zero-cost plateau steps without dividing by zero', () => {
 Run:
 
 ```bash
-npx node-test run tests/lod/allocateAdaptiveLod.test.ts
+npm test -- tests/lod/allocateAdaptiveLod.test.ts
 ```
 
 Expected: FAIL because the allocator module does not exist.
@@ -508,7 +510,7 @@ export {
 Run:
 
 ```bash
-npx node-test run tests/lod/allocateAdaptiveLod.test.ts \
+npm test -- tests/lod/allocateAdaptiveLod.test.ts \
   tests/lod/allocateLodTargets.test.ts
 npm run typecheck
 ```
@@ -582,7 +584,7 @@ test.each([1024, 1])(
 Run:
 
 ```bash
-npx node-test run tests/lod/createGeometryWorkspace.test.ts
+npm test -- tests/lod/createGeometryWorkspace.test.ts
 ```
 
 Expected: FAIL because colors are not stored or returned.
@@ -603,7 +605,7 @@ In `createGeometryWorkspace.ts`:
 Run:
 
 ```bash
-npx node-test run tests/lod/createGeometryWorkspace.test.ts \
+npm test -- tests/lod/createGeometryWorkspace.test.ts \
   tests/lod/simplifyGeometry.test.ts
 npm run typecheck
 ```
@@ -655,7 +657,8 @@ function createLodUnitCurve(options: {
 Create `tests/lod/createLodUnitCurve.test.ts` using a two-triangle colored workspace geometry:
 
 ```ts
-import { expect, test } from 'node-test';
+import { test } from 'node:test';
+import { expect } from 'expect';
 import { createGeometryWorkspace } from '../../packages/toolchain-core/src/lod/createGeometryWorkspace.js';
 import { createLodUnitCurve } from '../../packages/toolchain-core/src/lod/createLodUnitCurve.js';
 
@@ -709,7 +712,7 @@ test('creates monotonic samples and retains sampled vertex colors', async () => 
 Run:
 
 ```bash
-npx node-test run tests/lod/createLodUnitCurve.test.ts
+npm test -- tests/lod/createLodUnitCurve.test.ts
 ```
 
 Expected: FAIL because the curve module does not exist.
@@ -819,7 +822,7 @@ for (const sample of curve.samples) {
 Run:
 
 ```bash
-npx node-test run tests/lod/createLodUnitCurve.test.ts \
+npm test -- tests/lod/createLodUnitCurve.test.ts \
   tests/lod/createGeometryWorkspace.test.ts \
   tests/lod/simplifyGeometry.test.ts
 npm run typecheck
@@ -1031,7 +1034,7 @@ test('uses different simplification rates for heterogeneous units', async () => 
 Run:
 
 ```bash
-npx node-test run tests/partition/lodGeneration.test.ts -t heterogeneous
+npm test -- tests/partition/lodGeneration.test.ts -t heterogeneous
 ```
 
 Expected: FAIL because `allocation`, `curveSamples`, and adaptive stats are not integrated.
@@ -1221,7 +1224,7 @@ expect(proportional.files.map((file) => [
 Run:
 
 ```bash
-npx node-test run tests/partition/lodGeneration.test.ts \
+npm test -- tests/partition/lodGeneration.test.ts \
   tests/partition/partitionAsset.test.ts \
   tests/partition/tileset.test.ts
 npm run typecheck
@@ -1323,7 +1326,7 @@ test.each([
 Run:
 
 ```bash
-npx node-test run tests/cli/commands.test.ts -t "allocation|adaptive"
+npm test -- tests/cli/commands.test.ts -t "allocation|adaptive"
 ```
 
 Expected: FAIL because the options are unknown.
@@ -1371,7 +1374,7 @@ Add to `README.md`:
 Run:
 
 ```bash
-npx node-test run tests/cli/commands.test.ts
+npm test -- tests/cli/commands.test.ts
 npm run typecheck
 ```
 

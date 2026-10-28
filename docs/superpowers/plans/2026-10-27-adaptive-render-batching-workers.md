@@ -6,7 +6,7 @@
 
 **Architecture:** A main-thread planner selects a useful batch-building job only after the camera has settled. A bounded Worker pool produces transferable batch buffers, and a byte-budgeted uploader builds a candidate GPU generation. The generation is activated atomically; stale, failed, or over-budget work is discarded while the prior generation remains active.
 
-**Tech Stack:** Node.js 24 LTS, TypeScript 7, Web Workers, Transferable ArrayBuffer, WebGL2, node-test 5, Playwright
+**Tech Stack:** Node.js 24 LTS, TypeScript 7, Web Workers, Transferable ArrayBuffer, WebGL2, Node.js built-in test runner, `expect`, `tsx`, Playwright
 
 **Spec:** `../ice3-doc/docs/superpowers/specs/2026-10-27-industrial-render-batching-design.md`
 
@@ -105,7 +105,7 @@ Cover zero draw savings, exact byte budget, negative values, and deterministic t
 ```bash
 cd ../ice3-engine
 source ~/.nvm/nvm.sh && nvm use 24
-npx node-test run packages/runtime/tests/RenderBatchPlanner.test.ts
+npm test -- packages/runtime/tests/RenderBatchPlanner.test.ts
 ```
 
 Expected: FAIL because planner types do not exist.
@@ -117,7 +117,7 @@ Estimate gain and cost with the formulas in the spec. Sort candidates by materia
 - [ ] **Step 4: Run focused tests**
 
 ```bash
-npx node-test run packages/runtime/tests/RenderBatchPlanner.test.ts
+npm test -- packages/runtime/tests/RenderBatchPlanner.test.ts
 npm run typecheck
 ```
 
@@ -200,7 +200,7 @@ Assert:
 - [ ] **Step 2: Verify RED**
 
 ```bash
-npx node-test run packages/runtime/tests/BatchWorkerPool.test.ts
+npm test -- packages/runtime/tests/BatchWorkerPool.test.ts
 ```
 
 Expected: FAIL because the pool does not exist.
@@ -224,7 +224,7 @@ Use module workers when supported and fall back to classic workers. Keep one job
 - [ ] **Step 4: Run tests**
 
 ```bash
-npx node-test run packages/runtime/tests/BatchWorkerPool.test.ts
+npm test -- packages/runtime/tests/BatchWorkerPool.test.ts
 npm run typecheck
 ```
 
@@ -291,7 +291,7 @@ Also cover batch splitting, material mismatch rejection, index overflow, and emp
 - [ ] **Step 2: Verify RED**
 
 ```bash
-npx node-test run packages/runtime/tests/MergeBatchBuffers.test.ts
+npm test -- packages/runtime/tests/MergeBatchBuffers.test.ts
 ```
 
 Expected: FAIL because the merge function does not exist.
@@ -303,7 +303,7 @@ Compute exact output lengths first, allocate once, copy typed ranges, apply vert
 - [ ] **Step 4: Run tests**
 
 ```bash
-npx node-test run packages/runtime/tests/MergeBatchBuffers.test.ts
+npm test -- packages/runtime/tests/MergeBatchBuffers.test.ts
 npm run typecheck
 ```
 
@@ -359,7 +359,7 @@ Cover:
 - [ ] **Step 2: Verify RED**
 
 ```bash
-npx node-test run packages/renderer/tests/BatchGenerationUploader.test.ts
+npm test -- packages/renderer/tests/BatchGenerationUploader.test.ts
 ```
 
 Expected: FAIL because the uploader does not exist.
@@ -371,7 +371,7 @@ Upload only during idle frames. Keep active and candidate generations separate. 
 - [ ] **Step 4: Run tests and typecheck**
 
 ```bash
-npx node-test run packages/renderer/tests/BatchGenerationUploader.test.ts
+npm test -- packages/renderer/tests/BatchGenerationUploader.test.ts
 npm run typecheck
 ```
 
@@ -440,7 +440,7 @@ Cover Worker failure, upload failure, memory rejection, and `adaptive` disabled.
 - [ ] **Step 2: Verify RED**
 
 ```bash
-npx node-test run packages/runtime/tests/AdaptiveRenderBatch.test.ts
+npm test -- packages/runtime/tests/AdaptiveRenderBatch.test.ts
 ```
 
 Expected: FAIL because the controller does not exist.

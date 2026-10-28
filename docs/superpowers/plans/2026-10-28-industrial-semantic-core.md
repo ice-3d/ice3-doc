@@ -6,7 +6,7 @@
 
 **Architecture:** A pure TypeScript workspace core owns immutable domain models and mutable runtime stores. Registries provide indexed lookup, a relation graph handles typed edges, and `ICEIndustrialWorkspace` coordinates context changes, batched state notifications, events, operations, and manifest serialization without DOM, WebGL, HTTP, or AI-specific concepts.
 
-**Tech Stack:** Node.js 24 LTS, TypeScript 7, ESM, npm workspaces, node-test 5, JSON Schema-compatible TypeScript validation
+**Tech Stack:** Node.js 24 LTS, TypeScript 7, ESM, npm workspaces, Node.js built-in test runner, `expect`, `tsx`, JSON Schema-compatible TypeScript validation
 
 **Spec:** `../ice3-doc/docs/superpowers/specs/2026-10-28-industrial-semantic-layer-design.md`
 
@@ -42,7 +42,7 @@
 - Create: `ice3-industrial/package-lock.json`
 - Create: `ice3-industrial/tsconfig.base.json`
 - Create: `ice3-industrial/tsconfig.json`
-- Create: `ice3-industrial/node-test.config.ts`
+- Create: `ice3-industrial/scripts/run-tests.mjs`
 - Create: `ice3-industrial/scripts/clean.mjs`
 - Create: `ice3-industrial/tests/architecture/package-boundaries.test.mjs`
 - Create: `ice3-industrial/packages/industrial-core/package.json`
@@ -148,7 +148,8 @@ function parseIndustrialManifest(
 - [ ] **Step 1: Write the failing valid-manifest test**
 
 ```ts
-import { expect, test } from 'node-test';
+import { test } from 'node:test';
+import { expect } from 'expect';
 import { parseIndustrialManifest } from
   '../../packages/industrial-core/src/index.js';
 import { manifestFixture } from './manifestFixture.js';
@@ -175,7 +176,7 @@ Run:
 ```bash
 cd ../ice3-industrial
 source ~/.nvm/nvm.sh && nvm use 24
-npx node-test run tests/core/Manifest.test.ts
+npm test -- tests/core/Manifest.test.ts
 ```
 
 Expected: FAIL because the workspace/package does not exist.
@@ -190,7 +191,7 @@ Create the root workspace and core package using the shared scripts:
     "clean": "node scripts/clean.mjs",
     "build": "npm run clean && tsc -b",
     "typecheck": "tsc -b --pretty false",
-    "test": "node-test run",
+    "test": "node scripts/run-tests.mjs",
     "test:architecture": "node --test tests/architecture/package-boundaries.test.mjs",
     "verify": "npm run test:architecture && npm run typecheck && npm test"
   }
@@ -203,7 +204,9 @@ Root dev dependencies:
 {
   "@types/node": "24.19.2",
   "typescript": "7.0.2",
-  "node-test": "5.0.5"
+  "expect": "30.5.2",
+    "jest-mock": "30.5.2",
+    "tsx": "4.23.15"
 }
 ```
 
@@ -281,7 +284,7 @@ it.each([
 - [ ] **Step 6: Run focused tests, typecheck, and full suite**
 
 ```bash
-npx node-test run tests/core/Manifest.test.ts
+npm test -- tests/core/Manifest.test.ts
 npm run typecheck
 npm test
 ```
@@ -356,7 +359,7 @@ expect(() => entities.require('missing'))
 - [ ] **Step 2: Verify RED**
 
 ```bash
-npx node-test run tests/core/Registries.test.ts
+npm test -- tests/core/Registries.test.ts
 ```
 
 Expected: FAIL because classes do not exist.
@@ -377,7 +380,7 @@ Verify duplicate IDs and external identity conflicts throw during construction e
 - [ ] **Step 5: Run focused tests, typecheck, and full suite**
 
 ```bash
-npx node-test run tests/core/Registries.test.ts
+npm test -- tests/core/Registries.test.ts
 npm run typecheck
 npm test
 ```
@@ -469,7 +472,7 @@ expect(graph.reachable('pump-01', {
 - [ ] **Step 2: Verify RED**
 
 ```bash
-npx node-test run tests/core/Relations.test.ts
+npm test -- tests/core/Relations.test.ts
 ```
 
 Expected: FAIL because the graph does not exist.
@@ -496,7 +499,7 @@ Cover no query, ID/type/parent filters, external identity, property quality, unk
 - [ ] **Step 5: Verify query RED**
 
 ```bash
-npx node-test run tests/core/Queries.test.ts
+npm test -- tests/core/Queries.test.ts
 ```
 
 Expected: FAIL because query filtering is absent.
@@ -508,7 +511,7 @@ The query layer uses registry indexes and only reads state through a supplied lo
 - [ ] **Step 7: Run focused tests, typecheck, and full suite**
 
 ```bash
-npx node-test run tests/core/Relations.test.ts tests/core/Queries.test.ts
+npm test -- tests/core/Relations.test.ts tests/core/Queries.test.ts
 npm run typecheck
 npm test
 ```
@@ -625,7 +628,7 @@ expect(changes[0]).toHaveLength(1);
 - [ ] **Step 2: Verify RED**
 
 ```bash
-npx node-test run tests/core/StateStore.test.ts
+npm test -- tests/core/StateStore.test.ts
 ```
 
 Expected: FAIL because the state store does not exist.
@@ -667,7 +670,7 @@ Cover:
 - [ ] **Step 6: Run focused tests, typecheck, and full suite**
 
 ```bash
-npx node-test run tests/core/StateStore.test.ts
+npm test -- tests/core/StateStore.test.ts
 npm run typecheck
 npm test
 ```
@@ -747,7 +750,7 @@ expect(store.list().map((event) => event.type))
 - [ ] **Step 2: Verify event RED**
 
 ```bash
-npx node-test run tests/core/Events.test.ts
+npm test -- tests/core/Events.test.ts
 ```
 
 Expected: FAIL because event storage is absent.
@@ -770,7 +773,7 @@ await expect(registry.execute('pump-01', 'ice:start', {}, {
 - [ ] **Step 5: Verify operation RED**
 
 ```bash
-npx node-test run tests/core/Operations.test.ts
+npm test -- tests/core/Operations.test.ts
 ```
 
 Expected: FAIL because operation registration is absent.
@@ -790,7 +793,7 @@ Wrap handler failure as `ICE3_INDUSTRIAL_OPERATION_FAILED`; preserve `AbortError
 - [ ] **Step 7: Run focused tests, typecheck, and full suite**
 
 ```bash
-npx node-test run tests/core/Events.test.ts tests/core/Operations.test.ts
+npm test -- tests/core/Events.test.ts tests/core/Operations.test.ts
 npm run typecheck
 npm test
 ```
@@ -892,7 +895,7 @@ expect(contexts).toHaveLength(1);
 - [ ] **Step 2: Verify workspace RED**
 
 ```bash
-npx node-test run tests/core/Workspace.test.ts
+npm test -- tests/core/Workspace.test.ts
 ```
 
 Expected: FAIL because the facade does not exist.
@@ -916,7 +919,7 @@ Verify object-key insertion order does not affect output and that dynamic state/
 - [ ] **Step 5: Verify serialization RED**
 
 ```bash
-npx node-test run tests/core/Serialization.test.ts
+npm test -- tests/core/Serialization.test.ts
 ```
 
 Expected: FAIL because deterministic serialization is absent.
@@ -928,7 +931,7 @@ Sort object keys recursively while preserving array order unless the manifest de
 - [ ] **Step 7: Run focused tests, typecheck, and full suite**
 
 ```bash
-npx node-test run tests/core/Workspace.test.ts tests/core/Serialization.test.ts
+npm test -- tests/core/Workspace.test.ts tests/core/Serialization.test.ts
 npm run typecheck
 npm test
 ```
@@ -998,7 +1001,7 @@ Verify duplicate adapter IDs, unknown adapter IDs, malformed import, and adapter
 - [ ] **Step 2: Verify RED**
 
 ```bash
-npx node-test run tests/core/Adapters.test.ts
+npm test -- tests/core/Adapters.test.ts
 ```
 
 Expected: FAIL because adapters do not exist.

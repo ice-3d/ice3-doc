@@ -6,7 +6,7 @@
 
 **Architecture:** 工具链继续从单一规范化几何流水线生成粗模，但把内部 Tile 的粗模拆成稳定设备分片；运行时把所有分片组合成一个逻辑 Tile。预取使用独立低优先级集合，不参与当前切面的 ready/idle 判定。
 
-**Tech Stack:** TypeScript 7, Node.js 24 LTS, node-test, Playwright, OGC 3D Tiles 1.1, ICE3 core/assets/runtime/toolchain
+**Tech Stack:** TypeScript 7, Node.js 24 LTS, Node.js test runner, Playwright, OGC 3D Tiles 1.1, ICE3 core/assets/runtime/toolchain
 
 **Spec:** `ice3-doc/docs/superpowers/specs/2026-10-27-lod-refinement-and-scene-api-design.md`
 
@@ -125,10 +125,10 @@ test('writes standard contents for a chunked tile', () => {
 
 ```bash
 cd ../ice3-engine
-npx node-test run packages/assets/tests/TilesetReader.test.ts
+npm test -- packages/assets/tests/TilesetReader.test.ts
 
 cd ../ice3-toolchain
-npx node-test run tests/partition/tileset.test.ts
+npm test -- tests/partition/tileset.test.ts
 ```
 
 Expected: FAIL because multi-content is rejected and the writer only emits one
@@ -145,10 +145,10 @@ content.
 - [ ] **Step 4: Verify GREEN**
 
 ```bash
-npx node-test run packages/assets/tests/TilesetReader.test.ts
+npm test -- packages/assets/tests/TilesetReader.test.ts
 
 cd ../ice3-toolchain
-npx node-test run tests/partition/tileset.test.ts
+npm test -- tests/partition/tileset.test.ts
 ```
 
 Expected: both suites pass.
@@ -237,7 +237,7 @@ test('keeps an oversized unit intact', () => {
 - [ ] **Step 2: Run RED**
 
 ```bash
-npx node-test run tests/lod/createCoarseChunkPlan.test.ts
+npm test -- tests/lod/createCoarseChunkPlan.test.ts
 ```
 
 Expected: FAIL because chunk planning does not exist.
@@ -253,7 +253,7 @@ Expected: FAIL because chunk planning does not exist.
 - [ ] **Step 4: Verify GREEN**
 
 ```bash
-npx node-test run tests/lod/createCoarseChunkPlan.test.ts
+npm test -- tests/lod/createCoarseChunkPlan.test.ts
 npm run typecheck
 ```
 
@@ -339,7 +339,7 @@ reported error remains finite.
 - [ ] **Step 2: Run RED**
 
 ```bash
-npx node-test run tests/partition/lodGeneration.test.ts \
+npm test -- tests/partition/lodGeneration.test.ts \
   tests/lod/simplifyGeometry.test.ts
 ```
 
@@ -365,7 +365,7 @@ simplification is absent.
 - [ ] **Step 4: Verify GREEN**
 
 ```bash
-npx node-test run tests/partition/lodGeneration.test.ts \
+npm test -- tests/partition/lodGeneration.test.ts \
   tests/lod/simplifyGeometry.test.ts \
   tests/cli/commands.test.ts
 npm run typecheck
@@ -437,7 +437,7 @@ it('does not commit a partial logical tile when one chunk fails', async () => {
 - [ ] **Step 2: Run RED**
 
 ```bash
-npx node-test run packages/runtime/tests/MultiContentTile.test.ts
+npm test -- packages/runtime/tests/MultiContentTile.test.ts
 ```
 
 Expected: FAIL because the loader assumes one `contentUri`.
@@ -455,7 +455,7 @@ Expected: FAIL because the loader assumes one `contentUri`.
 - [ ] **Step 4: Verify GREEN**
 
 ```bash
-npx node-test run packages/runtime/tests/MultiContentTile.test.ts \
+npm test -- packages/runtime/tests/MultiContentTile.test.ts \
   packages/runtime/tests/TilesetLoader.test.ts \
   packages/runtime/tests/LodLoader.test.ts
 npm run typecheck
@@ -515,7 +515,7 @@ it('does not treat prefetch failure as a visible failure', async () => {
 - [ ] **Step 2: Run RED**
 
 ```bash
-npx node-test run packages/runtime/tests/LodLoader.test.ts
+npm test -- packages/runtime/tests/LodLoader.test.ts
 ```
 
 Expected: FAIL because prefetch is currently absent.
@@ -532,7 +532,7 @@ Expected: FAIL because prefetch is currently absent.
 - [ ] **Step 4: Verify GREEN**
 
 ```bash
-npx node-test run packages/runtime/tests/LodLoader.test.ts \
+npm test -- packages/runtime/tests/LodLoader.test.ts \
   packages/runtime/tests/LodSelector.test.ts
 npm run typecheck
 npm test
@@ -585,7 +585,7 @@ it('produces distinct target cuts at calibrated thresholds', () => {
 - [ ] **Step 2: Run RED**
 
 ```bash
-npx node-test run packages/runtime/tests/LodSelector.test.ts -t calibrated
+npm test -- packages/runtime/tests/LodSelector.test.ts -t calibrated
 ```
 
 Expected: FAIL only if current behavior violates monotonic refinement.
@@ -608,7 +608,7 @@ and update all default-value assertions and docs to the measured value.
 - [ ] **Step 5: Verify GREEN and commit**
 
 ```bash
-npx node-test run packages/runtime/tests/LodSelector.test.ts
+npm test -- packages/runtime/tests/LodSelector.test.ts
 npm run verify
 git add packages/runtime/src/asset/ICETilesetLoader.ts README.md docs/api/m1.md
 git commit -m "feat(runtime): calibrate lod screen-space error"
