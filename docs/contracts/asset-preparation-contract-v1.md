@@ -826,6 +826,9 @@ The runtime compatibility rules are:
   visible.
 - Keep the current complete visible coverage during camera motion until the next
   LOD cut is complete and GPU-ready.
+- Update spatial visibility during camera motion for unrelated GPU-ready Tiles;
+  only ancestor/descendant LOD replacement waits for camera settle and complete
+  replacement coverage.
 - Use a full-asset-radius retention halo by default, so camera movement alone
   does not unload Resident Tiles; resident count and byte budgets remain the
   final memory limits.
