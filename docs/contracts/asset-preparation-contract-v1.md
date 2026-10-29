@@ -400,45 +400,42 @@ ice3-tool validate <file.glb> [--report <file.json>]
 7. 客户资产与敏感路径不进入契约示例、测试和报告。
 8. 跨仓库冻结样例和契约测试通过。
 
-## 18. Tileset distribution and partition diagnostics
+## 18. Tileset 分发与 partition Diagnostic
 
-- Distribution index: OGC 3D Tiles 1.1 `tileset.json`.
-- Contents: ICE3 Prepared GLB Profile v1 files.
-- Every embedded GLB `bufferView` includes the mandatory `buffer: 0` index.
-- Supported v1 subset: explicit `children`, local Cartesian `box` or `sphere`,
-  relative `content.uri`, finite 4x4 `transform`, and `REPLACE` refinement.
-- Unsupported v1 features: `region`, external tilesets, `implicitTiling`,
-  non-Prepared GLB contents, and undeclared required extensions.
-- Partition output is published atomically as a directory.
-- ICE3-owned tile metadata lives under standard `extras.ice3`.
-- Tool diagnostics are `ICE3_TOOL_PARTITION_OPTIONS_INVALID`,
+- 分发索引为 OGC 3D Tiles 1.1 `tileset.json`。
+- Content 为 ICE3 Prepared GLB Profile v1 文件。
+- 每个内嵌 GLB `bufferView` 都包含必需的 `buffer: 0` index。
+- 支持的 v1 子集包括显式 `children`、本地 Cartesian `box` 或 `sphere`、相对
+  `content.uri`、有限 4x4 `transform` 和 `REPLACE` refinement。
+- 不支持的 v1 功能包括 `region`、外部 Tileset、`implicitTiling`、非 Prepared GLB
+  content 和未声明的 required extension。
+- Partition 输出以目录为单位原子发布。
+- ICE3 自有 Tile metadata 位于标准 `extras.ice3`。
+- Tool Diagnostic 包括 `ICE3_TOOL_PARTITION_OPTIONS_INVALID`、
   `ICE3_TOOL_PARTITION_EMPTY`, `ICE3_TOOL_PARTITION_UNSPLITTABLE`,
   `ICE3_TOOL_PARTITION_OUTPUT_EXISTS`,
   `ICE3_TOOL_TILESET_INVALID`, and `ICE3_TOOL_TILESET_WRITE_FAILED`.
-- Runtime diagnostics are `ICE3_TILESET_INVALID`, `ICE3_TILESET_UNSUPPORTED`,
+- Runtime Diagnostic 包括 `ICE3_TILESET_INVALID`、`ICE3_TILESET_UNSUPPORTED`、
   `ICE3_TILESET_TILE_FAILED`, `ICE3_TILESET_DUPLICATE_ID`,
   `ICE3_TILESET_ABORTED`, `ICE3_TILESET_CAMERA_REQUIRED`, and
   `ICE3_TILESET_RESIDENT_BUDGET_EXCEEDED`.
 
-## 19. Adaptive Tileset runtime behavior
+## 19. Adaptive Tileset Runtime 行为
 
-The distribution remains a standard explicit-tree OGC 3D Tiles 1.1 Tileset.
-The runtime combines the current perspective camera and viewport with partition
-bounds to maintain these camera-relative sets:
+分发对象仍是标准 explicit-tree OGC 3D Tiles 1.1 Tileset。Runtime 结合当前
+PerspectiveCamera、Viewport 和 partition Bounds 维护以下 camera-relative set：
 
-- `visible`: partitions intersecting the strict view frustum.
-- `prefetch`: partitions in the expanded prefetch margin outside the strict
-  frustum.
-- `retain`: loaded or candidate partitions inside a wider unload margin.
+- `visible`：与严格 view frustum 相交的 partition。
+- `prefetch`：位于严格 frustum 外、但处于扩展 prefetch margin 内的 partition。
+- `retain`：位于更大 unload margin 内的已加载或候选 partition。
 
-The wider retention margin creates hysteresis so small camera movement does not
-repeatedly load and unload the same partition. When a partition stops being
-retained, or is displaced by budget pressure outside the visible set, the runtime
-removes it from the unified scene and releases its decoded cache entry.
+更大的 retention margin 形成 hysteresis，避免小幅 camera movement 反复加载和卸载同一
+partition。Partition 离开 retention 范围，或因 budget pressure 被挤出 visible set
+后，Runtime 将其从统一 Scene 移除并释放 decoded cache entry。
 
-The runtime defaults are:
+Runtime 默认值如下：
 
-| Option | Default |
+| 选项 | 默认值 |
 | --- | ---: |
 | `maxConcurrentTiles` | 2 |
 | `maxResidentTiles` | 24 |
@@ -448,78 +445,66 @@ The runtime defaults are:
 | `maxCommitsPerFrame` | 1 |
 | `lodSettleDelayMs` | 180 |
 
-`maxResidentTiles` and `maxResidentBytes` are soft budgets. Visible completeness
-wins: a visible set larger than either budget continues loading and remains
-resident, while the runtime emits one deduplicated
-`ICE3_TILESET_RESIDENT_BUDGET_EXCEEDED` warning. Offscreen prefetch is suppressed
-while the budget is exceeded. `residentBytes` counts prepared position, index,
-edge, and color buffers and must not be presented as driver-reported GPU usage.
+`maxResidentTiles` 和 `maxResidentBytes` 是 soft budget。可见完整性优先：visible set
+超出任一 budget 时仍继续加载并保持 resident，同时 Runtime 只发送一次去重的
+`ICE3_TILESET_RESIDENT_BUDGET_EXCEEDED` warning。超出 budget 时暂停 offscreen
+prefetch。`residentBytes` 统计 prepared position、index、edge 和 color buffer，不得
+表述为 driver-reported GPU usage。
 
-Every partition is represented by one removable container in the unified scene,
-including identity-transform partitions. Before disposal, the runtime checks
-whether the active selection belongs to that container and clears it first. A
-stale request result is discarded before scene commit and its cache is released.
-Successful partitions are committed at most `maxCommitsPerFrame` per animation
-frame.
+每个 partition 在统一 Scene 中由一个可移除 container 表示，包括 identity-transform
+partition。Disposal 前，Runtime 检查 active Selection 是否属于该 container，并先清除
+Selection。stale request result 在 Scene commit 前丢弃并释放 cache。成功 partition
+每帧最多提交 `maxCommitsPerFrame` 次。
 
-The handle exposes `pending`, `loading`, `loaded`, `failed`, and `evicted` tile
-states plus aggregate work-set statistics. It emits `TILESET_TILE_LOADING`,
+Handle 暴露 `pending`、`loading`、`loaded`、`failed` 和 `evicted` Tile state，以及
+聚合 work-set 统计。它发送 `TILESET_TILE_LOADING`、
 `TILESET_TILE_LOADED`, `TILESET_TILE_FAILED`, `TILESET_TILE_UNLOADED`,
 `TILESET_READY`, and `TILESET_IDLE`. `whenReady()` reports the first visible
 content; `whenIdle()` reports stability of the work set active when it was
 called. `whenComplete()` is not part of the contract because camera-driven
 residency must not imply global completion.
 
-### 19.1 LOD transition visibility
+### 19.1 LOD 过渡可见性
 
-Hierarchical LOD changes use a stable screen-space-error band. A coarse Tile
-refines when its error exceeds the configured limit. It coarsens only after the
-error falls below 75% of that limit, preventing camera movement near the
-threshold from repeatedly toggling representations.
+Hierarchical LOD 切换使用稳定的 screen-space-error band。Coarse Tile 的 error 超过配置
+上限时执行 refine；只有 error 低于该上限的 75% 后才 coarsen，避免 camera 在阈值附近
+移动时反复切换 representation。
 
-The current visible representation remains in the scene while the complete next
-visible representation is loaded off-scene. The runtime publishes the deepest
-complete coverage frontier: a parent is replaced only when every visible child
-branch under it has a resident child representation. Newly available coarse
-branches therefore replace their ancestor progressively instead of waiting for
-all final leaf targets in the view. Each replacement removes the old level in the
-same scene mutation. Ancestor and descendant content must not be visible together,
-and a transition must not create an empty visible frame. Prefetched descendants
-remain hidden until they become part of the active coverage frontier.
+加载完整的下一可见 representation 时，当前可见 representation 继续留在 Scene。
+Runtime 发布最深的完整 coverage frontier：只有父级下每个可见 child branch 都有
+resident child representation 时才替换父级。因此新就绪的 coarse branch 可以逐步替换
+ancestor，无需等待视图中所有最终 leaf target。每次替换在同一次 Scene mutation 中移除
+旧层级。Ancestor 与 descendant content 不得同时可见，transition 也不得产生空白帧。
+Prefetched descendant 在进入 active coverage frontier 前保持隐藏。
 
-Continuous camera motion does not publish repeated LOD group swaps. The active
-representation stays stable while the current view's next target group loads
-off-scene. A content-bearing coarse ancestor remains resident but hidden as a
-motion fallback when available. Entering motion may atomically switch to that
-fallback; the runtime publishes the final target group only after the camera has
-been stable for `lodSettleDelayMs`. Setting the delay to `0` disables the
-interaction stabilization window.
+Camera 连续运动不会发布重复 LOD group swap。当前视图的下一 target group 在 off-scene
+加载时，active representation 保持稳定。带内容的 coarse ancestor 可保持 resident 但
+隐藏，作为 motion fallback。进入运动状态时可以原子切换到 fallback；只有 camera 稳定
+达到 `lodSettleDelayMs` 后，Runtime 才发布最终 target group。将该延迟设为 `0` 会关闭
+interaction stabilization window。
 
-If a required descendant fails, its fallback content replaces the whole
-overlapping target subtree; successful siblings are not mixed with an ancestor
-representation. `TILESET_READY` is emitted only after the first complete
-visible group is committed. These guarantees do not change the Tileset schema,
-Prepared GLB format, or `selectionId` identity.
+必需 descendant 失败时，其 fallback content 替换整个重叠 target subtree；成功 sibling
+不得与 ancestor representation 混合。只有首个完整 visible group 提交后才发送
+`TILESET_READY`。这些保证不改变 Tileset schema、Prepared GLB format 或
+`selectionId` identity。
 
-This stage establishes the frustum, retention, budget, commit throttling, and
-unload mechanisms reused by hierarchical LOD. Implicit tiling, external
-Tilesets, and runtime mesh simplification remain unsupported.
+本阶段建立 frustum、retention、budget、commit throttling 和 unload 机制，供
+hierarchical LOD 复用。Implicit tiling、external Tileset 和 Runtime Mesh
+simplification 仍不支持。
 
-## 20. Hierarchical LOD asset generation
+## 20. Hierarchical LOD Asset 生成
 
-`partition --lod` enables coarse proxies without changing the standard Tileset
-shape:
+`partition --lod` 在不改变标准 Tileset 形状的前提下启用 coarse proxy：
 
-- fine leaves remain under `parts/`;
-- internal-node proxies are written under `coarse/`;
-- internal and leaf content are relative Prepared GLBs;
-- every node continues to use `REPLACE`;
-- `geometricError` is measured in world meters and is never derived from a
-  fixed LOD index or camera distance.
+- fine leaf 保留在 `parts/`。
+- internal-node proxy 写入 `coarse/`。
+- internal 和 leaf content 都是相对 Prepared GLB。
+- 每个 Node 继续使用 `REPLACE`。
+- `geometricError` 以 world meter 计量，绝不根据固定 LOD index 或 camera distance 推导。
 
-Defaults:
+默认值：
 
-| Option | Default |
+| 选项 | 默认值 |
 | --- | ---: |
 | `lodRatio` | 0.15 |
 | `lodMaxTriangles` | 250000 |
@@ -527,37 +512,33 @@ Defaults:
 | `lodAllocation` | `proportional` |
 | `lodCurveSamples` | 8 |
 
-Coarse geometry is simplified per semantic device and material primitive.
-Devices are never merged into a shared selection identity, and per-device
-minimums take priority over the node's soft triangle cap in proportional mode.
+Coarse Geometry 按 semantic device 和 Material primitive 简化。Device 不会合并到共享
+Selection identity；proportional mode 中，per-device minimum 优先于 Node 的 soft
+triangle cap。
 
-`lodAllocation` accepts:
+`lodAllocation` 接受以下值：
 
-- `proportional`: every device receives the same configured ratio, with device
-  minimums applied. Existing output remains stable for identical input,
-  options, and tool version.
-- `adaptive`: each device receives a deterministic logarithmic simplification
-  curve. The allocator keeps only monotonic samples where additional actual
-  triangles reduce error, then spends the node budget on the largest
-  normalized marginal error reduction.
+- `proportional`：每个 device 使用相同配置比例，并应用 device minimum。相同 input、
+  option 和 tool version 的既有输出保持稳定。
+- `adaptive`：每个 device 使用确定性 logarithmic simplification curve。Allocator 只
+  保留增加实际 triangle 会降低 error 的 monotonic sample，再把 Node budget 分配给
+  normalized marginal error reduction 最大的样本。
 
-The adaptive node budget is:
+Adaptive Node budget 为：
 
 ```text
 min(lodMaxTriangles, proportional target total for that node)
 ```
 
-This keeps adaptive and proportional comparisons under the same nominal node
-work. `lodMaxTriangles` remains an upper cap. If all devices at their minimum
-samples exceed that node budget, adaptive generation fails with
-`ICE3_TOOL_LOD_BUDGET_INVALID` and emits no partial output.
+这样 adaptive 和 proportional comparison 具有相同 nominal Node work。
+`lodMaxTriangles` 仍是上限。所有 device 在 minimum sample 下仍超过该 Node budget 时，
+adaptive generation 以 `ICE3_TOOL_LOD_BUDGET_INVALID` 失败，不输出部分结果。
 
-`lodCurveSamples` must be an integer from `4` through `32`. Curve sample
-geometry is stored in the same bounded temporary workspace as normalized
-source geometry. One curve is cached per semantic device, concurrent spills
-use unique paths, and all temporary data is removed after success or failure.
+`lodCurveSamples` 必须是 `4` 到 `32` 的整数。Curve sample Geometry 与 normalized
+source Geometry 存放在同一个有界 temporary workspace。每个 semantic device 缓存一条
+curve，concurrent spill 使用唯一路径；无论成功或失败，所有 temporary data 都会删除。
 
-Prepared GLB node extras may include:
+Prepared GLB Node extras 可以包含：
 
 ```json
 {
@@ -568,24 +549,21 @@ Prepared GLB node extras may include:
 }
 ```
 
-`id` remains unique inside the GLB. `selectionId` can repeat across LOD
-contents to identify the same business device. Missing `selectionId` falls back
-to `id`, preserving existing assets.
+`id` 在 GLB 内保持唯一。`selectionId` 可以跨 LOD content 重复，以标识同一个业务设备。
+缺少 `selectionId` 时回退到 `id`，从而兼容既有 Asset。
 
-The source document is parsed once. Normalized device geometry is held in a
-bounded temporary workspace, spilling excess units to temporary binary files.
-Fine and coarse outputs are produced by the same build task. Every coarse proxy
-simplifies original normalized geometry rather than another coarse proxy.
-Temporary data and incomplete output directories are removed after success,
-failure, or cancellation.
+Source document 只解析一次。Normalized device Geometry 保存在有界 temporary workspace，
+超出的 unit 写入 temporary binary file。Fine 和 coarse output 由同一个 build task
+生成。每个 coarse proxy 都从原始 normalized Geometry 简化，而不是简化另一个 proxy。
+无论成功、失败或取消，都会删除 temporary data 和不完整 output directory。
 
-New tool diagnostics are `ICE3_TOOL_LOD_INVALID`,
+新增 tool Diagnostic 包括 `ICE3_TOOL_LOD_INVALID`、
 `ICE3_TOOL_LOD_UNSUPPORTED`, `ICE3_TOOL_LOD_BUDGET_INVALID`, and
 `ICE3_TOOL_LOD_CLEANUP_FAILED`.
-The optional LOD simplifier is a toolchain dependency and is not part of the
-browser runtime or public package dependency graph.
+可选 LOD simplifier 是 toolchain dependency，不属于 browser Runtime 或公开 package
+dependency graph。
 
-The partition report preserves existing coarse statistics and adds:
+Partition report 保留现有 coarse statistic，并增加：
 
 ```ts
 interface ICELodAdaptiveStats {
@@ -598,64 +576,54 @@ interface ICELodAdaptiveStats {
 }
 ```
 
-Adaptive generation changes only coarse geometry and error metadata. It does
-not add Tileset fields, alter `REPLACE`, change Prepared GLB framing, or move
-work into the browser runtime.
+Adaptive generation 只改变 coarse Geometry 和 error metadata，不新增 Tileset 字段、
+不改变 `REPLACE`、不改变 Prepared GLB framing，也不把工作移入 browser Runtime。
 
-Internal coarse content may use the standard Tileset `contents` array when it
-exceeds the configured chunk limit. Chunks are deterministic, never split an
-individual device, and retain stable semantic selection identities. The runtime
-loads all required chunks as one logical Tile and commits only the complete
-group.
+Internal coarse content 超过配置 chunk limit 时，可以使用标准 Tileset `contents`
+数组。Chunk 具有确定性，不拆分单个 device，并保留稳定 semantic Selection identity。
+Runtime 将所有必需 chunk 作为一个 logical Tile 加载，只提交完整 group。
 
-## 21. Conservative semantic proxy generation
+## 21. 保守 semantic proxy 生成
 
-`partition --lod --lod-allocation adaptive` accepts the optional
-`--semantic-proxy off|auto` switch. The default is `off`. `auto` is rejected
-before source processing unless both `--lod` and adaptive allocation are active;
-`off` preserves the existing adaptive output for identical input and options.
+`partition --lod --lod-allocation adaptive` 接受可选
+`--semantic-proxy off|auto` 开关，默认值为 `off`。除非同时启用 `--lod` 和 adaptive
+allocation，否则 `auto` 在 source processing 前被拒绝；`off` 对相同 input 和 option
+保持既有 adaptive output。
 
-Proxy generation is an offline toolchain operation over semantic device units.
-It samples unique source-mesh vertices and non-degenerate triangle centroids,
-fits OBB and cylinder candidates in mesh-local coordinates, and stores qualified
-geometry in the bounded temporary workspace. Principal axes are derived from the
-deduplicated surface vertices so asymmetric tessellation cannot rotate the axes
-of an otherwise symmetric device.
+Proxy generation 是作用于 semantic device unit 的离线 toolchain operation。它采样唯一
+source Mesh vertex 和非退化 triangle centroid，在 mesh-local coordinate 中拟合 OBB 和
+cylinder candidate，并把合格 Geometry 存入有界 temporary workspace。Principal axis
+从去重 surface vertex 推导，避免非对称 tessellation 旋转原本对称设备的 axis。
 
-An accepted candidate must satisfy all fixed limits:
+Accepted candidate 必须满足以下固定限制：
 
-| Metric | Limit |
+| Metric | 限制 |
 | --- | ---: |
 | Normalized maximum surface deviation | `<= 0.05` |
 | Proxy volume / source local AABB volume | `<= 2.0` |
 | Source triangle reduction | `>= 8x` |
 
-Devices below 64 source triangles are ineligible. OBB uses 12 triangles and
-cylinder uses 64. Candidates that fail a limit, have unstable axes, or lack
-sufficient triangle reduction are rejected and remain on the existing QEM
-path. Accepted proxies and QEM samples compete under the same Tile triangle
-budget; a proxy receives no semantic budget bonus.
+少于 64 个 source triangle 的 device 不参与。OBB 使用 12 个 triangle，cylinder 使用
+64 个。未满足限制、axis 不稳定或 triangle reduction 不足的 candidate 被拒绝，并继续
+使用既有 QEM path。Accepted proxy 与 QEM sample 在相同 Tile triangle budget 下竞争；
+proxy 不获得 semantic budget bonus。
 
-OBB candidates additionally require a source-bounds aspect ratio no greater
-than `8:1`. Highly elongated equipment such as conveyors keeps QEM geometry
-because a plain box loses too much visible structure. This aspect limit does not
-apply to cylinder candidates.
+OBB candidate 还要求 source Bounds aspect ratio 不超过 `8:1`。传送带等高度细长设备
+继续使用 QEM Geometry，因为普通 box 会丢失过多可见结构。Cylinder candidate 不适用该
+aspect limit。
 
-A selected proxy replaces only the geometry of its source mesh in the Prepared
-GLB. It retains the source mesh-local coordinate system, node transforms, node
-IDs, and `selectionId` values. Shared source meshes continue to share one proxy,
-and proxy and QEM devices may coexist in one Tile and one coarse content group.
-The output remains a standard Prepared GLB with no proxy-specific extension,
-Tileset field, private asset format, or runtime API. Invalid selected proxy
-geometry fails the build instead of publishing a partial output.
+Selected proxy 只替换 Prepared GLB 中 source Mesh 的 Geometry，保留 source
+mesh-local coordinate、Node transform、Node ID 和 `selectionId`。共享 source Mesh
+继续共享一个 proxy；proxy 与 QEM device 可以共存于同一 Tile 和 coarse content group。
+输出仍是标准 Prepared GLB，不增加 proxy-specific extension、Tileset field、私有
+Asset format 或 Runtime API。Selected proxy Geometry 无效时构建失败，不发布部分输出。
 
-Material selection is deterministic: the dominant material is chosen by
-triangle count and then lowest source material index. Averaged vertex color is
-used only when every contributing primitive has vertex colors; otherwise the
-dominant material is retained. The proxy does not read textures or synthesize a
-new PBR material.
+Material selection 具有确定性：先按 triangle count 选择 dominant Material，再用最低
+source Material index 排序。只有所有 contributing primitive 都有 vertex color 时才
+使用平均 vertex color，否则保留 dominant Material。Proxy 不读取 texture，也不合成新
+PBR Material。
 
-The partition report adds:
+Partition report 增加：
 
 ```ts
 interface ICESemanticProxyStats {
@@ -670,29 +638,24 @@ interface ICESemanticProxyStats {
 }
 ```
 
-Accepted, rejected, and kind counts use unique semantic units. Selected,
-triangle, and saved-triangle counts describe final coarse contents. The saved
-triangle count is the local device benefit before the adaptive allocator can
-reassign released budget to other devices; it is not an expected reduction in
-the final Tile total. Proxy reports contain no source paths, customer names,
-device names, previews, or geometry.
+Accepted、rejected 和类型计数使用唯一 semantic unit。Selected、triangle 和
+saved-triangle count 描述最终 coarse content。saved triangle count 是 adaptive
+allocator 重新分配 budget 前的 local device benefit，不等同于最终 Tile total 的预期
+缩减。Proxy report 不包含 source path、客户名、设备名、preview 或 Geometry。
 
-The proxy workflow keeps the same compatibility boundary as the rest of the
-contract: runtime conversion remains forbidden, generated content is ordinary
-Prepared GLB, every GLB must pass validation, and existing Tileset behavior is
-unchanged. Enabling or disabling proxies must not change `selectionId` identity
-or node transforms.
+Proxy workflow 保持与 contract 其余部分相同的 compatibility boundary：禁止 Runtime
+conversion；生成内容是普通 Prepared GLB；每个 GLB 必须通过 validation；既有 Tileset
+行为不变。启用或禁用 proxy 不得改变 `selectionId` identity 或 Node transform。
 
-## 22. Static render batches and repeated geometry
+## 22. Static render batch 与重复 Geometry
 
-Static batching is an optional offline preprocessing step. The toolchain
-command defaults to `--render-batch off`; `--render-batch static` enables the
-feature without changing source parsing or adding a runtime dependency.
-Existing Prepared GLBs without batch metadata continue through the ordinary
-mesh path with unchanged bytes.
+Static batching 是可选离线 preprocessing step。Toolchain command 默认
+`--render-batch off`；`--render-batch static` 在不改变 source parsing、不增加 runtime
+dependency 的情况下启用该功能。没有 batch metadata 的既有 Prepared GLB 继续走普通
+Mesh path，bytes 保持不变。
 
-A batched Prepared GLB still contains one JSON chunk and one BIN chunk. Batch
-metadata is stored at `asset.extras.ice3.batching`:
+Batched Prepared GLB 仍包含一个 JSON chunk 和一个 BIN chunk。Batch metadata 位于
+`asset.extras.ice3.batching`：
 
 ```ts
 interface ICEPreparedBatching {
@@ -715,20 +678,18 @@ interface ICEPreparedBatching {
 }
 ```
 
-The 3 semantic arrays have equal lengths. `semanticNodeIds` reference the
-Prepared GLB node namespace and must match the corresponding node's
-`selectionId`. Every batch triangle primitive declares an `UNSIGNED_INT`
-`SCALAR` attribute named `_ICE3_SEMANTIC_INDEX`; every value indexes the
-semantic arrays. Invalid metadata, bounds, primitive references, or semantic
-indices fail with `ICE3_ASSET_BATCH_INVALID`.
+3 个 semantic array 长度相同。`semanticNodeIds` 引用 Prepared GLB Node namespace，并
+必须匹配对应 Node 的 `selectionId`。每个 batch triangle primitive 声明名为
+`_ICE3_SEMANTIC_INDEX` 的 `UNSIGNED_INT` `SCALAR` attribute；每个值索引 semantic
+array。Metadata、Bounds、primitive reference 或 semantic index 无效时，以
+`ICE3_ASSET_BATCH_INVALID` 失败。
 
-Only triangle geometry is statically batched in version 1.0. Source geometry
-may share a batch when its effective output material state, vertex-color mode,
-and edge state are identical. World transforms are baked into batch vertices.
-Semantic nodes remain as query-only identity carriers, and each Tile receives
-render-only batch nodes with IDs unique across the unified Tileset scene.
+Version 1.0 只对 triangle Geometry 执行 static batch。Source Geometry 在有效 output
+Material state、vertex-color mode 和 edge state 完全相同时可以共享 batch。World
+transform 烘焙到 batch vertex。Semantic Node 继续作为 query-only identity carrier；
+每个 Tile 获得只在统一 Tileset Scene 内唯一的 render-only batch Node。
 
-The partition report adds:
+Partition report 增加：
 
 ```ts
 interface ICRenderBatchStats {
@@ -742,28 +703,26 @@ interface ICRenderBatchStats {
 }
 ```
 
-`renderBatchDrawReduction` is
+`renderBatchDrawReduction` 为
 `(inputPrimitives - batchCount) / max(1, inputPrimitives)`. Reports contain
 aggregate counts only and never include customer names, source paths, semantic
 labels, or geometry.
 
-Runtime compatibility rules:
+Runtime compatibility rule：
 
-- Batch nodes use batch geometry once and preserve the existing `selectionId`
-  returned by GPU picking.
-- Repeated ordinary meshes with the same geometry and material object are
-  submitted through one instanced draw; geometry stays in one GPU buffer.
-- Each instance carries a stable semantic index used by picking and highlight.
-- Instance-buffer allocation failure falls back to ordinary mesh draws and
-  increments `renderer.instancingFallbacks`; the runtime emits a deduplicated
-  warning with `ICE3_RENDER_INSTANCING_FALLBACK`.
-- LOD replacement remains atomic per Tile. Batching does not change
-  `geometricError`, `REPLACE` behavior, or semantic identity.
+- Batch Node 只使用一次 batch Geometry，并保留 GPU picking 返回的既有 `selectionId`。
+- Geometry 和 Material object 相同的重复普通 Mesh 通过一次 instanced draw 提交；
+  Geometry 保留在一个 GPU buffer。
+- 每个 instance 携带稳定 semantic index，供 picking 和 highlight 使用。
+- Instance-buffer allocation 失败时回退到普通 Mesh draw，并增加
+  `renderer.instancingFallbacks`；Runtime 发送去重 warning
+  `ICE3_RENDER_INSTANCING_FALLBACK`。
+- LOD replacement 仍按 Tile 原子执行。Batching 不改变 `geometricError`、`REPLACE`
+  行为或 semantic identity。
 
-Measured on a controlled industrial Prepared GLB with edges disabled and
-identical partition settings:
+在关闭 edge、使用相同 partition setting 的受控工业 Prepared GLB 上测得：
 
-| Metric | Ordinary mesh path | Static batches |
+| Metric | 普通 Mesh path | Static batch |
 | --- | ---: | ---: |
 | Source triangles | 16,939,337 | 16,939,337 |
 | Input drawable primitives | 1,472 | 1,472 |
@@ -775,79 +734,68 @@ identical partition settings:
 | Selection identities | 261 | 261 |
 | Page errors / failed requests | 0 / 0 | 0 / 0 |
 
-With proportional LOD enabled under the same settings, the complete output
-contains 108 GLBs and 107 Tiles. Its aggregate batch report covers 9,984 input
-drawable primitives across fine and coarse content with 2,079 output batches,
-for a reported reduction of 79.18%. Every GLB validates, all 261 semantic
-selection identities match the ordinary output, and Chromium and WebKit report
-zero page errors or failed requests. In an identical camera and 45-second
-observation window, Chromium's active LOD work set rendered 1,472 ordinary
-Draw Calls versus 114 static batches while loading the same coarse work set.
-Static batching trades larger prepared bytes and longer offline builds for
-materially lower runtime submission cost.
+在相同设置下启用 proportional LOD 时，完整输出包含 108 个 GLB 和 107 个 Tile。
+聚合 batch report 覆盖 fine/coarse content 的 9,984 个 input drawable primitive，
+输出 2,079 个 batch，报告缩减率为 79.18%。每个 GLB 都通过 validation，261 个
+semantic Selection identity 与普通输出一致，Chromium 与 WebKit 都没有页面错误或失败
+请求。相同 camera 和 45 秒观察窗口内，Chromium active LOD work set 绘制 1,472 个普通
+Draw Call，而 static batch 为 114 个，且加载相同 coarse work set。Static batching
+以更大的 prepared bytes 和更长的 offline build 换取显著更低的 Runtime submission
+cost。
 
-### 22.1 Optional adaptive runtime repacking
+### 22.1 可选 adaptive Runtime repacking
 
-`ICETilesetLoader` accepts `renderBatching.mode` with `asset`, `adaptive`, or
-`off`. The default is `asset`: use Prepared GLB batches without runtime
-repacking. `adaptive` enables idle-time generation; `off` disables adaptive
-planning and does not rewrite or unpack already prepared batches.
+`ICETilesetLoader` 的 `renderBatching.mode` 接受 `asset`、`adaptive` 或 `off`，默认
+`asset`：使用 Prepared GLB batch，不在 Runtime repacking。`adaptive` 启用 idle-time
+generation；`off` 关闭 adaptive planning，并且不重写或解包 prepared batch。
 
-Adaptive planning is permitted only when the camera and visible target set are
-stable. The runtime may merge compatible visible batch geometry across content
-boundaries for the current generation, but it must not change semantic
-selection IDs, Tileset bounds, `geometricError`, or `REPLACE` behavior.
+只有 camera 和 visible target set 稳定时才允许 adaptive planning。Runtime 可以为当前
+generation 跨 content boundary 合并兼容 visible batch Geometry，但不得改变 semantic
+Selection ID、Tileset Bounds、`geometricError` 或 `REPLACE` 行为。
 
-The implementation contract is:
+Implementation contract：
 
-- Worker concurrency is bounded and defaults to
+- Worker concurrency 有界，默认值为
   `min(4, max(1, hardwareConcurrency - 1))`.
-- Source ownership transfers through `ArrayBuffer` transfer lists exactly once.
-- Candidate uploads are split by `uploadBytesPerFrame`; no buffer larger than
-  the frame budget is accepted by that budget.
-- Candidate GPU geometry remains inactive until every chunk is prepared.
-- A single callback activates the completed generation. The runtime restores
-  the prior visible mesh/batch layout on camera motion, target change,
-  cancellation, or disposal.
-- Worker, transfer, upload, or activation failure leaves the previous active
-  generation unchanged and releases candidate resources.
-- Generation diagnostics are deduplicated per generation:
+- Source ownership 通过 `ArrayBuffer` transfer list 恰好转移一次。
+- Candidate upload 按 `uploadBytesPerFrame` 拆分；超过 frame budget 的 buffer 不会由
+  该 budget 接受。
+- 每个 chunk 准备完成前，candidate GPU Geometry 保持 inactive。
+- 单次 callback 激活完整 generation。Camera motion、target change、cancellation 或
+  disposal 时，Runtime 恢复之前的 visible Mesh/Batch layout。
+- Worker、transfer、upload 或 activation 失败时，上一个 active generation 保持不变，
+  并释放 candidate resource。
+- 每个 generation 的 Diagnostic 会去重：
   `ICE3_RENDER_BATCH_ADAPTIVE_STARTED`,
   `ICE3_RENDER_BATCH_ADAPTIVE_COMPLETED`,
   `ICE3_RENDER_BATCH_ADAPTIVE_CANCELLED`,
   `ICE3_RENDER_BATCH_ADAPTIVE_FAILED`, and
   `ICE3_RENDER_BATCH_MEMORY_REJECTED`.
-- `ICETilesetHandle.adaptiveStats` exposes only generation counters and batch
-  counts; it never exposes Worker, transferable, or GPU handles.
+- `ICETilesetHandle.adaptiveStats` 只暴露 generation counter 和 batch count，不暴露
+  Worker、transferable 或 GPU handle。
 
-### 22.2 GPU residency and transition stability
+### 22.2 GPU residency 与 transition stability
 
-CPU-resident Tiles own their GPU geometry from successful commit until actual
-Tile unload. Visibility, frustum membership, and temporary LOD coverage changes
-must not independently evict those buffers.
+CPU-resident Tile 从成功 commit 到实际 unload 期间拥有自己的 GPU Geometry。Visibility、
+frustum membership 和 temporary LOD coverage 变化不得单独驱逐这些 buffer。
 
-The runtime compatibility rules are:
+Runtime compatibility rule：
 
-- Upload every retained Tile's complete geometry before making that Tile
-  visible.
-- Keep the current complete visible coverage during camera motion until the next
-  LOD cut is complete and GPU-ready.
-- Update spatial visibility during camera motion for unrelated GPU-ready Tiles;
-  only ancestor/descendant LOD replacement waits for camera settle and complete
-  replacement coverage.
-- Use a full-asset-radius retention halo by default, so camera movement alone
-  does not unload Resident Tiles; resident count and byte budgets remain the
-  final memory limits.
-- Reuse non-owned geometry for at least 60 inactive frames before eligible for
-  eviction.
-- Use byte-budgeted least-recently-used eviction for non-owned geometry; the
-  default geometry budget is 768 MiB.
-- Keep the default resident limit at 64 Tiles and 768 MiB so a 54-Tile,
-  469 MB controlled industrial working set can remain stable.
-- Expose cumulative `gpuUploads` and `gpuEvictions` diagnostics alongside
-  `gpuBytes`. Re-entering already resident content must not increase either
-  counter.
+- Tile 可见前上传其完整 Geometry。
+- Camera motion 期间保持当前完整 visible coverage，直到下一 LOD cut 完整且 GPU-ready。
+- 对无关的 GPU-ready Tile，可以在 Camera motion 期间更新 spatial visibility；只有
+  ancestor/descendant LOD replacement 需要等待 camera settle 和完整 replacement
+  coverage。
+- 默认使用 full-asset-radius retention halo，避免仅因 camera movement 卸载 Resident
+  Tile；resident count 和 byte budget 仍是最终 memory limit。
+- 非自有 Geometry 至少保留 60 个 inactive frame 后才可驱逐。
+- 非自有 Geometry 使用按 byte budget 约束的 least-recently-used eviction；默认
+  Geometry budget 为 768 MiB。
+- 默认将 resident limit 保持为 64 Tiles 和 768 MiB，使受控测试中 54 Tile、469 MB 的
+  industrial working set 保持稳定。
+- 在 `gpuBytes` 旁暴露累计 `gpuUploads` 和 `gpuEvictions` Diagnostic。重新进入已
+  resident content 不得增加任一 counter。
 
-Eviction is permitted only when a Tile is unloaded, a non-owned resource exceeds
-its inactivity window, or the GPU budget requires removing an unpinned
-least-recently-used resource. Context loss remains a full-device reset.
+只有 Tile unload、非自有资源超过 inactivity window，或 GPU budget 需要移除未 pinned
+的 least-recently-used resource 时才允许 eviction。Context loss 仍执行 full-device
+reset。

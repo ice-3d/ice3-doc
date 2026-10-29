@@ -6,7 +6,6 @@
 >
 > Owner: ICE3 architecture maintainers
 >
-> English summary: Define deterministic per-unit triangle budget allocation and error curves for adaptive coarse LOD generation.
 
 | 项目 | 内容 |
 | --- | --- |

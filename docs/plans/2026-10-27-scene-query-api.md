@@ -4,50 +4,49 @@
 >
 > Status: Implemented
 >
-> Owner: ICE3 architecture maintainers
+> Owner: ICE3 架构维护者
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **面向 Agent 工作执行者：** 必需子技能：使用 superpowers:subagent-driven-development（推荐）或 superpowers:executing-plans，逐个任务执行本计划。使用复选框（`- [ ]`）语法跟踪步骤。
 
-**Goal:** 提供稳定、去重、可序列化的场景查询、屏幕拾取、世界射线和设备聚焦能力，供任意工具或业务调用。
+**目标：** 提供稳定、去重、可序列化的场景查询、屏幕拾取、世界射线和设备聚焦能力，供任意工具或业务调用。
 
-**Architecture:** 通用查询器遍历当前统一场景，按语义选择身份去重并选择最精细代表节点。引擎暴露只读查询快照；拾取和射线返回同一快照格式；相机控制器只接收查询结果的世界包围盒。
+**架构：** 通用查询器遍历当前统一场景，按语义选择身份去重并选择最精细代表节点。引擎暴露只读查询快照；拾取和射线返回同一快照格式；相机控制器只接收查询结果的世界包围盒。
 
-**Tech Stack:** TypeScript 7, Node.js 24.22.1 LTS, WebGL2, Node.js test runner, Playwright, ICE3 core/runtime
+**技术栈：** TypeScript 7, Node.js 24.22.1 LTS, WebGL2, Node.js test runner, Playwright, ICE3 core/runtime
 
-**Spec:** `../specs/2026-10-27-lod-refinement-and-scene-api-design.md`
+**规范：** `../specs/2026-10-27-lod-refinement-and-scene-api-design.md`
 
-## Global Constraints
+## 全局约束
 
-- Use Node.js 24.22.1 LTS from `.nvmrc`.
-- Develop on `feature/lod-refinement`.
-- Follow RED-GREEN-REFACTOR.
-- Add no runtime dependency.
-- API names and documentation contain no Agent- or AI-specific concepts.
-- Query results are frozen read-only snapshots.
-- Duplicate LOD representations of one selection identity return one result.
-- Results are deterministic and sorted by `selectionId`.
-- All world coordinates are Y-up meters, matching the Prepared GLB contract.
-- Customer assets and derivatives never enter tracked artifacts.
+- 使用 `.nvmrc` 指定的 Node.js 24.22.1 LTS。
+- 在 `feature/lod-refinement` 分支开发。
+- 遵循 RED-GREEN-REFACTOR。
+- 不添加运行时依赖。
+- API 名称和文档不包含 Agent 或 AI 特有的概念。
+- 查询结果是冻结的只读快照。
+- 同一选择身份的重复 LOD 表示只返回一个结果。
+- 结果具有确定性，并按 `selectionId` 排序。
+- 所有世界坐标均为 Y 轴向上的米制单位，与 Prepared GLB contract 一致。
+- 客户 Asset 及其派生物绝不进入受跟踪的制品。
 
-## Review Focus
+## 审查重点
 
-- Coarse and fine representations of one device coexist during a transition and
-  must not appear twice in query results.
-- A hidden child with visible ancestors must remain hidden.
-- Screen picking and world raycasting must return the same logical device.
-- A query during pending LOD work must return only resident nodes.
-- Focus on a very small or flat device must choose a finite camera distance.
+- 转换期间，同一设备的粗模和精细表示会同时存在，但不得在查询结果中出现两次。
+- 祖先节点可见的隐藏子节点必须保持隐藏。
+- 屏幕拾取和世界射线投射必须返回同一逻辑设备。
+- LOD 工作尚未完成时执行查询，必须只返回常驻节点。
+- 对极小或扁平设备进行聚焦时，必须选择有限的相机距离。
 
 ---
 
-### Task 1: Pure Scene Item Collector
+### 任务 1：纯场景项收集器
 
-**Files:**
-- Create: `ice3-engine/packages/runtime/src/query/ICESceneQuery.ts`
-- Create: `ice3-engine/packages/runtime/tests/SceneQuery.test.ts`
-- Modify: `ice3-engine/packages/runtime/src/index.ts`
+**文件：**
+- 创建：`ice3-engine/packages/runtime/src/query/ICESceneQuery.ts`
+- 创建：`ice3-engine/packages/runtime/tests/SceneQuery.test.ts`
+- 修改：`ice3-engine/packages/runtime/src/index.ts`
 
-**Interfaces:**
+**接口：**
 
 ```ts
 export interface ICESceneQuery {
@@ -73,13 +72,13 @@ export function collectSceneItems(
 ): readonly ICESceneItem[];
 ```
 
-- Traverse all `ICEMesh` nodes.
-- Group by `selectionId`.
-- Choose the deepest representative; ties use lexical `node.id`.
-- Compute world bounds from geometry bounds and the node world matrix.
-- Apply filters and sort by `selectionId`.
+- 遍历所有 `ICEMesh` 节点。
+- 按 `selectionId` 分组。
+- 选择最深的代表节点；若并列，则使用字典序最小的 `node.id`。
+- 根据几何包围盒和节点世界矩阵计算世界包围盒。
+- 应用过滤条件并按 `selectionId` 排序。
 
-- [ ] **Step 1: Write failing dedupe, visibility, bounds, and limit tests**
+- [ ] **步骤 1：编写会失败的去重、可见性、包围盒和数量限制测试**
 
 ```ts
 test('returns one logical device for coarse and fine nodes', () => {
@@ -123,32 +122,32 @@ test('applies visibility, bounds, and deterministic limit', () => {
 });
 ```
 
-- [ ] **Step 2: Run RED**
+- [ ] **步骤 2：运行 RED**
 
 ```bash
 npm test -- packages/runtime/tests/SceneQuery.test.ts
 ```
 
-Expected: FAIL because the query module does not exist.
+预期：FAIL，因为查询模块尚不存在。
 
-- [ ] **Step 3: Implement**
+- [ ] **步骤 3：实现**
 
-- Validate positive integer limits and finite query bounds.
-- Compute node world bounds once during traversal.
-- A node is visible only when itself and all ancestors are visible.
-- Do not mutate scene nodes.
-- Freeze each item and the returned array.
+- 验证数量限制为正整数，且查询包围盒为有限值。
+- 遍历时只计算一次节点世界包围盒。
+- 仅当节点自身及其所有祖先均可见时，节点才可见。
+- 不得修改场景节点。
+- 冻结每个项及返回数组。
 
-- [ ] **Step 4: Verify GREEN**
+- [ ] **步骤 4：验证 GREEN**
 
 ```bash
 npm test -- packages/runtime/tests/SceneQuery.test.ts
 npm run typecheck
 ```
 
-Expected: pass.
+预期：通过。
 
-- [ ] **Step 5: Commit**
+- [ ] **步骤 5：提交**
 
 ```bash
 git add packages/runtime/src/query/ICESceneQuery.ts \
@@ -159,25 +158,25 @@ git commit -m "feat(runtime): collect semantic scene items"
 
 ---
 
-### Task 2: Public Engine Query API
+### 任务 2：公共引擎查询 API
 
-**Files:**
-- Modify: `ice3-engine/packages/runtime/src/ICE3.ts`
-- Modify: `ice3-engine/packages/runtime/tests/EngineLifecycle.test.ts`
-- Modify: `ice3-engine/docs/api/m1.md`
+**文件：**
+- 修改：`ice3-engine/packages/runtime/src/ICE3.ts`
+- 修改：`ice3-engine/packages/runtime/tests/EngineLifecycle.test.ts`
+- 修改：`ice3-engine/docs/api/m1.md`
 
-**Interfaces:**
+**接口：**
 
 ```ts
 engine.queryScene(query?: ICESceneQuery): readonly ICESceneItem[];
 engine.findBySelectionId(selectionId: string): ICENode | undefined;
 ```
 
-- `findBySelectionId` uses the same representative choice as `queryScene`.
-- Calls before a scene is configured return an empty query and `undefined`.
-- Engine destruction makes further queries throw `ICE3_ENGINE_DESTROYED`.
+- `findBySelectionId` 使用与 `queryScene` 相同的代表节点选择规则。
+- 在配置场景之前调用时，查询返回空结果，并返回 `undefined`。
+- 引擎销毁后，后续查询会抛出 `ICE3_ENGINE_DESTROYED`。
 
-- [ ] **Step 1: Write failing engine tests**
+- [ ] **步骤 1：编写会失败的引擎测试**
 
 ```ts
 it('queries semantic items without exposing LOD duplicates', () => {
@@ -207,22 +206,21 @@ it('returns an empty query before scene configuration', () => {
 });
 ```
 
-- [ ] **Step 2: Run RED**
+- [ ] **步骤 2：运行 RED**
 
 ```bash
 npm test -- packages/runtime/tests/EngineLifecycle.test.ts
 ```
 
-Expected: FAIL because the public methods do not exist.
+预期：FAIL，因为公共方法尚不存在。
 
-- [ ] **Step 3: Implement and export**
+- [ ] **步骤 3：实现并导出**
 
-- Reuse `collectSceneItems`.
-- `findBySelectionId` returns the node whose `nodeId` matches the selected
-  representative.
-- Update public package exports.
+- 复用 `collectSceneItems`。
+- `findBySelectionId` 返回 `nodeId` 与选中代表节点匹配的节点。
+- 更新公共软件包导出。
 
-- [ ] **Step 4: Verify GREEN**
+- [ ] **步骤 4：验证 GREEN**
 
 ```bash
 npm test -- packages/runtime/tests/EngineLifecycle.test.ts
@@ -230,9 +228,9 @@ npm run typecheck
 npm test
 ```
 
-Expected: pass.
+预期：通过。
 
-- [ ] **Step 5: Commit**
+- [ ] **步骤 5：提交**
 
 ```bash
 git add packages/runtime/src/ICE3.ts \
@@ -243,15 +241,15 @@ git commit -m "feat(runtime): expose semantic scene queries"
 
 ---
 
-### Task 3: Screen Pick Result with Semantic Item
+### 任务 3：带语义项的屏幕拾取结果
 
-**Files:**
-- Modify: `ice3-engine/packages/runtime/src/ICE3.ts`
-- Modify: `ice3-engine/packages/runtime/src/query/ICESceneQuery.ts`
-- Modify: `ice3-engine/packages/runtime/tests/SelectionGesture.test.ts`
-- Modify: `ice3-engine/tests/e2e/m1.spec.ts`
+**文件：**
+- 修改：`ice3-engine/packages/runtime/src/ICE3.ts`
+- 修改：`ice3-engine/packages/runtime/src/query/ICESceneQuery.ts`
+- 修改：`ice3-engine/packages/runtime/tests/SelectionGesture.test.ts`
+- 修改：`ice3-engine/tests/e2e/m1.spec.ts`
 
-**Interfaces:**
+**接口：**
 
 ```ts
 engine.pickItem(point: ICEScreenPoint): {
@@ -260,11 +258,11 @@ engine.pickItem(point: ICEScreenPoint): {
 };
 ```
 
-- Existing `engine.pick()` remains.
-- `pickItem()` reuses the GPU exact pick and same semantic representative.
-- An empty or error pick returns an empty object.
+- 保留现有 `engine.pick()`。
+- `pickItem()` 复用 GPU 精确拾取和相同的语义代表节点。
+- 空拾取或错误拾取返回空对象。
 
-- [ ] **Step 1: Write failing tests**
+- [ ] **步骤 1：编写会失败的测试**
 
 ```ts
 it('returns the logical item from a GPU hit', () => {
@@ -281,30 +279,30 @@ it('returns no item for an empty pick', () => {
 });
 ```
 
-- [ ] **Step 2: Run RED**
+- [ ] **步骤 2：运行 RED**
 
 ```bash
 npm test -- packages/runtime/tests/SelectionGesture.test.ts
 ```
 
-Expected: FAIL because `pickItem` does not exist.
+预期：FAIL，因为 `pickItem` 尚不存在。
 
-- [ ] **Step 3: Implement**
+- [ ] **步骤 3：实现**
 
-- Reuse `samplePick`.
-- Convert the hit node to `ICESceneItem`.
-- Keep current selection and highlight behavior unchanged.
+- 复用 `samplePick`。
+- 将命中的节点转换为 `ICESceneItem`。
+- 保持当前选择和高亮行为不变。
 
-- [ ] **Step 4: Verify GREEN**
+- [ ] **步骤 4：验证 GREEN**
 
 ```bash
 npm test -- packages/runtime/tests/SelectionGesture.test.ts
 npm run test:e2e -- --project=chromium tests/e2e/m1.spec.ts
 ```
 
-Expected: pass.
+预期：通过。
 
-- [ ] **Step 5: Commit**
+- [ ] **步骤 5：提交**
 
 ```bash
 git add packages/runtime/src/ICE3.ts \
@@ -316,15 +314,15 @@ git commit -m "feat(runtime): expose semantic pick results"
 
 ---
 
-### Task 4: World-Space Raycast
+### 任务 4：世界空间射线投射
 
-**Files:**
-- Create: `ice3-engine/packages/runtime/src/query/ICESceneRaycaster.ts`
-- Create: `ice3-engine/packages/runtime/tests/SceneRaycaster.test.ts`
-- Modify: `ice3-engine/packages/runtime/src/ICE3.ts`
-- Modify: `ice3-engine/packages/runtime/src/index.ts`
+**文件：**
+- 创建：`ice3-engine/packages/runtime/src/query/ICESceneRaycaster.ts`
+- 创建：`ice3-engine/packages/runtime/tests/SceneRaycaster.test.ts`
+- 修改：`ice3-engine/packages/runtime/src/ICE3.ts`
+- 修改：`ice3-engine/packages/runtime/src/index.ts`
 
-**Interfaces:**
+**接口：**
 
 ```ts
 interface ICERay {
@@ -336,13 +334,13 @@ interface ICERay {
 engine.raycast(ray: ICERay): ICESceneItem | undefined;
 ```
 
-- Normalize direction.
-- Transform the ray into mesh local coordinates.
-- Test indexed triangles with the smallest positive intersection.
-- Respect node/ancestor visibility and max distance.
-- Deduplicate the final hit by semantic identity.
+- 规范化方向。
+- 将射线变换到网格局部坐标。
+- 使用最小正交点测试索引三角形。
+- 遵守节点及其祖先的可见性以及最大距离。
+- 按语义身份对最终命中结果去重。
 
-- [ ] **Step 1: Write failing ray tests**
+- [ ] **步骤 1：编写会失败的射线测试**
 
 ```ts
 it('hits the nearest visible indexed triangle', () => {
@@ -363,22 +361,22 @@ it('rejects a zero or nonfinite direction', () => {
 });
 ```
 
-- [ ] **Step 2: Run RED**
+- [ ] **步骤 2：运行 RED**
 
 ```bash
 npm test -- packages/runtime/tests/SceneRaycaster.test.ts
 ```
 
-Expected: FAIL because raycasting does not exist.
+预期：FAIL，因为射线投射尚不存在。
 
-- [ ] **Step 3: Implement**
+- [ ] **步骤 3：实现**
 
-- Reuse geometry bounds for initial rejection.
-- Use Möller–Trumbore triangle intersection.
-- Ignore backface side selection rules; both windings count as geometry hits.
-- Choose the nearest valid hit and return the semantic item from Task 1.
+- 复用几何包围盒进行初步排除。
+- 使用 Möller–Trumbore 三角形求交。
+- 忽略背面侧选择规则；两种绕序均视为几何命中。
+- 选择最近的有效命中，并返回任务 1 中的语义项。
 
-- [ ] **Step 4: Verify GREEN**
+- [ ] **步骤 4：验证 GREEN**
 
 ```bash
 npm test -- packages/runtime/tests/SceneRaycaster.test.ts \
@@ -387,9 +385,9 @@ npm run typecheck
 npm test
 ```
 
-Expected: pass.
+预期：通过。
 
-- [ ] **Step 5: Commit**
+- [ ] **步骤 5：提交**
 
 ```bash
 git add packages/runtime/src/query/ICESceneRaycaster.ts \
@@ -401,15 +399,15 @@ git commit -m "feat(runtime): raycast semantic scene items"
 
 ---
 
-### Task 5: Generic Camera Focus
+### 任务 5：通用相机聚焦
 
-**Files:**
-- Modify: `ice3-engine/packages/runtime/src/input/ICEOrbitController.ts`
-- Modify: `ice3-engine/packages/runtime/tests/OrbitController.test.ts`
-- Modify: `ice3-engine/examples/m1/main.ts`
-- Modify: `ice3-engine/tests/e2e/m1.spec.ts`
+**文件：**
+- 修改：`ice3-engine/packages/runtime/src/input/ICEOrbitController.ts`
+- 修改：`ice3-engine/packages/runtime/tests/OrbitController.test.ts`
+- 修改：`ice3-engine/examples/m1/main.ts`
+- 修改：`ice3-engine/tests/e2e/m1.spec.ts`
 
-**Interfaces:**
+**接口：**
 
 ```ts
 controller.focus(
@@ -421,13 +419,13 @@ controller.focus(
 ): void;
 ```
 
-- Preserve the current view direction.
-- Choose `distance = radius / sin(verticalFov / 2) * padding`.
-- Clamp the center for flat or point bounds.
-- Default padding is `1.15`.
-- Default animate is `true`, unless reduced-motion is active.
+- 保留当前视图方向。
+- 选择 `distance = radius / sin(verticalFov / 2) * padding`。
+- 对扁平或点包围盒的中心进行钳制。
+- 默认 padding 为 `1.15`。
+- 除非启用了减少动态效果，否则默认 animate 为 `true`。
 
-- [ ] **Step 1: Write failing focus tests**
+- [ ] **步骤 1：编写会失败的聚焦测试**
 
 ```ts
 it('focuses item bounds while preserving direction', () => {
@@ -450,22 +448,22 @@ test('focus ignores invalid padding', () => {
 });
 ```
 
-- [ ] **Step 2: Run RED**
+- [ ] **步骤 2：运行 RED**
 
 ```bash
 npm test -- packages/runtime/tests/OrbitController.test.ts
 ```
 
-Expected: FAIL because focus does not exist.
+预期：FAIL，因为聚焦尚不存在。
 
-- [ ] **Step 3: Implement**
+- [ ] **步骤 3：实现**
 
-- Operate only on camera transforms.
-- Reuse existing render requests and damping lifecycle.
-- `animate: false` applies the final pose immediately.
-- Confirm an animated focus naturally changes the LOD target.
+- 仅操作相机变换。
+- 复用现有渲染请求和阻尼生命周期。
+- `animate: false` 会立即应用最终姿态。
+- 确认动画聚焦会自然改变 LOD 目标。
 
-- [ ] **Step 4: Verify GREEN**
+- [ ] **步骤 4：验证 GREEN**
 
 ```bash
 npm test -- packages/runtime/tests/OrbitController.test.ts \
@@ -474,9 +472,9 @@ npm run test:e2e -- --project=chromium tests/e2e/m1.spec.ts
 npm run test:e2e -- --project=webkit tests/e2e/m1.spec.ts
 ```
 
-Expected: pass.
+预期：通过。
 
-- [ ] **Step 5: Commit**
+- [ ] **步骤 5：提交**
 
 ```bash
 git add packages/runtime/src/input/ICEOrbitController.ts \
@@ -488,25 +486,25 @@ git commit -m "feat(runtime): focus scene items"
 
 ---
 
-### Task 6: API Documentation and Final Verification
+### 任务 6：API 文档与最终验证
 
-**Files:**
-- Modify: `ice3-engine/README.md`
-- Modify: `ice3-engine/docs/api/m1.md`
-- Modify: `ice3-engine/docs/diagnostics.md`
-- Modify: `ice3-doc/docs/contracts/asset-preparation-contract-v1.md`
+**文件：**
+- 修改：`ice3-engine/README.md`
+- 修改：`ice3-engine/docs/api/m1.md`
+- 修改：`ice3-engine/docs/diagnostics.md`
+- 修改：`ice3-doc/docs/contracts/asset-preparation-contract-v1.md`
 
-- [ ] **Step 1: Document**
+- [ ] **步骤 1：编写文档**
 
-Document:
+记录：
 
-- query filter and snapshot semantics;
-- semantic deduplication across LOD;
-- screen pick and world raycast;
-- focus behavior and reduced-motion;
-- no AI-specific API.
+- 查询过滤器和快照语义；
+- 跨 LOD 的语义去重；
+- 屏幕拾取和世界射线投射；
+- 聚焦行为与减少动态效果；
+- 不包含 AI 特有的 API。
 
-- [ ] **Step 2: Run complete gates**
+- [ ] **步骤 2：运行完整门禁**
 
 ```bash
 cd ../ice3-toolchain
@@ -517,12 +515,12 @@ npm run verify
 npm pack --workspaces --dry-run
 ```
 
-- [ ] **Step 3: Audit and clean**
+- [ ] **步骤 3：审查和清理**
 
-- Remove temporary controlled assets and scripts.
-- Check Git, tracked binaries, ignored files, package contents, and naming.
+- 删除临时受控 Asset 和脚本。
+- 检查 Git、受跟踪的二进制文件、忽略文件、软件包内容和命名。
 
-- [ ] **Step 4: Commit and merge**
+- [ ] **步骤 4：提交并合并**
 
 ```bash
 git add README.md docs/api/m1.md docs/diagnostics.md
@@ -533,15 +531,14 @@ git add docs/contracts/asset-preparation-contract-v1.md
 git commit -m "docs: define semantic scene query capabilities"
 ```
 
-Merge both feature branches to `main` after full verification.
+完整验证通过后，将两个功能分支合入 `main`。
 
-## Execution Recommendation
+## 执行建议
 
-Use Native execution after the LOD refinement plan. Query, pick, raycast, and
-focus share one semantic representative rule; implementing them in one focused
-session avoids inconsistent device identity.
+在 LOD 精炼计划之后使用 Native 执行。查询、拾取、射线投射和聚焦共享
+同一语义代表节点规则；在一个集中会话中实现它们，可避免设备身份不一致。
 
-## Related Documents
+## 相关文档
 
-- `ICE3-DOC-IDX-001` — [Documentation index](../README.md)
-- `ICE3-DOC-SPEC-005` — [LOD refinement and scene API specification](../specs/2026-10-27-lod-refinement-and-scene-api-design.md)
+- `ICE3-DOC-IDX-001` — [文档索引](../README.md)
+- `ICE3-DOC-SPEC-005` — [LOD 精炼与场景 API 规范](../specs/2026-10-27-lod-refinement-and-scene-api-design.md)

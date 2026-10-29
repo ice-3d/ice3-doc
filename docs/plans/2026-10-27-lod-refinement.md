@@ -4,52 +4,52 @@
 >
 > Status: Implemented
 >
-> Owner: ICE3 architecture maintainers
+> Owner: ICE3 架构维护者
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **面向 Agent 工作执行者：** 必需子技能：使用 superpowers:subagent-driven-development（推荐）或 superpowers:executing-plans，逐个任务执行本计划。使用复选框（`- [ ]`）语法跟踪步骤。
 
-**Goal:** 使用标准 Tileset 多内容把粗模控制在分片和总体预算内，并恢复非阻塞预取与经过实测的 SSE 默认值。
+**目标：** 使用标准 Tileset 多内容把粗模控制在分片和总体预算内，并恢复非阻塞预取与经过实测的 SSE 默认值。
 
-**Architecture:** 工具链继续从单一规范化几何流水线生成粗模，但把内部 Tile 的粗模拆成稳定设备分片；运行时把所有分片组合成一个逻辑 Tile。预取使用独立低优先级集合，不参与当前切面的 ready/idle 判定。
+**架构：** 工具链继续从单一规范化几何流水线生成粗模，但把内部 Tile 的粗模拆成稳定设备分片；运行时把所有分片组合成一个逻辑 Tile。预取使用独立低优先级集合，不参与当前切面的 ready/idle 判定。
 
-**Tech Stack:** TypeScript 7, Node.js 24.22.1 LTS, Node.js test runner, Playwright, OGC 3D Tiles 1.1, ICE3 core/assets/runtime/toolchain
+**技术栈：** TypeScript 7, Node.js 24.22.1 LTS, Node.js test runner, Playwright, OGC 3D Tiles 1.1, ICE3 core/assets/runtime/toolchain
 
-**Spec:** `../specs/2026-10-27-lod-refinement-and-scene-api-design.md`
+**规范：** `../specs/2026-10-27-lod-refinement-and-scene-api-design.md`
 
-## Global Constraints
+## 全局约束
 
-- Use Node.js 24.22.1 LTS from `.nvmrc`.
-- Develop on `feature/lod-refinement`; merge to `main` only after the full gate passes.
-- Follow RED-GREEN-REFACTOR for every behavior change.
-- Add no browser runtime dependency.
-- Coarse total bytes must be lower than fine total bytes.
-- Calibration target is coarse triangles no more than 25% of fine triangles; report misses.
-- Default coarse chunk limit is 32 MiB.
-- Never split an individual equipment unit.
-- Use standard OGC 3D Tiles 1.1 `contents`, never a private manifest.
-- Prefetch must not block current visible-cut `whenIdle()`.
-- Do not place customer assets or derivatives in Git, tests, screenshots, logs, or packages.
+- 使用 `.nvmrc` 指定的 Node.js 24.22.1 LTS。
+- 在 `feature/lod-refinement` 分支开发；仅当完整验证门禁通过后才可合入 `main`。
+- 每项行为变更都遵循 RED-GREEN-REFACTOR。
+- 不添加浏览器运行时依赖。
+- 粗模总字节数必须低于精细模型总字节数。
+- 校准目标是粗模三角形数量不超过精细模型三角形数量的 25%；若未达标，须报告。
+- 默认粗模分片上限为 32 MiB。
+- 绝不拆分单个设备单元。
+- 使用标准 OGC 3D Tiles 1.1 `contents`，绝不使用私有清单。
+- 预取不得阻塞当前可见切面的 `whenIdle()`。
+- 不得将客户 Asset 或其派生物放入 Git、测试、截图、日志或软件包。
 
-## Review Focus
+## 审查重点
 
-- A logical Tile with many chunks must commit only after all required chunks succeed.
-- One oversized individual device must remain intact and be reported instead of silently dropped.
-- Chunk order and output bytes must be deterministic.
-- Prefetch failure must not change current visible readiness or global failure state.
-- A changed camera during chunk loading must release stale staged chunks and caches.
+- 包含多个分片的逻辑 Tile 只能在所有必需分片成功后才提交。
+- 单个超大设备必须保持完整并予以报告，不得被静默丢弃。
+- 分片顺序和输出字节必须具有确定性。
+- 预取失败不得改变当前可见就绪状态或全局失败状态。
+- 分片加载期间相机发生变化时，必须释放过期暂存分片和缓存。
 
 ---
 
-### Task 1: Parse Single and Multi-Content Tiles
+### 任务 1：解析单内容与多内容 Tile
 
-**Files:**
-- Modify: `ice3-engine/packages/assets/src/ICETileset.ts`
-- Modify: `ice3-engine/packages/assets/src/ICETilesetReader.ts`
-- Modify: `ice3-engine/packages/assets/tests/TilesetReader.test.ts`
-- Modify: `ice3-toolchain/packages/toolchain-core/src/partition/tileset.ts`
-- Modify: `ice3-toolchain/tests/partition/tileset.test.ts`
+**文件：**
+- 修改：`ice3-engine/packages/assets/src/ICETileset.ts`
+- 修改：`ice3-engine/packages/assets/src/ICETilesetReader.ts`
+- 修改：`ice3-engine/packages/assets/tests/TilesetReader.test.ts`
+- 修改：`ice3-toolchain/packages/toolchain-core/src/partition/tileset.ts`
+- 修改：`ice3-toolchain/tests/partition/tileset.test.ts`
 
-**Interfaces:**
+**接口：**
 
 ```ts
 interface ICETilesetTile {
@@ -63,13 +63,13 @@ interface ICEFinishedTile {
 }
 ```
 
-- Single `content.uri` normalizes to one `contentUris` entry and keeps
-  `contentUri`.
-- Multi `contents` produces ordered `contentUris` and omits `contentUri`.
-- Empty arrays, duplicate URIs, both fields together, absolute or escaping URIs,
-  and non-relative resources are rejected.
+- 单个 `content.uri` 规范化为一个 `contentUris` 条目，并保留
+  `contentUri`。
+- 多个 `contents` 生成有序的 `contentUris`，并省略 `contentUri`。
+- 空数组、重复 URI、同时提供两个字段、绝对 URI 或越界 URI，
+  以及非相对资源都会被拒绝。
 
-- [ ] **Step 1: Write failing reader and writer tests**
+- [ ] **步骤 1：编写会失败的 reader 和 writer 测试**
 
 ```ts
 test('normalizes multiple tile contents in stable order', () => {
@@ -103,7 +103,7 @@ test('rejects content and contents on the same tile', () => {
 });
 ```
 
-Toolchain test:
+工具链测试：
 
 ```ts
 test('writes standard contents for a chunked tile', () => {
@@ -127,7 +127,7 @@ test('writes standard contents for a chunked tile', () => {
 });
 ```
 
-- [ ] **Step 2: Run RED**
+- [ ] **步骤 2：运行 RED**
 
 ```bash
 cd ../ice3-engine
@@ -137,18 +137,17 @@ cd ../ice3-toolchain
 npm test -- tests/partition/tileset.test.ts
 ```
 
-Expected: FAIL because multi-content is rejected and the writer only emits one
-content.
+预期：FAIL，因为多内容会被拒绝，且 writer 只输出一个 content。
 
-- [ ] **Step 3: Implement normalization and writing**
+- [ ] **步骤 3：实现规范化与写入**
 
-- Create one shared normalization helper in the assets reader.
-- Preserve input content order.
-- Keep existing single-content consumers working through `contentUri`.
-- Toolchain chooses `content` for one URI and `contents` for multiple URIs.
-- Validate OGC schema after the writer change.
+- 在 assets reader 中创建一个共享的规范化辅助函数。
+- 保留输入内容的顺序。
+- 通过 `contentUri` 保持现有单内容消费方正常工作。
+- 工具链为单个 URI 选择 `content`，为多个 URI 选择 `contents`。
+- writer 变更后验证 OGC schema。
 
-- [ ] **Step 4: Verify GREEN**
+- [ ] **步骤 4：验证 GREEN**
 
 ```bash
 npm test -- packages/assets/tests/TilesetReader.test.ts
@@ -157,9 +156,9 @@ cd ../ice3-toolchain
 npm test -- tests/partition/tileset.test.ts
 ```
 
-Expected: both suites pass.
+预期：两个测试套件均通过。
 
-- [ ] **Step 5: Commit both repositories**
+- [ ] **步骤 5：提交两个仓库**
 
 ```bash
 cd ../ice3-engine
@@ -176,15 +175,15 @@ git commit -m "feat(toolchain): write multi-content tiles"
 
 ---
 
-### Task 2: Deterministic Coarse Chunk Planning
+### 任务 2：确定性的粗模分片规划
 
-**Files:**
-- Create: `ice3-toolchain/packages/toolchain-core/src/lod/createCoarseChunkPlan.ts`
-- Create: `ice3-toolchain/tests/lod/createCoarseChunkPlan.test.ts`
-- Modify: `ice3-toolchain/packages/toolchain-core/src/partition/types.ts`
-- Modify: `ice3-toolchain/packages/toolchain-core/src/index.ts`
+**文件：**
+- 创建：`ice3-toolchain/packages/toolchain-core/src/lod/createCoarseChunkPlan.ts`
+- 创建：`ice3-toolchain/tests/lod/createCoarseChunkPlan.test.ts`
+- 修改：`ice3-toolchain/packages/toolchain-core/src/partition/types.ts`
+- 修改：`ice3-toolchain/packages/toolchain-core/src/index.ts`
 
-**Interfaces:**
+**接口：**
 
 ```ts
 interface ICECoarseChunkOptions {
@@ -208,12 +207,12 @@ function createCoarseChunkPlan(
 ): readonly ICECoarseChunk[];
 ```
 
-- `unitId` is the stable semantic device key, not a display name.
-- Units are sorted by `unitId`.
-- Greedy grouping preserves order.
-- Oversized single units create one oversized chunk rather than being cut.
+- `unitId` 是稳定的语义设备键，而不是显示名称。
+- 单元按 `unitId` 排序。
+- 贪婪分组保持顺序。
+- 超大单元会单独形成一个超大分片，而不是被切分。
 
-- [ ] **Step 1: Write failing chunk planning tests**
+- [ ] **步骤 1：编写会失败的分片规划测试**
 
 ```ts
 test('groups stable units without splitting a device', () => {
@@ -240,32 +239,31 @@ test('keeps an oversized unit intact', () => {
 });
 ```
 
-- [ ] **Step 2: Run RED**
+- [ ] **步骤 2：运行 RED**
 
 ```bash
 npm test -- tests/lod/createCoarseChunkPlan.test.ts
 ```
 
-Expected: FAIL because chunk planning does not exist.
+预期：FAIL，因为分片规划尚不存在。
 
-- [ ] **Step 3: Implement deterministic grouping**
+- [ ] **步骤 3：实现确定性分组**
 
-- Reject nonpositive/nonfinite byte limits.
-- Reject duplicate or empty unit IDs.
-- Sort by lexical stable ID.
-- Use the provided byte estimate for planning; exact generated sizes are checked
-  again in Task 4.
+- 拒绝非正数或非有限字节上限。
+- 拒绝重复或空的单元 ID。
+- 按字典序对稳定 ID 排序。
+- 使用提供的字节估算值进行规划；实际生成大小会在任务 4 中再次检查。
 
-- [ ] **Step 4: Verify GREEN**
+- [ ] **步骤 4：验证 GREEN**
 
 ```bash
 npm test -- tests/lod/createCoarseChunkPlan.test.ts
 npm run typecheck
 ```
 
-Expected: pass.
+预期：通过。
 
-- [ ] **Step 5: Commit**
+- [ ] **步骤 5：提交**
 
 ```bash
 git add packages/toolchain-core/src/lod/createCoarseChunkPlan.ts \
@@ -277,27 +275,27 @@ git commit -m "feat(toolchain): plan stable coarse chunks"
 
 ---
 
-### Task 3: Generate and Measure Coarse Chunks
+### 任务 3：生成并测量粗模分片
 
-**Files:**
-- Modify: `ice3-toolchain/packages/toolchain-core/src/partition/partitionAsset.ts`
-- Modify: `ice3-toolchain/packages/toolchain-core/src/lod/simplifyGeometry.ts`
-- Modify: `ice3-toolchain/packages/toolchain-core/src/partition/types.ts`
-- Modify: `ice3-toolchain/packages/toolchain-core/src/partition/tileset.ts`
-- Modify: `ice3-toolchain/packages/cli/src/commands.ts`
-- Modify: `ice3-toolchain/tests/partition/lodGeneration.test.ts`
-- Modify: `ice3-toolchain/tests/cli/commands.test.ts`
-- Modify: `ice3-toolchain/tests/lod/simplifyGeometry.test.ts`
+**文件：**
+- 修改：`ice3-toolchain/packages/toolchain-core/src/partition/partitionAsset.ts`
+- 修改：`ice3-toolchain/packages/toolchain-core/src/lod/simplifyGeometry.ts`
+- 修改：`ice3-toolchain/packages/toolchain-core/src/partition/types.ts`
+- 修改：`ice3-toolchain/packages/toolchain-core/src/partition/tileset.ts`
+- 修改：`ice3-toolchain/packages/cli/src/commands.ts`
+- 修改：`ice3-toolchain/tests/partition/lodGeneration.test.ts`
+- 修改：`ice3-toolchain/tests/cli/commands.test.ts`
+- 修改：`ice3-toolchain/tests/lod/simplifyGeometry.test.ts`
 
-**Interfaces:**
+**接口：**
 
-- `ICELodBuildOptions` gains:
+- `ICELodBuildOptions` 新增：
 
 ```ts
 readonly coarseChunkMaxBytes?: number;
 ```
 
-- `ICEPartitionResult.stats` gains:
+- `ICEPartitionResult.stats` 新增：
 
 ```ts
 readonly coarseContentCount: number;
@@ -307,12 +305,12 @@ readonly coarseTriangleRatio: number;
 readonly coarseByteRatio: number;
 ```
 
-- Tile coarse content uses `contentUris`.
+- Tile 粗模内容使用 `contentUris`。
 
-- [ ] **Step 1: Write failing integrated split test**
+- [ ] **步骤 1：编写会失败的集成拆分测试**
 
-Extend `lodGeneration.test.ts` with a source containing at least four devices
-and a chunk limit forcing two or more coarse chunks:
+为 `lodGeneration.test.ts` 增加一个测试，其源包含至少四个设备，且分片上限
+会强制产生两个或更多粗模分片：
 
 ```ts
 const result = await partitionAsset(createLodPartitionSource(), {
@@ -338,37 +336,33 @@ expect(result.stats.coarseContentCount).toBeGreaterThan(1);
 expect(result.stats.maxCoarseChunkBytes).toBeLessThanOrEqual(5000);
 ```
 
-Add a simplification test where topology-preserving reduction cannot meet the
-target but the second-stage collapse can; assert the actual result is lower and
-reported error remains finite.
+增加一个简化测试：保持拓扑的简化无法达到目标，但第二阶段折叠可以达到；
+断言实际结果更低，且报告误差仍为有限值。
 
-- [ ] **Step 2: Run RED**
+- [ ] **步骤 2：运行 RED**
 
 ```bash
 npm test -- tests/partition/lodGeneration.test.ts \
   tests/lod/simplifyGeometry.test.ts
 ```
 
-Expected: FAIL because coarse content is still one file and the fallback
-simplification is absent.
+预期：FAIL，因为粗模内容仍是一个文件，且回退简化尚不存在。
 
-- [ ] **Step 3: Implement chunk generation**
+- [ ] **步骤 3：实现分片生成**
 
-- Allocate one coarse triangle budget for the logical Tile before chunking.
-- Build candidate coarse chunk bytes from semantic units.
-- Group units with `createCoarseChunkPlan`.
-- Generate one Prepared GLB per group.
-- If actual chunk bytes exceed the configured limit and multiple units exist,
-  split that group further.
-- Emit `coarse/<tile-id>/part-NNN.glb`.
-- Write multiple `contentUris` to the finished Tile.
-- Run topology-preserving simplification first and count-based conservative
-  collapse only when the target is materially missed.
-- Report actual ratios and oversized devices.
-- Parse `--coarse-chunk-max-bytes`, defaulting to `--max-bytes`.
-- Expose all coarse chunk statistics in JSON CLI output.
+- 在分片前为逻辑 Tile 分配一个粗模三角形预算。
+- 根据语义单元构建候选粗模分片字节。
+- 使用 `createCoarseChunkPlan` 对单元分组。
+- 为每个组生成一个 Prepared GLB。
+- 如果实际分片字节超过配置上限且存在多个单元，则进一步拆分该组。
+- 输出 `coarse/<tile-id>/part-NNN.glb`。
+- 向完成的 Tile 写入多个 `contentUris`。
+- 先运行保持拓扑的简化，仅在明显未达到目标时运行基于计数的保守折叠。
+- 报告实际比例和超大设备。
+- 解析 `--coarse-chunk-max-bytes`，默认使用 `--max-bytes`。
+- 在 JSON CLI 输出中公开所有粗模分片统计信息。
 
-- [ ] **Step 4: Verify GREEN**
+- [ ] **步骤 4：验证 GREEN**
 
 ```bash
 npm test -- tests/partition/lodGeneration.test.ts \
@@ -378,9 +372,9 @@ npm run typecheck
 npm test
 ```
 
-Expected: all pass and existing non-LOD output remains unchanged.
+预期：全部通过，且现有非 LOD 输出保持不变。
 
-- [ ] **Step 5: Commit**
+- [ ] **步骤 5：提交**
 
 ```bash
 git add packages/toolchain-core/src/partition/partitionAsset.ts \
@@ -396,15 +390,15 @@ git commit -m "feat(toolchain): split coarse lod content"
 
 ---
 
-### Task 4: Logical Multi-Content Tile Lifecycle
+### 任务 4：逻辑多内容 Tile 生命周期
 
-**Files:**
-- Modify: `ice3-engine/packages/runtime/src/asset/ICETilesetLoader.ts`
-- Modify: `ice3-engine/packages/runtime/tests/TilesetLoader.test.ts`
-- Create: `ice3-engine/packages/runtime/tests/MultiContentTile.test.ts`
-- Modify: `ice3-engine/examples/m1/global.d.ts`
+**文件：**
+- 修改：`ice3-engine/packages/runtime/src/asset/ICETilesetLoader.ts`
+- 修改：`ice3-engine/packages/runtime/tests/TilesetLoader.test.ts`
+- 创建：`ice3-engine/packages/runtime/tests/MultiContentTile.test.ts`
+- 修改：`ice3-engine/examples/m1/global.d.ts`
 
-**Interfaces:**
+**接口：**
 
 ```ts
 interface ICETilesetStats {
@@ -413,11 +407,11 @@ interface ICETilesetStats {
 }
 ```
 
-- A logical tile owns staged chunk containers.
-- The Tile is loaded only after every required chunk succeeds.
-- Tile cache cleanup clears every content URI.
+- 一个逻辑 Tile 拥有所有已暂存的分片容器。
+- 仅当每个必需分片都成功后，Tile 才会被加载。
+- Tile 缓存清理会清除每个内容 URI。
 
-- [ ] **Step 1: Write failing multi-content tests**
+- [ ] **步骤 1：编写会失败的多内容测试**
 
 ```ts
 it('commits one logical container after all chunks finish', async () => {
@@ -440,25 +434,25 @@ it('does not commit a partial logical tile when one chunk fails', async () => {
 });
 ```
 
-- [ ] **Step 2: Run RED**
+- [ ] **步骤 2：运行 RED**
 
 ```bash
 npm test -- packages/runtime/tests/MultiContentTile.test.ts
 ```
 
-Expected: FAIL because the loader assumes one `contentUri`.
+预期：FAIL，因为 loader 假定只有一个 `contentUri`。
 
-- [ ] **Step 3: Implement logical Tile loading**
+- [ ] **步骤 3：实现逻辑 Tile 加载**
 
-- Replace single-URI cache fields with per-chunk records.
-- Load chunk URIs sequentially inside one concurrency slot.
-- Stage all chunk containers.
-- On complete success, create one logical container and submit it once.
-- On failure or eviction, dispose all staged chunks and clear every URL.
-- Update all event/stat calculations to logical Tile counts plus chunk counts.
-- `TILESET_TILE_LOADED` emits once for the logical Tile.
+- 将单 URI 缓存字段替换为按分片记录。
+- 在一个并发槽位内按顺序加载分片 URI。
+- 暂存所有分片容器。
+- 全部成功后，创建一个逻辑容器并提交一次。
+- 加载失败或驱逐时，释放所有暂存分片并清除每个 URL。
+- 将所有事件和统计计算更新为逻辑 Tile 计数加各分片计数。
+- `TILESET_TILE_LOADED` 对逻辑 Tile 只发出一次。
 
-- [ ] **Step 4: Verify GREEN**
+- [ ] **步骤 4：验证 GREEN**
 
 ```bash
 npm test -- packages/runtime/tests/MultiContentTile.test.ts \
@@ -468,9 +462,9 @@ npm run typecheck
 npm test
 ```
 
-Expected: all pass.
+预期：全部通过。
 
-- [ ] **Step 5: Commit**
+- [ ] **步骤 5：提交**
 
 ```bash
 git add packages/runtime/src/asset/ICETilesetLoader.ts \
@@ -482,21 +476,20 @@ git commit -m "feat(runtime): load multi-content tiles atomically"
 
 ---
 
-### Task 5: Non-Blocking Prefetch
+### 任务 5：非阻塞预取
 
-**Files:**
-- Modify: `ice3-engine/packages/runtime/src/asset/ICETilesetLoader.ts`
-- Modify: `ice3-engine/packages/runtime/src/asset/ICELodSelector.ts`
-- Modify: `ice3-engine/packages/runtime/tests/LodLoader.test.ts`
-- Modify: `ice3-engine/packages/runtime/tests/LodSelector.test.ts`
+**文件：**
+- 修改：`ice3-engine/packages/runtime/src/asset/ICETilesetLoader.ts`
+- 修改：`ice3-engine/packages/runtime/src/asset/ICELodSelector.ts`
+- 修改：`ice3-engine/packages/runtime/tests/LodLoader.test.ts`
+- 修改：`ice3-engine/packages/runtime/tests/LodSelector.test.ts`
 
-**Interfaces:**
+**接口：**
 
-- Selector returns an optional prefetch target list for one level beyond the
-  visible cut.
-- Prefetch state is tracked separately from required current-cut work.
+- selector 返回可选预取目标列表，范围超出可见切面一级。
+- 预取状态与当前切面必需工作分开跟踪。
 
-- [ ] **Step 1: Write failing prefetch tests**
+- [ ] **步骤 1：编写会失败的预取测试**
 
 ```ts
 it('keeps visible whenIdle independent from background prefetch', async () => {
@@ -518,24 +511,24 @@ it('does not treat prefetch failure as a visible failure', async () => {
 });
 ```
 
-- [ ] **Step 2: Run RED**
+- [ ] **步骤 2：运行 RED**
 
 ```bash
 npm test -- packages/runtime/tests/LodLoader.test.ts
 ```
 
-Expected: FAIL because prefetch is currently absent.
+预期：FAIL，因为当前尚未实现预取。
 
-- [ ] **Step 3: Implement prefetch**
+- [ ] **步骤 3：实现预取**
 
-- Derive one-level neighboring content from the visible target cut.
-- Suppress prefetch when the resident limit is reached.
-- Queue prefetch below current visible/fallback work.
-- Track prefetch candidates separately from required idle work.
-- On camera change, discard prefetched content outside retention.
-- On prefetch failure, evict locally without failing visible coverage.
+- 从可见目标切面派生一级相邻内容。
+- 达到常驻上限时停止预取。
+- 将预取排入低于当前可见工作和回退工作的队列。
+- 将预取候选与必需的 idle 工作分开跟踪。
+- 相机变化时，丢弃保留范围之外的预取内容。
+- 预取失败时，仅在本地执行驱逐，不使可见覆盖失败。
 
-- [ ] **Step 4: Verify GREEN**
+- [ ] **步骤 4：验证 GREEN**
 
 ```bash
 npm test -- packages/runtime/tests/LodLoader.test.ts \
@@ -544,9 +537,9 @@ npm run typecheck
 npm test
 ```
 
-Expected: all pass.
+预期：全部通过。
 
-- [ ] **Step 5: Commit**
+- [ ] **步骤 5：提交**
 
 ```bash
 git add packages/runtime/src/asset/ICETilesetLoader.ts \
@@ -558,21 +551,21 @@ git commit -m "feat(runtime): prefetch adjacent lod content"
 
 ---
 
-### Task 6: Measure and Select SSE Default
+### 任务 6：测量并选择 SSE 默认值
 
-**Files:**
-- Modify: `ice3-engine/packages/runtime/src/asset/ICETilesetLoader.ts`
-- Modify: `ice3-engine/README.md`
-- Modify: `ice3-engine/docs/api/m1.md`
-- Modify controlled work-set measurement script outside Git during validation
+**文件：**
+- 修改：`ice3-engine/packages/runtime/src/asset/ICETilesetLoader.ts`
+- 修改：`ice3-engine/README.md`
+- 修改：`ice3-engine/docs/api/m1.md`
+- 验证期间在 Git 之外修改受控工作集测量脚本
 
-**Interfaces:**
+**接口：**
 
-- Evaluate thresholds `16`, `32`, and `48` in a controlled browser.
-- Choose one default only after comparing target differences, visible quality,
-  resident bytes, first-content time, and idle time.
+- 在受控浏览器中评估阈值 `16`、`32` 和 `48`。
+- 只有在比较目标差异、可见质量、常驻字节、首个内容耗时和 idle 耗时后，
+  才选择一个默认值。
 
-- [ ] **Step 1: Add deterministic threshold test**
+- [ ] **步骤 1：添加确定性阈值测试**
 
 ```ts
 it('produces distinct target cuts at calibrated thresholds', () => {
@@ -588,30 +581,30 @@ it('produces distinct target cuts at calibrated thresholds', () => {
 });
 ```
 
-- [ ] **Step 2: Run RED**
+- [ ] **步骤 2：运行 RED**
 
 ```bash
 npm test -- packages/runtime/tests/LodSelector.test.ts -t calibrated
 ```
 
-Expected: FAIL only if current behavior violates monotonic refinement.
+预期：仅当当前行为违反单调细化时才为 FAIL。
 
-- [ ] **Step 3: Measure the controlled asset**
+- [ ] **步骤 3：测量受控 Asset**
 
-Generate temporary hierarchical output outside Git. Use a temporary browser page
-and public API. For each threshold record only aggregate metrics.
+在 Git 之外生成临时层级输出。使用临时浏览器页面和公共 API。
+对每个阈值仅记录聚合指标。
 
-- [ ] **Step 4: Set the calibrated default**
+- [ ] **步骤 4：设置校准后的默认值**
 
-Change:
+修改：
 
 ```ts
 this.maxScreenSpaceErrorPixels = options.maxScreenSpaceErrorPixels ?? <chosen>;
 ```
 
-and update all default-value assertions and docs to the measured value.
+并将所有默认值断言和文档更新为实测值。
 
-- [ ] **Step 5: Verify GREEN and commit**
+- [ ] **步骤 5：验证 GREEN 并提交**
 
 ```bash
 npm test -- packages/runtime/tests/LodSelector.test.ts
@@ -622,14 +615,14 @@ git commit -m "feat(runtime): calibrate lod screen-space error"
 
 ---
 
-### Task 7: LOD Refinement Verification
+### 任务 7：LOD 精炼验证
 
-**Files:**
-- Modify: `ice3-toolchain/README.md`
-- Modify: `ice3-doc/docs/contracts/asset-preparation-contract-v1.md`
-- Modify: `ice3-engine/docs/diagnostics.md`
+**文件：**
+- 修改：`ice3-toolchain/README.md`
+- 修改：`ice3-doc/docs/contracts/asset-preparation-contract-v1.md`
+- 修改：`ice3-engine/docs/diagnostics.md`
 
-- [ ] **Step 1: Run both full gates**
+- [ ] **步骤 1：运行两个完整门禁**
 
 ```bash
 cd ../ice3-toolchain
@@ -642,11 +635,11 @@ npm run verify
 npm pack --workspaces --dry-run
 ```
 
-Expected: all tests pass and no model files are packaged.
+预期：所有测试通过，且没有模型文件被打包。
 
-- [ ] **Step 2: Run controlled real-asset verification**
+- [ ] **步骤 2：运行受控真实 Asset 验证**
 
-Record only:
+仅记录：
 
 ```text
 totalFineTriangles
@@ -669,20 +662,20 @@ selectedSseThreshold
 pageErrors
 ```
 
-Acceptance:
+验收标准：
 
-- coarse bytes < fine bytes;
-- each non-oversized coarse chunk <= configured limit;
-- triangle ratio is at or below 25%, or explicitly reported as above target;
-- prefetch failure count is isolated from visible failure;
-- moving away releases resident content;
-- no page errors.
+- 粗模字节 < 精细模型字节；
+- 每个未超大的粗模分片 <= 配置上限；
+- 三角形比例不高于 25%，或明确报告超过目标；
+- 预取失败计数与可见失败隔离；
+- 移开后释放常驻内容；
+- 没有页面错误。
 
-- [ ] **Step 3: Clean and audit**
+- [ ] **步骤 3：清理和审查**
 
-Delete temporary controlled assets, then run Git/package/naming audits.
+删除临时受控 Asset，然后运行 Git、软件包和命名审查。
 
-- [ ] **Step 4: Commit docs and merge**
+- [ ] **步骤 4：提交文档并合并**
 
 ```bash
 cd ../ice3-toolchain
@@ -698,15 +691,14 @@ git add docs/contracts/asset-preparation-contract-v1.md
 git commit -m "docs: define chunked coarse lod contract"
 ```
 
-Merge all repository branches to `main` after clean full verification.
+在干净且完整的验证通过后，将所有仓库分支合入 `main`。
 
-## Execution Recommendation
+## 执行建议
 
-Use Native execution. Multi-content parsing, chunk planning, logical Tile
-loading, prefetch, and SSE behavior share exact Tile IDs and readiness
-semantics; one continuous implementation session reduces lifecycle drift.
+使用 Native 执行。多内容解析、分片规划、逻辑 Tile 加载、预取和 SSE 行为
+共享精确的 Tile ID 与就绪语义；在一个连续实施会话中完成可减少生命周期漂移。
 
-## Related Documents
+## 相关文档
 
-- `ICE3-DOC-IDX-001` — [Documentation index](../README.md)
-- `ICE3-DOC-SPEC-005` — [LOD refinement and scene API specification](../specs/2026-10-27-lod-refinement-and-scene-api-design.md)
+- `ICE3-DOC-IDX-001` — [文档索引](../README.md)
+- `ICE3-DOC-SPEC-005` — [LOD 精炼与场景 API 规范](../specs/2026-10-27-lod-refinement-and-scene-api-design.md)

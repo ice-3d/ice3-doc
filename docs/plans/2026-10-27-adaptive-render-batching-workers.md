@@ -1,4 +1,4 @@
-# Adaptive Industrial Render Batching Worker Implementation Plan
+# Adaptive Industrial Render Batching Worker 实施计划
 
 > Document ID: ICE3-DOC-PLAN-002
 >
@@ -8,46 +8,51 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Add an optional idle-time Worker pipeline that creates better runtime batch generations without blocking camera interaction or risking partial GPU state.
+**目标：** 增加可选 idle-time Worker pipeline，在不阻塞 camera interaction、不产生部分
+GPU state 的前提下生成更优 Runtime batch generation。
 
-**Architecture:** A main-thread planner selects a useful batch-building job only after the camera has settled. A bounded Worker pool produces transferable batch buffers, and a byte-budgeted uploader builds a candidate GPU generation. The generation is activated atomically; stale, failed, or over-budget work is discarded while the prior generation remains active.
+**架构：** Main-thread planner 只在 camera 稳定后选择有价值的 batch-building job。有界
+Worker pool 生成 transferable batch buffer，byte-budgeted uploader 构建 candidate GPU
+generation。Generation 原子激活；stale、failed 或 over-budget work 被丢弃，之前
+generation 保持 active。
 
-**Tech Stack:** Node.js 24.22.1 LTS, TypeScript 7, Web Workers, Transferable ArrayBuffer, WebGL2, Node.js built-in test runner, `expect`, `tsx`, Playwright
+**技术栈：** Node.js 24.22.1 LTS、TypeScript 7、Web Worker、Transferable
+ArrayBuffer、WebGL2、Node.js built-in test runner、`expect`、`tsx`、Playwright。
 
-**Spec:** `../specs/2026-10-27-industrial-render-batching-design.md`
+**规格：** `../specs/2026-10-27-industrial-render-batching-design.md`
 
-## Global Constraints
+## 全局约束
 
-- Complete static batching first; this plan consumes that batch model.
-- Work on feature branches and merge to `main` only after full verification.
-- Use Node.js 24.22.1 LTS from `.nvmrc`.
-- Do not add runtime dependencies.
-- Runtime adaptive batching is optional and defaults to idle-only operation.
-- No large geometry preparation or upload may run during active camera motion.
-- Use Transferable ArrayBuffers; SharedArrayBuffer is optional and never required.
-- A failed or stale generation must leave the active generation unchanged.
-- Never expose GPU objects through public APIs.
-- Never commit controlled customer assets, derived files, screenshots, logs, or paths.
-- Avoid competitor names and the prohibited generic 3D-library brand term in all artifacts.
+- 先完成 static batching；本计划消费该 batch model。
+- 在功能分支工作，完整验证后才合入 `main`。
+- 使用 `.nvmrc` 指定的 Node.js 24.22.1 LTS。
+- 不增加 Runtime dependency。
+- Runtime adaptive batching 可选，默认只在 idle 时运行。
+- Camera active motion 期间不得执行大型 Geometry preparation 或 upload。
+- 使用 Transferable ArrayBuffer；SharedArrayBuffer 可选且永非必需。
+- Generation 失败或 stale 时，active generation 必须保持不变。
+- 永不通过 public API 暴露 GPU object。
+- 永不提交受控客户 Asset、派生文件、screenshot、log 或 path。
+- 所有 artifact 中避免竞品名称和禁止的通用 3D library 品牌词。
 
-## Review Focus
+## 审查重点
 
-- Camera motion begins while a Worker is producing a candidate; the result must be rejected rather than applied to the new view.
-- Worker transfer moves ownership away from the sender; no later code may read or mutate the transferred buffer.
-- One upload chunk succeeds and the next fails; the old GPU generation must remain active with no partial swap or leaked buffers.
-- Selection changes while a generation loads; picking and highlights must continue using the active generation until the atomic swap.
-- `hardwareConcurrency` is unavailable or Worker startup fails; static batching and ordinary rendering must remain functional.
+- Worker 生成 candidate 时 camera 开始移动；结果必须拒绝，不能应用到新 view。
+- Worker transfer 将 ownership 从发送方移走；后续 code 不得读取或修改已转移 buffer。
+- 一个 upload chunk 成功而下一个失败；旧 GPU generation 必须保持 active，不出现部分 swap 或 buffer leak。
+- Generation 加载期间 Selection 变化；atomic swap 前，picking 和 highlight 继续使用 active generation。
+- `hardwareConcurrency` 不可用或 Worker startup 失败；static batching 和普通 rendering 必须继续可用。
 
 ---
 
-### Task 1: Define the Batch Plan and Cost Model
+### Task 1：定义 Batch Plan 和 Cost Model
 
-**Files:**
-- Create: `ice3-engine/packages/runtime/src/batching/ICERenderBatchPlanner.ts`
-- Create: `ice3-engine/packages/runtime/src/batching/ICERenderBatchPlan.ts`
-- Test: `ice3-engine/packages/runtime/tests/RenderBatchPlanner.test.ts`
+**文件：**
+- 新建：`ice3-engine/packages/runtime/src/batching/ICERenderBatchPlanner.ts`
+- 新建：`ice3-engine/packages/runtime/src/batching/ICERenderBatchPlan.ts`
+- 测试：`ice3-engine/packages/runtime/tests/RenderBatchPlanner.test.ts`
 
-**Interfaces:**
+**接口：**
 
 ```ts
 export interface ICERenderBatchPlanInput {
@@ -78,10 +83,10 @@ export class ICERenderBatchPlanner {
 }
 ```
 
-- Consumes: active asset batch metadata and visibility set.
-- Produces: a deterministic accepted or rejected merge plan; no arrays are copied.
+- 消费：active Asset batch metadata 和 visibility set。
+- 产出：确定性 accepted 或 rejected merge plan，不复制 array。
 
-- [ ] **Step 1: Write failing cost-model tests**
+- [ ] **步骤 1：编写失败的 cost-model test**
 
 ```ts
 const planInput = (count: number, byteLength: number) => ({
@@ -104,9 +109,9 @@ expect(planner.plan(planInput(100, 16 * 1024)).accepted).toBe(true);
 expect(planner.plan(planInput(2, 64 * 1024 * 1024)).accepted).toBe(false);
 ```
 
-Cover zero draw savings, exact byte budget, negative values, and deterministic tie ordering.
+覆盖零 draw saving、准确 byte budget、负数和确定性的 tie ordering。
 
-- [ ] **Step 2: Verify RED**
+- [ ] **步骤 2：验证 RED**
 
 ```bash
 cd ../ice3-engine
@@ -114,22 +119,23 @@ source ~/.nvm/nvm.sh && nvm use 24
 npm test -- packages/runtime/tests/RenderBatchPlanner.test.ts
 ```
 
-Expected: FAIL because planner types do not exist.
+预期：因为 planner type 不存在而失败。
 
-- [ ] **Step 3: Implement the deterministic planner**
+- [ ] **步骤 3：实现确定性 planner**
 
-Estimate gain and cost with the formulas in the spec. Sort candidates by material key, visible order, byte size, then ID. Reject plans that exceed memory or minimum-gain thresholds.
+按 Spec 中的公式估算 gain 和 cost。Candidate 依次按 material key、visible order、byte
+size 和 ID 排序。超过 memory 或 minimum-gain threshold 的 plan 被拒绝。
 
-- [ ] **Step 4: Run focused tests**
+- [ ] **步骤 4：运行聚焦测试**
 
 ```bash
 npm test -- packages/runtime/tests/RenderBatchPlanner.test.ts
 npm run typecheck
 ```
 
-Expected: PASS.
+预期：通过。
 
-- [ ] **Step 5: Commit**
+- [ ] **步骤 5：提交**
 
 ```bash
 git add packages/runtime/src/batching/ICERenderBatchPlan.ts \
@@ -140,15 +146,15 @@ git commit -m "feat(runtime): plan adaptive render batches"
 
 ---
 
-### Task 2: Define the Worker Protocol and Bounded Pool
+### Task 2：定义 Worker Protocol 和有界 Pool
 
-**Files:**
+**文件：**
 - Create: `ice3-engine/packages/runtime/src/batching/ICEBatchWorkerProtocol.ts`
 - Create: `ice3-engine/packages/runtime/src/batching/ICEBatchWorkerPool.ts`
 - Create: `ice3-engine/packages/runtime/src/batching/createBatchWorker.ts`
 - Test: `ice3-engine/packages/runtime/tests/BatchWorkerPool.test.ts`
 
-**Interfaces:**
+**接口：**
 
 ```ts
 export interface ICEBatchWorkerSource {
@@ -191,29 +197,29 @@ export class ICEBatchWorkerPool {
 }
 ```
 
-- Consumes: planner-accepted source batch IDs.
-- Produces: bounded asynchronous jobs and transferable worker responses.
+- 消费：planner 接受的 source batch ID。
+- 产出：有界异步 job 和 transferable Worker response。
 
-- [ ] **Step 1: Write a failing worker-pool test with a fake Worker**
+- [ ] **步骤 1：使用 fake Worker 编写失败的 Worker pool test**
 
-Assert:
+断言：
 
-- The pool does not exceed its configured concurrency.
-- Transfer list contains every transferred ArrayBuffer once.
-- Aborting a job removes its pending promise and ignores a late response.
-- A worker construction failure returns the documented fallback error.
+- Pool 不超过配置 concurrency。
+- Transfer list 中每个 transferred ArrayBuffer 只出现一次。
+- 中止 job 会移除 pending promise 并忽略 late response。
+- Worker 构造失败返回文档化 fallback error。
 
-- [ ] **Step 2: Verify RED**
+- [ ] **步骤 2：验证 RED**
 
 ```bash
 npm test -- packages/runtime/tests/BatchWorkerPool.test.ts
 ```
 
-Expected: FAIL because the pool does not exist.
+预期：因为 pool 不存在而失败。
 
-- [ ] **Step 3: Implement the pool**
+- [ ] **步骤 3：实现 pool**
 
-Default concurrency:
+默认 concurrency：
 
 ```ts
 Math.min(
@@ -225,18 +231,19 @@ Math.min(
 )
 ```
 
-Use module workers when supported and fall back to classic workers. Keep one job per Worker and reject every pending request on `dispose()`.
+支持时使用 module Worker，否则回退到 classic Worker。每个 Worker 保持一个 job，并在
+`dispose()` 时拒绝所有 pending request。
 
-- [ ] **Step 4: Run tests**
+- [ ] **步骤 4：运行测试**
 
 ```bash
 npm test -- packages/runtime/tests/BatchWorkerPool.test.ts
 npm run typecheck
 ```
 
-Expected: PASS.
+预期：通过。
 
-- [ ] **Step 5: Commit**
+- [ ] **步骤 5：提交**
 
 ```bash
 git add packages/runtime/src/batching/ICEBatchWorkerProtocol.ts \
@@ -248,14 +255,14 @@ git commit -m "feat(runtime): add bounded batch worker pool"
 
 ---
 
-### Task 3: Merge Geometry Inside the Worker
+### Task 3：在 Worker 内合并 Geometry
 
-**Files:**
-- Create: `ice3-engine/packages/runtime/src/workers/renderBatchWorker.ts`
-- Create: `ice3-engine/packages/runtime/src/batching/mergeBatchBuffers.ts`
-- Test: `ice3-engine/packages/runtime/tests/MergeBatchBuffers.test.ts`
+**文件：**
+- 新建：`ice3-engine/packages/runtime/src/workers/renderBatchWorker.ts`
+- 新建：`ice3-engine/packages/runtime/src/batching/mergeBatchBuffers.ts`
+- 测试：`ice3-engine/packages/runtime/tests/MergeBatchBuffers.test.ts`
 
-**Interfaces:**
+**接口：**
 
 ```ts
 export interface ICEMergedBatchBuffer {
@@ -273,10 +280,10 @@ export function mergeBatchBuffers(
 ): readonly ICEMergedBatchBuffer[];
 ```
 
-- Consumes: transferred source buffers.
-- Produces: deterministic merged typed arrays split by the configured limits.
+- 消费：transfer 后的 source buffer。
+- 产出：按配置 limit 拆分的确定性 merged typed array。
 
-- [ ] **Step 1: Write a failing merge test**
+- [ ] **步骤 1：编写失败的 merge test**
 
 ```ts
 const merged = mergeBatchBuffers([
@@ -292,30 +299,31 @@ expect(merged[0]!.semanticIndices).toEqual(
 );
 ```
 
-Also cover batch splitting, material mismatch rejection, index overflow, and empty inputs.
+同时覆盖 batch splitting、Material mismatch rejection、index overflow 和 empty input。
 
-- [ ] **Step 2: Verify RED**
+- [ ] **步骤 2：验证 RED**
 
 ```bash
 npm test -- packages/runtime/tests/MergeBatchBuffers.test.ts
 ```
 
-Expected: FAIL because the merge function does not exist.
+预期：因为 merge function 不存在而失败。
 
-- [ ] **Step 3: Implement zero-copy-friendly output allocation**
+- [ ] **步骤 3：实现 zero-copy-friendly output allocation**
 
-Compute exact output lengths first, allocate once, copy typed ranges, apply vertex offsets, and transfer result buffers from the Worker.
+先计算准确 output length，一次分配，复制 typed range，应用 vertex offset，并从 Worker
+transfer result buffer。
 
-- [ ] **Step 4: Run tests**
+- [ ] **步骤 4：运行测试**
 
 ```bash
 npm test -- packages/runtime/tests/MergeBatchBuffers.test.ts
 npm run typecheck
 ```
 
-Expected: PASS.
+预期：通过。
 
-- [ ] **Step 5: Commit**
+- [ ] **步骤 5：提交**
 
 ```bash
 git add packages/runtime/src/workers/renderBatchWorker.ts \
@@ -326,15 +334,15 @@ git commit -m "feat(runtime): merge render buffers in workers"
 
 ---
 
-### Task 4: Upload Candidate Generations Within Frame Budget
+### Task 4：在 Frame Budget 内上传 Candidate Generation
 
-**Files:**
-- Create: `ice3-engine/packages/renderer/src/ICEWebGL2BatchGenerationUploader.ts`
-- Modify: `ice3-engine/packages/renderer/src/WebGL2GeometryCache.ts`
-- Modify: `ice3-engine/packages/renderer/src/WebGL2RendererBackend.ts`
-- Test: `ice3-engine/packages/renderer/tests/BatchGenerationUploader.test.ts`
+**文件：**
+- 新建：`ice3-engine/packages/renderer/src/ICEWebGL2BatchGenerationUploader.ts`
+- 修改：`ice3-engine/packages/renderer/src/WebGL2GeometryCache.ts`
+- 修改：`ice3-engine/packages/renderer/src/WebGL2RendererBackend.ts`
+- 测试：`ice3-engine/packages/renderer/tests/BatchGenerationUploader.test.ts`
 
-**Interfaces:**
+**接口：**
 
 ```ts
 interface ICEBatchUploadOptions {
@@ -350,40 +358,41 @@ function queueBatchGeneration(
 ): void;
 ```
 
-- Consumes: Worker-merged buffers.
-- Produces: a complete non-active GPU generation, then one atomic activation callback.
+- 消费：Worker merged buffer。
+- 产出：完整但非 active 的 GPU generation，随后执行一次 atomic activation callback。
 
-- [ ] **Step 1: Write failing uploader tests**
+- [ ] **步骤 1：编写失败的 uploader test**
 
-Cover:
+覆盖：
 
-- Chunk byte cap is never exceeded.
-- No activation occurs before the final chunk.
-- Failure releases all candidate GPU resources.
-- Superseded generation is not activated.
+- 永不超出 chunk byte cap。
+- 最后一个 chunk 前不激活。
+- Failure 释放全部 candidate GPU resource。
+- Superseded generation 不激活。
 
-- [ ] **Step 2: Verify RED**
+- [ ] **步骤 2：验证 RED**
 
 ```bash
 npm test -- packages/renderer/tests/BatchGenerationUploader.test.ts
 ```
 
-Expected: FAIL because the uploader does not exist.
+预期：因为 uploader 不存在而失败。
 
-- [ ] **Step 3: Implement chunked upload**
+- [ ] **步骤 3：实现 chunked upload**
 
-Upload only during idle frames. Keep active and candidate generations separate. Activation swaps generation IDs in one callback; old resources are deleted after the swap.
+只在 idle frame 上传。Active 和 candidate generation 分开保存。Activation 在单个
+callback 中交换 generation ID；swap 完成后删除旧 resource。
 
-- [ ] **Step 4: Run tests and typecheck**
+- [ ] **步骤 4：运行 test 和 typecheck**
 
 ```bash
 npm test -- packages/renderer/tests/BatchGenerationUploader.test.ts
 npm run typecheck
 ```
 
-Expected: PASS.
+预期：通过。
 
-- [ ] **Step 5: Commit**
+- [ ] **步骤 5：提交**
 
 ```bash
 git add packages/renderer/src/ICEWebGL2BatchGenerationUploader.ts \
@@ -395,9 +404,9 @@ git commit -m "feat(renderer): swap uploaded batch generations"
 
 ---
 
-### Task 5: Integrate Idle Planning, Cancellation, and Metrics
+### Task 5：接入 Idle Planning、Cancellation 和 Metric
 
-**Files:**
+**文件：**
 - Create: `ice3-engine/packages/runtime/src/batching/ICEAdaptiveRenderBatchController.ts`
 - Modify: `ice3-engine/packages/runtime/src/ICE3.ts`
 - Modify: `ice3-engine/packages/runtime/src/asset/ICETilesetLoader.ts`
@@ -419,10 +428,10 @@ interface ICERenderBatchingOptions {
 }
 ```
 
-- Consumes: planner, pool, merger, uploader, and active visible work set.
-- Produces: optional idle adaptive batching with stable fallback and diagnostics.
+- 消费：planner、pool、merger、uploader 和 active visible work set。
+- 产出：可选 idle adaptive batching，具有稳定 fallback 和 Diagnostic。
 
-- [ ] **Step 1: Write failing controller tests**
+- [ ] **步骤 1：编写失败的 controller test**
 
 ```ts
 expect(controller.request({
@@ -441,30 +450,30 @@ controller.cancel(2);
 expect(controller.activeGeneration).toBe(1);
 ```
 
-Cover Worker failure, upload failure, memory rejection, and `adaptive` disabled.
+覆盖 Worker failure、upload failure、memory rejection 和 `adaptive` disabled。
 
-- [ ] **Step 2: Verify RED**
+- [ ] **步骤 2：验证 RED**
 
 ```bash
 npm test -- packages/runtime/tests/AdaptiveRenderBatch.test.ts
 ```
 
-Expected: FAIL because the controller does not exist.
+预期：因为 controller 不存在而失败。
 
-- [ ] **Step 3: Implement idle gating**
+- [ ] **步骤 3：实现 idle gating**
 
-Start only when:
+只有满足以下条件才启动：
 
-- camera and visible set are stable;
-- the planner accepts the job;
-- no candidate generation is active;
-- the memory budget permits it.
+- Camera 和 visible set 稳定。
+- Planner 接受 job。
+- 没有 active candidate generation。
+- Memory budget 允许。
 
-Cancel on camera motion, target change, asset disposal, or newer generation.
+Camera motion、target change、Asset disposal 或 newer generation 时取消。
 
-- [ ] **Step 4: Add diagnostics**
+- [ ] **步骤 4：增加 Diagnostic**
 
-Add:
+增加：
 
 - `ICE3_RENDER_BATCH_ADAPTIVE_STARTED`
 - `ICE3_RENDER_BATCH_ADAPTIVE_COMPLETED`
@@ -472,29 +481,29 @@ Add:
 - `ICE3_RENDER_BATCH_ADAPTIVE_FAILED`
 - `ICE3_RENDER_BATCH_MEMORY_REJECTED`
 
-Each diagnostic is deduplicated per generation.
+每个 generation 的 Diagnostic 都去重。
 
-- [ ] **Step 5: Add browser interaction regression**
+- [ ] **步骤 5：增加 browser interaction regression**
 
-In both Chromium and WebKit:
+在 Chromium 和 WebKit 中：
 
-1. Load a batch-capable file.
-2. Move the camera continuously.
-3. Verify no candidate generation completes during motion.
-4. Stop and wait for idle.
-5. Verify at most one generation becomes active.
-6. Verify selection and LOD remain correct.
+1. 加载支持 batch 的文件。
+2. 持续移动 camera。
+3. 验证 motion 期间没有 candidate generation 完成。
+4. 停止并等待 idle。
+5. 验证最多一个 generation 变为 active。
+6. 验证 Selection 和 LOD 保持正确。
 
-- [ ] **Step 6: Run complete verification**
+- [ ] **步骤 6：运行完整验证**
 
 ```bash
 npm run verify
 npm pack --workspaces --dry-run --json
 ```
 
-Expected: all green and no model-like files in packages.
+预期：全部通过，package 中没有 model-like 文件。
 
-- [ ] **Step 7: Commit**
+- [ ] **步骤 7：提交**
 
 ```bash
 git add packages/runtime/src/batching/ICEAdaptiveRenderBatchController.ts \
@@ -506,7 +515,7 @@ git add packages/runtime/src/batching/ICEAdaptiveRenderBatchController.ts \
 git commit -m "feat(runtime): add adaptive worker batching"
 ```
 
-## Related Documents
+## 关联文档
 
-- `ICE3-DOC-IDX-001` — [Documentation index](../README.md)
-- `ICE3-DOC-SPEC-004` — [Industrial render batching specification](../specs/2026-10-27-industrial-render-batching-design.md)
+- `ICE3-DOC-IDX-001` — [文档索引](../README.md)
+- `ICE3-DOC-SPEC-004` — [工业渲染 Batch Spec](../specs/2026-10-27-industrial-render-batching-design.md)

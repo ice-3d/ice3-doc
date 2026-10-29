@@ -5,7 +5,5 @@
 > Status: Approved
 >
 > Owner: Documentation tests
->
-> English summary: A test specification with a required English summary.
 
-这份规格用于验证英文摘要规则。
+这份规格用于验证中文文档规则。

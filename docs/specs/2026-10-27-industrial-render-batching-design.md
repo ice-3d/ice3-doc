@@ -6,7 +6,6 @@
 >
 > Owner: ICE3 architecture maintainers
 >
-> English summary: Define static and runtime render batching with stable semantic identity and bounded GPU residency.
 
 | 项目 | 内容 |
 | --- | --- |

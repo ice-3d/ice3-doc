@@ -7,7 +7,6 @@
 > Owner: ICE3 architecture maintainers
 
 >
-> English summary: Define the authored Blender pipeline for a credible, fully synthetic wastewater treatment plant.
 
 | 项目 | 内容 |
 | --- | --- |

@@ -7,7 +7,6 @@
 > Owner: ICE3 architecture maintainers
 
 >
-> English summary: Define hierarchical LOD asset generation, coarse-content selection, and stable semantic identity across refinement levels.
 
 | 项目 | 内容 |
 | --- | --- |

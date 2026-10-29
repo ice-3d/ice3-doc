@@ -7,7 +7,6 @@
 > Owner: ICE3 architecture maintainers
 
 >
-> English summary: Define the browser-independent industrial semantic core, workspace model, and native JSON contract.
 
 | 项目 | 内容 |
 | --- | --- |

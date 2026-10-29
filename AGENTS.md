@@ -1,4 +1,4 @@
-# ICE3 Documentation Repository Rules
+# ICE3 Documentation 仓库规则
 
 > Document ID: ICE3-DOC-POL-001
 >
@@ -6,42 +6,42 @@
 >
 > Owner: ICE3 documentation maintainers
 
-## Cross-repository contracts
+## 跨仓库契约
 
-- This repository is the single source of truth for cross-project formats, metrics, budgets, compatibility rules, shared diagnostics, and their versioning.
-- Each contract must define its scope, compatibility window, consumers, frozen examples, and validation requirements.
-- Consumer repositories link to canonical contract documents instead of maintaining independent complete copies.
-- A contract change requires checking every consumer and passing all cross-repository documentation and conformance checks.
-- Every product Markdown document has a unique `ICE3-<AREA>-<TYPE>-<NNN>` ID, explicit title, status, owner, index entry, and valid relative references.
-- Root `AGENTS.md` files are repository governance inputs, not product documentation, and are excluded from product-document discovery.
+- 本仓库是跨项目 format、metric、budget、compatibility rule、shared diagnostic 及其版本规则的唯一权威。
+- 每份 contract 必须定义适用范围、兼容窗口、消费方、冻结示例和 validation requirement。
+- 消费仓库链接权威 contract，不维护独立完整副本。
+- contract 变更必须检查所有消费方，并通过跨仓库文档与一致性检查。
+- 每份产品 Markdown 使用唯一 `ICE3-<AREA>-<TYPE>-<NNN>` ID，并包含明确标题、Status、Owner、索引条目和有效相对链接。
+- 根目录 `AGENTS.md` 是仓库治理输入，不属于产品文档，不进入产品文档发现流程。
 
-## Delivery
+## 交付
 
-- Use Node.js 24.22.1 LTS from `.nvmrc`.
-- Develop on a feature branch and merge to `main` only after the full verification gate passes.
-- Keep generated indexes, contract references, and repository links deterministic.
-- Do not weaken validation tests to make an invalid document pass.
+- 使用 `.nvmrc` 指定的 Node.js 24.22.1 LTS。
+- 在功能分支开发，完整验证门禁通过后才可合入 `main`。
+- 保持生成的索引、contract reference 和 repository link 具有确定性。
+- 不得为了让无效文档通过而削弱 validation test。
 
-## Commit identity
+## 提交身份
 
-- Every Git author and committer name in this repository must be `damoqiongqiu`.
-- Verify the configured and recorded names before committing, merging, or pushing.
+- 本仓库所有 Git author 和 committer 名称必须为 `damoqiongqiu`。
+- 提交、合并或推送前核对配置名称与提交记录。
 
-## Naming and legal boundary
+## 命名与法律边界
 
-- Do not use competitor, vendor, or third-party product names in documents, links, diagrams, metadata, examples, or commits.
-- Do not expose prohibited names indirectly through URLs, screenshots, package names, repository names, class names, or other identifiers.
-- Describe comparisons only with neutral approved categories.
-- Keep necessary source research outside product repositories and subject it to legal review.
+- 文档、链接、图表、metadata、示例或 commit 中不得出现竞品、厂商或第三方产品名称。
+- 不得通过 URL、截图、package 名、仓库名、class 名或其他标识间接暴露禁止名称。
+- 技术比较只使用经批准的中性类别。
+- 必要的外部资料留在产品仓库之外，并接受法律审查。
 
-## Customer asset protection
+## 客户 Asset 保护
 
-- Real customer model assets remain in a controlled local directory outside every repository.
-- Customer models or derived fragments must not enter documentation, screenshots, examples, diagrams, logs, or Git history.
-- Public documentation uses synthetic, sanitized, or explicitly redistributable material instead.
-- Before completing asset-related work, inspect Git status, tracked files, ignore rules, and staged content.
+- 真实客户模型 Asset 保留在受控本地目录中，不进入任何仓库。
+- 客户模型或派生片段不得进入文档、截图、示例、图表、日志或 Git history。
+- 公开文档使用虚构、已脱敏或明确可分发材料。
+- 完成 Asset 相关工作前，检查 Git status、tracked files、ignore rules 和 staged content。
 
-## Verification
+## 验证
 
 ```bash
 npm test
@@ -49,7 +49,7 @@ npm run docs:check
 npm run docs:check:workspace
 ```
 
-## Related Documents
+## 关联文档
 
-- `ICE3-DOC-IDX-001` — [Documentation index](docs/README.md)
-- `ICE3-DOC-ARC-001` — [Family architecture](docs/architecture.md)
+- `ICE3-DOC-IDX-001` — [文档索引](docs/README.md)
+- `ICE3-DOC-ARC-001` — [ICE3 家族架构](docs/architecture.md)

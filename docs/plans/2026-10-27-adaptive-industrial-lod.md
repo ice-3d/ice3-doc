@@ -1,69 +1,69 @@
-# Adaptive Industrial LOD Implementation Plan
+# 自适应工业 LOD 实施计划
 
 > Document ID: ICE3-DOC-PLAN-001
 >
 > Status: Implemented
 >
-> Owner: ICE3 architecture maintainers
+> Owner: ICE3 架构维护者
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **面向智能体执行者：** 必需子技能：使用 superpowers:subagent-driven-development（推荐）或 superpowers:executing-plans 按任务逐步实施本计划。步骤使用复选框（`- [ ]`）语法跟踪。
 
-**Goal:** Add deterministic per-unit adaptive coarse-model budget allocation while preserving the existing standard Tileset, Prepared GLB, and runtime contracts.
+**目标：** 在保留现有标准 Tileset、Prepared GLB 和运行时契约的前提下，增加确定性的逐单元自适应粗模预算分配。
 
-**Architecture:** The toolchain generates a bounded simplification curve for each semantic unit, stores sampled geometry in the existing temporary workspace, and greedily allocates a Tile's triangle budget to the highest marginal error reduction. Adaptive mode is opt-in in this phase; the existing proportional allocator remains byte-for-byte compatible.
+**架构：** 工具链为每个语义单元生成有界简化曲线，将采样几何存储在现有临时工作区中，并贪心地将 Tile 的三角形预算分配给边际误差降低最大的单元。本阶段的自适应模式为可选启用；现有的 proportional 分配器保持逐字节兼容。
 
-**Tech Stack:** Node.js 24.22.1 LTS, TypeScript 7, ESM, npm workspaces, Node.js built-in test runner, `expect`, `tsx`, Prepared GLB, OGC 3D Tiles 1.1, `meshoptimizer` simplifier
+**技术栈：** Node.js 24.22.1 LTS、TypeScript 7、ESM、npm workspaces、Node.js 内置测试运行器、`expect`、`tsx`、Prepared GLB、OGC 3D Tiles 1.1、`meshoptimizer` 简化器
 
-**Spec:** `../specs/2026-10-27-adaptive-industrial-lod-design.md`
+**规范：** `../specs/2026-10-27-adaptive-industrial-lod-design.md`
 
-## Global Constraints
+## 全局约束
 
-- Use Node.js 24.22.1 LTS from `.nvmrc`; do not verify with Node 25.
-- Work on a feature branch and merge to `main` only after full verification.
-- Do not add runtime dependencies.
-- Do not add a private asset or Tileset format; output remains Prepared GLB and OGC 3D Tiles 1.1.
-- Do not change engine runtime APIs in this phase.
-- The existing `proportional` mode must retain its current output and tests.
-- Adaptive generation is offline only.
-- Selection IDs and semantic device boundaries must survive all sample and rebuild steps.
-- Preserve vertex colors through workspace spilling and coarse reconstruction.
-- Never write controlled customer assets or derived files into Git, packages, logs, tests, or documentation.
-- Avoid competitor names and the prohibited generic 3D-library brand term in code, comments, tests, commits, and docs.
-- All sampling and allocation must be deterministic for identical input, options, and tool version.
+- 使用 `.nvmrc` 指定的 Node.js 24.22.1 LTS；不要使用 Node 25 进行验证。
+- 在功能分支上开发，仅在完整验证通过后合入 `main`。
+- 不要添加运行时依赖。
+- 不要添加私有 Asset 或 Tileset 格式；输出仍为 Prepared GLB 和 OGC 3D Tiles 1.1。
+- 本阶段不要更改引擎运行时 API。
+- 现有 `proportional` 模式必须保留当前输出和测试。
+- 自适应生成仅在离线环境中执行。
+- Selection ID 和语义设备边界必须在所有采样与重建步骤中保持不变。
+- 在工作区溢出和粗模重建过程中保留顶点颜色。
+- 切勿将受控客户 Asset 或派生文件写入 Git、包、日志、测试或文档。
+- 避免在代码、注释、测试、提交和文档中出现竞品名称以及被禁止的通用 3D 库品牌术语。
+- 对于相同输入、选项和工具版本，所有采样和分配必须具有确定性。
 
-## Review Focus
+## 审查重点
 
-- Device minimum triangle counts can exceed the adaptive Tile budget; the build must fail clearly instead of returning an over-budget coarse Tile.
-- Spilled sampled geometry can silently lose vertex colors; tests must round-trip colors through both memory and disk paths.
-- Simplification can plateau or retain source geometry, producing equal actual triangle counts; marginal-benefit division must skip zero-cost steps safely.
-- The same semantic unit appears in multiple ancestor Tiles; its curve must be computed once and reused with the same selection identity.
-- Rebuilding coarse GLBs from sampled workspace geometry can lose selection IDs; tests must assert every adaptive coarse node still exposes its source device identity.
+- 设备最低三角形数可能超过自适应 Tile 预算；构建必须明确失败，而不是返回超出预算的粗模 Tile。
+- 溢出的采样几何可能静默丢失顶点颜色；测试必须通过内存和磁盘两条路径往返验证颜色。
+- 简化可能进入平台期或保留源几何，从而产生相同的实际三角形数；边际收益除法必须安全跳过零成本步骤。
+- 同一语义单元会出现在多个祖先 Tile 中；其曲线必须只计算一次，并以相同的 selection 标识复用。
+- 从采样的工作区几何重建粗模 GLB 可能丢失 Selection ID；测试必须断言每个自适应粗模 Node 仍暴露其源设备标识。
 
-## File Structure
+## 文件结构
 
-- `packages/toolchain-core/src/partition/types.ts` owns public LOD configuration.
-- `packages/toolchain-core/src/lod/types.ts` owns curve, sample, primitive, and allocation types.
-- `packages/toolchain-core/src/lod/createLodSampleSchedule.ts` owns deterministic target-triangle sampling.
-- `packages/toolchain-core/src/lod/allocateAdaptiveLod.ts` owns pure budget allocation.
-- `packages/toolchain-core/src/lod/createLodUnitCurve.ts` owns unit-level sampled geometry generation.
-- `packages/toolchain-core/src/lod/createGeometryWorkspace.ts` owns temporary sampled geometry storage.
-- `packages/toolchain-core/src/partition/partitionAsset.ts` integrates curves into coarse-node construction while preserving proportional mode.
-- `packages/cli/src/commands.ts` owns CLI parsing and validation.
-- `packages/toolchain-core/src/index.ts` exports the new public types and functions.
+- `packages/toolchain-core/src/partition/types.ts` 负责公共 LOD 配置。
+- `packages/toolchain-core/src/lod/types.ts` 负责曲线、样本、primitive 和分配类型。
+- `packages/toolchain-core/src/lod/createLodSampleSchedule.ts` 负责确定性的目标三角形采样。
+- `packages/toolchain-core/src/lod/allocateAdaptiveLod.ts` 负责纯预算分配。
+- `packages/toolchain-core/src/lod/createLodUnitCurve.ts` 负责单元级采样几何生成。
+- `packages/toolchain-core/src/lod/createGeometryWorkspace.ts` 负责临时采样几何存储。
+- `packages/toolchain-core/src/partition/partitionAsset.ts` 将曲线集成到粗模 Node 构建中，同时保留 proportional 模式。
+- `packages/cli/src/commands.ts` 负责 CLI 解析和验证。
+- `packages/toolchain-core/src/index.ts` 导出新的公共类型和函数。
 
 ---
 
-### Task 1: Add LOD Configuration and Deterministic Sample Targets
+### 任务 1：添加 LOD 配置和确定性采样目标
 
-**Files:**
-- Modify: `ice3-toolchain/packages/toolchain-core/src/partition/types.ts`
-- Create: `ice3-toolchain/packages/toolchain-core/src/lod/createLodSampleSchedule.ts`
-- Create: `ice3-toolchain/tests/lod/createLodSampleSchedule.test.ts`
-- Modify: `ice3-toolchain/packages/toolchain-core/src/index.ts`
+**文件：**
+- 修改：`ice3-toolchain/packages/toolchain-core/src/partition/types.ts`
+- 新建：`ice3-toolchain/packages/toolchain-core/src/lod/createLodSampleSchedule.ts`
+- 新建：`ice3-toolchain/tests/lod/createLodSampleSchedule.test.ts`
+- 修改：`ice3-toolchain/packages/toolchain-core/src/index.ts`
 
-**Interfaces:**
-- Consumes: existing `ICELodBuildOptions`.
-- Produces:
+**接口：**
+- 使用：现有 `ICELodBuildOptions`。
+- 产出：
 
 ```ts
 type ICELodAllocationMode = 'proportional' | 'adaptive';
@@ -81,7 +81,7 @@ function createLodSampleSchedule(options: {
 }): readonly number[];
 ```
 
-- [ ] **Step 1: Write the failing schedule tests**
+- [ ] **步骤 1：编写失败的采样计划测试**
 
 ```ts
 import { test } from 'node:test';
@@ -119,9 +119,9 @@ test('deduplicates tiny ranges and rejects invalid sample counts', () => {
 });
 ```
 
-- [ ] **Step 2: Run the test to verify it fails**
+- [ ] **步骤 2：运行测试以验证其失败**
 
-Run:
+运行：
 
 ```bash
 cd ../ice3-toolchain
@@ -130,11 +130,11 @@ nvm use 24
 npm test -- tests/lod/createLodSampleSchedule.test.ts
 ```
 
-Expected: FAIL because the module and exported function do not exist.
+预期：失败，因为模块和导出的函数尚不存在。
 
-- [ ] **Step 3: Add the configuration types**
+- [ ] **步骤 3：添加配置类型**
 
-In `packages/toolchain-core/src/partition/types.ts`:
+在 `packages/toolchain-core/src/partition/types.ts` 中：
 
 ```ts
 export type ICELodAllocationMode = 'proportional' | 'adaptive';
@@ -150,9 +150,9 @@ export interface ICELodBuildOptions {
 }
 ```
 
-- [ ] **Step 4: Implement deterministic logarithmic targets**
+- [ ] **步骤 4：实现确定性对数目标**
 
-In `packages/toolchain-core/src/lod/createLodSampleSchedule.ts`:
+在 `packages/toolchain-core/src/lod/createLodSampleSchedule.ts` 中：
 
 ```ts
 export interface ICELodSampleScheduleOptions {
@@ -191,9 +191,9 @@ export function createLodSampleSchedule(
 }
 ```
 
-- [ ] **Step 5: Export the new type and function**
+- [ ] **步骤 5：导出新类型和函数**
 
-In `packages/toolchain-core/src/index.ts`:
+在 `packages/toolchain-core/src/index.ts` 中：
 
 ```ts
 export {
@@ -206,18 +206,18 @@ export type {
 } from './partition/types.js';
 ```
 
-- [ ] **Step 6: Run the focused tests and typecheck**
+- [ ] **步骤 6：运行聚焦测试和类型检查**
 
-Run:
+运行：
 
 ```bash
 npm test -- tests/lod/createLodSampleSchedule.test.ts
 npm run typecheck
 ```
 
-Expected: both commands PASS.
+预期：两条命令均通过。
 
-- [ ] **Step 7: Commit**
+- [ ] **步骤 7：提交**
 
 ```bash
 git add packages/toolchain-core/src/partition/types.ts \
@@ -229,17 +229,17 @@ git commit -m "feat(toolchain): define deterministic lod samples"
 
 ---
 
-### Task 2: Implement the Adaptive Budget Allocator
+### 任务 2：实现自适应预算分配器
 
-**Files:**
-- Create: `ice3-toolchain/packages/toolchain-core/src/lod/types.ts`
-- Create: `ice3-toolchain/packages/toolchain-core/src/lod/allocateAdaptiveLod.ts`
-- Create: `ice3-toolchain/tests/lod/allocateAdaptiveLod.test.ts`
-- Modify: `ice3-toolchain/packages/toolchain-core/src/index.ts`
+**文件：**
+- 新建：`ice3-toolchain/packages/toolchain-core/src/lod/types.ts`
+- 新建：`ice3-toolchain/packages/toolchain-core/src/lod/allocateAdaptiveLod.ts`
+- 新建：`ice3-toolchain/tests/lod/allocateAdaptiveLod.test.ts`
+- 修改：`ice3-toolchain/packages/toolchain-core/src/index.ts`
 
-**Interfaces:**
-- Consumes: actual triangle and error values produced by sampled curves.
-- Produces:
+**接口：**
+- 使用：采样曲线产生的实际三角形数和误差值。
+- 产出：
 
 ```ts
 interface ICELodCurveSample {
@@ -283,7 +283,7 @@ function allocateAdaptiveLod(
 ): ICELodAllocation;
 ```
 
-- [ ] **Step 1: Write failing allocator tests**
+- [ ] **步骤 1：编写失败的分配器测试**
 
 ```ts
 import { test } from 'node:test';
@@ -364,23 +364,23 @@ test('skips zero-cost plateau steps without dividing by zero', () => {
 });
 ```
 
-- [ ] **Step 2: Run the test to verify it fails**
+- [ ] **步骤 2：运行测试以验证其失败**
 
-Run:
+运行：
 
 ```bash
 npm test -- tests/lod/allocateAdaptiveLod.test.ts
 ```
 
-Expected: FAIL because the allocator module does not exist.
+预期：失败，因为分配器模块尚不存在。
 
-- [ ] **Step 3: Define curve and allocation types**
+- [ ] **步骤 3：定义曲线和分配类型**
 
-Create `packages/toolchain-core/src/lod/types.ts` with the interfaces from the **Interfaces** block and export them from `allocateAdaptiveLod.ts`.
+使用 **接口** 块中的接口创建 `packages/toolchain-core/src/lod/types.ts`，并从 `allocateAdaptiveLod.ts` 导出这些接口。
 
-- [ ] **Step 4: Implement constrained greedy allocation**
+- [ ] **步骤 4：实现受约束的贪心分配**
 
-In `packages/toolchain-core/src/lod/allocateAdaptiveLod.ts`:
+在 `packages/toolchain-core/src/lod/allocateAdaptiveLod.ts` 中：
 
 ```ts
 import type {
@@ -497,9 +497,9 @@ export type {
 } from './types.js';
 ```
 
-- [ ] **Step 5: Export the allocator**
+- [ ] **步骤 5：导出分配器**
 
-In `packages/toolchain-core/src/index.ts`:
+在 `packages/toolchain-core/src/index.ts` 中：
 
 ```ts
 export {
@@ -511,9 +511,9 @@ export {
 } from './lod/allocateAdaptiveLod.js';
 ```
 
-- [ ] **Step 6: Run focused tests and typecheck**
+- [ ] **步骤 6：运行聚焦测试和类型检查**
 
-Run:
+运行：
 
 ```bash
 npm test -- tests/lod/allocateAdaptiveLod.test.ts \
@@ -521,9 +521,9 @@ npm test -- tests/lod/allocateAdaptiveLod.test.ts \
 npm run typecheck
 ```
 
-Expected: all PASS.
+预期：全部通过。
 
-- [ ] **Step 7: Commit**
+- [ ] **步骤 7：提交**
 
 ```bash
 git add packages/toolchain-core/src/lod/types.ts \
@@ -535,15 +535,15 @@ git commit -m "feat(toolchain): allocate lod by marginal error"
 
 ---
 
-### Task 3: Preserve Vertex Colors in the Geometry Workspace
+### 任务 3：在几何工作区中保留顶点颜色
 
-**Files:**
-- Modify: `ice3-toolchain/packages/toolchain-core/src/lod/createGeometryWorkspace.ts`
-- Modify: `ice3-toolchain/tests/lod/createGeometryWorkspace.test.ts`
+**文件：**
+- 修改：`ice3-toolchain/packages/toolchain-core/src/lod/createGeometryWorkspace.ts`
+- 修改：`ice3-toolchain/tests/lod/createGeometryWorkspace.test.ts`
 
-**Interfaces:**
-- Consumes: sampled positions, indices, and optional vertex colors.
-- Produces:
+**接口：**
+- 使用：采样的位置、索引和可选顶点颜色。
+- 产出：
 
 ```ts
 interface ICEWorkspaceGeometry {
@@ -553,9 +553,9 @@ interface ICEWorkspaceGeometry {
 }
 ```
 
-- [ ] **Step 1: Write failing memory and spill color tests**
+- [ ] **步骤 1：编写失败的内存和溢出颜色测试**
 
-Append to `tests/lod/createGeometryWorkspace.test.ts`:
+追加到 `tests/lod/createGeometryWorkspace.test.ts`：
 
 ```ts
 test.each([1024, 1])(
@@ -585,30 +585,30 @@ test.each([1024, 1])(
 );
 ```
 
-- [ ] **Step 2: Run the test to verify it fails**
+- [ ] **步骤 2：运行测试以验证其失败**
 
-Run:
+运行：
 
 ```bash
 npm test -- tests/lod/createGeometryWorkspace.test.ts
 ```
 
-Expected: FAIL because colors are not stored or returned.
+预期：失败，因为颜色没有被存储或返回。
 
-- [ ] **Step 3: Extend the spill encoding**
+- [ ] **步骤 3：扩展溢出编码**
 
-In `createGeometryWorkspace.ts`:
+在 `createGeometryWorkspace.ts` 中：
 
-- Add optional `colors` to `ICEWorkspaceGeometry` and `IGEStoredGeometry`.
-- Increase the encoded header from 8 bytes to 12 bytes: position bytes, index bytes, color bytes.
-- Include color bytes in the workspace memory limit.
-- Copy colors after indices when spilling.
-- Decode and validate color length as either 3 or 4 floats per vertex when present.
-- Return a defensive copy for the in-memory path.
+- 向 `ICEWorkspaceGeometry` 和 `IGEStoredGeometry` 添加可选 `colors`。
+- 将编码头从 8 字节增加到 12 字节：位置字节数、索引字节数、颜色字节数。
+- 将颜色字节计入工作区内存限制。
+- 溢出时在索引之后复制颜色。
+- 存在颜色时，解码并验证每个顶点的颜色长度为 3 或 4 个浮点数。
+- 对于内存路径返回防御性副本。
 
-- [ ] **Step 4: Run focused tests**
+- [ ] **步骤 4：运行聚焦测试**
 
-Run:
+运行：
 
 ```bash
 npm test -- tests/lod/createGeometryWorkspace.test.ts \
@@ -616,9 +616,9 @@ npm test -- tests/lod/createGeometryWorkspace.test.ts \
 npm run typecheck
 ```
 
-Expected: both the spilled and in-memory color cases PASS.
+预期：溢出和内存中的颜色用例均通过。
 
-- [ ] **Step 5: Commit**
+- [ ] **步骤 5：提交**
 
 ```bash
 git add packages/toolchain-core/src/lod/createGeometryWorkspace.ts \
@@ -628,17 +628,17 @@ git commit -m "feat(toolchain): retain colors in lod workspace"
 
 ---
 
-### Task 4: Build Per-Unit Simplification Curves
+### 任务 4：构建逐单元简化曲线
 
-**Files:**
-- Create: `ice3-toolchain/packages/toolchain-core/src/lod/createLodUnitCurve.ts`
-- Create: `ice3-toolchain/tests/lod/createLodUnitCurve.test.ts`
-- Modify: `ice3-toolchain/packages/toolchain-core/src/lod/types.ts`
-- Modify: `ice3-toolchain/packages/toolchain-core/src/index.ts`
+**文件：**
+- 新建：`ice3-toolchain/packages/toolchain-core/src/lod/createLodUnitCurve.ts`
+- 新建：`ice3-toolchain/tests/lod/createLodUnitCurve.test.ts`
+- 修改：`ice3-toolchain/packages/toolchain-core/src/lod/types.ts`
+- 修改：`ice3-toolchain/packages/toolchain-core/src/index.ts`
 
-**Interfaces:**
-- Consumes: `simplifyGeometry`, `createLodSampleSchedule`, and prepared primitive geometry already stored with optional colors in the workspace.
-- Produces:
+**接口：**
+- 使用：`simplifyGeometry`、`createLodSampleSchedule`，以及已经以可选颜色存储在 Workspace 中的 Prepared primitive 几何。
+- 产出：
 
 ```ts
 interface ICELodCurvePrimitive {
@@ -658,9 +658,9 @@ function createLodUnitCurve(options: {
 }): Promise<ICELodUnitCurve>;
 ```
 
-- [ ] **Step 1: Write a failing curve test**
+- [ ] **步骤 1：编写失败的曲线测试**
 
-Create `tests/lod/createLodUnitCurve.test.ts` using a two-triangle colored workspace geometry:
+使用双三角形带颜色的 Workspace 几何创建 `tests/lod/createLodUnitCurve.test.ts`：
 
 ```ts
 import { test } from 'node:test';
@@ -713,19 +713,19 @@ test('creates monotonic samples and retains sampled vertex colors', async () => 
 });
 ```
 
-- [ ] **Step 2: Run the test to verify it fails**
+- [ ] **步骤 2：运行测试以验证其失败**
 
-Run:
+运行：
 
 ```bash
 npm test -- tests/lod/createLodUnitCurve.test.ts
 ```
 
-Expected: FAIL because the curve module does not exist.
+预期：失败，因为曲线模块尚不存在。
 
-- [ ] **Step 3: Implement unit sample generation**
+- [ ] **步骤 3：实现单元采样生成**
 
-In `createLodUnitCurve.ts`:
+在 `createLodUnitCurve.ts` 中：
 
 ```ts
 export async function createLodUnitCurve(
@@ -806,9 +806,9 @@ export async function createLodUnitCurve(
 }
 ```
 
-- [ ] **Step 4: Add a color-preserving test**
+- [ ] **步骤 4：添加颜色保留测试**
 
-Extend the curve test to read every sampled geometry and assert that any geometry with colors has exactly 3 or 4 color components per vertex and finite values.
+扩展曲线测试，使其读取每个采样几何，并断言任何带颜色的几何在每个顶点上恰好有 3 或 4 个颜色分量且值均为有限值。
 
 ```ts
 for (const sample of curve.samples) {
@@ -823,9 +823,9 @@ for (const sample of curve.samples) {
 }
 ```
 
-- [ ] **Step 5: Run focused tests**
+- [ ] **步骤 5：运行聚焦测试**
 
-Run:
+运行：
 
 ```bash
 npm test -- tests/lod/createLodUnitCurve.test.ts \
@@ -834,9 +834,9 @@ npm test -- tests/lod/createLodUnitCurve.test.ts \
 npm run typecheck
 ```
 
-Expected: all PASS.
+预期：全部通过。
 
-- [ ] **Step 6: Commit**
+- [ ] **步骤 6：提交**
 
 ```bash
 git add packages/toolchain-core/src/lod/types.ts \
@@ -848,31 +848,31 @@ git commit -m "feat(toolchain): build per-unit lod curves"
 
 ---
 
-### Task 5: Integrate Adaptive Allocation into Coarse Builds
+### 任务 5：将自适应分配集成到粗模构建
 
-**Files:**
-- Modify: `ice3-toolchain/packages/toolchain-core/src/partition/partitionAsset.ts`
-- Modify: `ice3-toolchain/tests/partition/lodGeneration.test.ts`
-- Create: `ice3-toolchain/tests/partition/createAdaptiveLodSource.ts`
+**文件：**
+- 修改：`ice3-toolchain/packages/toolchain-core/src/partition/partitionAsset.ts`
+- 修改：`ice3-toolchain/tests/partition/lodGeneration.test.ts`
+- 新建：`ice3-toolchain/tests/partition/createAdaptiveLodSource.ts`
 
-**Interfaces:**
-- Consumes:
+**接口：**
+- 使用：
 
 ```ts
 allocateAdaptiveLod(input): ICELodAllocation
 createLodUnitCurve(options): Promise<ICELodUnitCurve>
 ```
 
-- Produces: unchanged `ICEPartitionResult` files and Tileset, with adaptive coarse geometry when `lod.allocation === 'adaptive'`.
+- 产出：`ICEPartitionResult` 文件和 Tileset 保持不变；当 `lod.allocation === 'adaptive'` 时使用自适应粗模几何。
 
-- [ ] **Step 1: Create a heterogeneous source fixture**
+- [ ] **步骤 1：创建异构源 fixture**
 
-Create two semantic units with the same node count but different geometry complexity:
+创建两个 Node 数相同但几何复杂度不同的语义单元：
 
-- Unit `simple-box`: an eight-triangle box.
-- Unit `complex-grid`: a multi-segment curved or grid surface with substantially more triangles and a higher simplification error.
+- 单元 `simple-box`：一个 8 三角形的盒体。
+- 单元 `complex-grid`：一个多段曲面或网格表面，其三角形数量显著更多，简化误差也更高。
 
-Create `tests/partition/createAdaptiveLodSource.ts`:
+创建 `tests/partition/createAdaptiveLodSource.ts`：
 
 ```ts
 import type { ICESourceDocument } from '../../packages/toolchain-core/src/index.js';
@@ -997,11 +997,11 @@ export function createAdaptiveLodPartitionSource(): ICESourceDocument {
 }
 ```
 
-Do not copy controlled customer geometry.
+不要复制受控客户几何。
 
-- [ ] **Step 2: Write the failing integration test**
+- [ ] **步骤 2：编写失败的集成测试**
 
-Append to `tests/partition/lodGeneration.test.ts`:
+追加到 `tests/partition/lodGeneration.test.ts`：
 
 ```ts
 test('uses different simplification rates for heterogeneous units', async () => {
@@ -1035,19 +1035,19 @@ test('uses different simplification rates for heterogeneous units', async () => 
 });
 ```
 
-- [ ] **Step 3: Run the test to verify it fails**
+- [ ] **步骤 3：运行测试以验证其失败**
 
-Run:
+运行：
 
 ```bash
 npm test -- tests/partition/lodGeneration.test.ts -t heterogeneous
 ```
 
-Expected: FAIL because `allocation`, `curveSamples`, and adaptive stats are not integrated.
+预期：失败，因为 `allocation`、`curveSamples` 和自适应统计尚未集成。
 
-- [ ] **Step 4: Add the curve cache**
+- [ ] **步骤 4：添加曲线缓存**
 
-Extend `ICBuildState`:
+扩展 `ICBuildState`：
 
 ```ts
 readonly lodCurveCache: Map<string, Promise<ICELodUnitCurve>>;
@@ -1056,7 +1056,7 @@ readonly adaptiveRatios: number[];
 maximumAdaptiveErrorMeters: number;
 ```
 
-Add a helper in `partitionAsset.ts`:
+在 `partitionAsset.ts` 中添加辅助函数：
 
 ```ts
 function loadUnitCurve(
@@ -1104,9 +1104,9 @@ function loadUnitCurve(
 }
 ```
 
-- [ ] **Step 5: Store source vertex colors in normalized workspace geometry**
+- [ ] **步骤 5：将源顶点颜色存储到规范化 Workspace 几何中**
 
-In `normalizeLodGeometry`, read `COLOR_0` before writing the primitive:
+在 `normalizeLodGeometry` 中，写入 primitive 之前读取 `COLOR_0`：
 
 ```ts
 const colorData = attributes?.COLOR_0 === undefined
@@ -1130,21 +1130,21 @@ await workspace.write(key, {
 });
 ```
 
-This makes the normalized workspace the single geometry source for both proportional and adaptive paths.
+这样，规范化 Workspace 就成为 proportional 和自适应路径共用的唯一几何源。
 
-- [ ] **Step 6: Branch coarse construction by allocation mode**
+- [ ] **步骤 6：按分配模式分支构建粗模**
 
-In `buildSingleCoarseNode`, keep the current proportional path untouched. Add an adaptive path that:
+在 `buildSingleCoarseNode` 中，保持当前 proportional 路径不变。添加一条自适应路径，使其：
 
-1. Loads all unit curves through `loadUnitCurve`.
-2. Computes the node diagonal from `node.bounds`.
-3. Calls `allocateAdaptiveLod` with `maxTrianglesPerProxy`.
-4. Loads each selected sample primitive from `workspace`.
-5. Places those geometries in the existing `overrides` map by `sourceKey`.
-6. Uses `allocation.maximumErrorMeters` for `coarseError`.
-7. Sets `overBudget = allocation.allocatedTriangles > maxTrianglesPerProxy`.
+1. 通过 `loadUnitCurve` 加载所有单元曲线。
+2. 根据 `node.bounds` 计算 Node 对角线。
+3. 使用 `maxTrianglesPerProxy` 调用 `allocateAdaptiveLod`。
+4. 从 `workspace` 加载每个选定的采样 primitive。
+5. 按 `sourceKey` 将这些几何放入现有 `overrides` 映射。
+6. 使用 `allocation.maximumErrorMeters` 作为 `coarseError`。
+7. 设置 `overBudget = allocation.allocatedTriangles > maxTrianglesPerProxy`。
 
-Use this structure:
+使用以下结构：
 
 ```ts
 const selection = allocationByUnit.get(unitId)!;
@@ -1158,15 +1158,15 @@ for (const primitive of selection.primitives) {
 }
 ```
 
-- [ ] **Step 7: Update adaptive build stats**
+- [ ] **步骤 7：更新自适应构建统计**
 
-When an adaptive coarse node becomes final:
+当自适应粗模 Node 最终确定时：
 
-- Add each unit ID with a sample ratio outside the node dominant ratio by more than `0.01` to `adaptiveUnitIds`.
-- Record each selected unit ratio `actualTriangles / sourceTriangles`.
-- Update `maximumAdaptiveErrorMeters`.
+- 将采样比例与 Node 主导比例相差超过 `0.01` 的每个单元 ID 添加到 `adaptiveUnitIds`。
+- 记录每个选定单元的比例 `actualTriangles / sourceTriangles`。
+- 更新 `maximumAdaptiveErrorMeters`。
 
-Expose in `ICEPartitionResult['stats']`:
+在 `ICEPartitionResult['stats']` 中暴露：
 
 ```ts
 readonly allocationMode: 'proportional' | 'adaptive';
@@ -1177,7 +1177,7 @@ readonly maximumErrorMeters: number;
 readonly curveSampleCount: number;
 ```
 
-For proportional mode return:
+对于 proportional 模式返回：
 
 ```ts
 allocationMode: 'proportional',
@@ -1188,9 +1188,9 @@ maximumErrorMeters: 0,
 curveSampleCount: 0,
 ```
 
-- [ ] **Step 8: Preserve proportional byte-for-byte**
+- [ ] **步骤 8：逐字节保留 proportional 输出**
 
-Add `createHash` from `node:crypto` to `tests/partition/lodGeneration.test.ts` and assert the existing synthetic output hashes:
+从 `node:crypto` 向 `tests/partition/lodGeneration.test.ts` 添加 `createHash`，并断言现有合成输出的哈希值：
 
 ```ts
 const proportional = await partitionAsset(createLodPartitionSource(), {
@@ -1225,9 +1225,9 @@ expect(proportional.files.map((file) => [
 ]);
 ```
 
-- [ ] **Step 9: Run integration tests**
+- [ ] **步骤 9：运行集成测试**
 
-Run:
+运行：
 
 ```bash
 npm test -- tests/partition/lodGeneration.test.ts \
@@ -1236,9 +1236,9 @@ npm test -- tests/partition/lodGeneration.test.ts \
 npm run typecheck
 ```
 
-Expected: all PASS.
+预期：全部通过。
 
-- [ ] **Step 10: Commit**
+- [ ] **步骤 10：提交**
 
 ```bash
 git add packages/toolchain-core/src/partition/partitionAsset.ts \
@@ -1249,25 +1249,25 @@ git commit -m "feat(toolchain): integrate adaptive coarse allocation"
 
 ---
 
-### Task 6: Add CLI Controls and Validate Reports
+### 任务 6：添加 CLI 控制项并验证报告
 
-**Files:**
-- Modify: `ice3-toolchain/packages/cli/src/commands.ts`
-- Modify: `ice3-toolchain/tests/cli/commands.test.ts`
-- Modify: `ice3-toolchain/README.md`
+**文件：**
+- 修改：`ice3-toolchain/packages/cli/src/commands.ts`
+- 修改：`ice3-toolchain/tests/cli/commands.test.ts`
+- 修改：`ice3-toolchain/README.md`
 
-**Interfaces:**
-- Consumes: `ICELodAllocationMode` and `curveSamples`.
-- Produces CLI options:
+**接口：**
+- 使用：`ICELodAllocationMode` 和 `curveSamples`。
+- 产出 CLI 选项：
 
 ```text
 --lod-allocation <proportional|adaptive>
 --lod-curve-samples <count>
 ```
 
-- [ ] **Step 1: Write failing CLI parsing tests**
+- [ ] **步骤 1：编写失败的 CLI 解析测试**
 
-Add:
+添加：
 
 ```ts
 test.each([
@@ -1327,19 +1327,19 @@ test.each([
 });
 ```
 
-- [ ] **Step 2: Run CLI tests to verify failure**
+- [ ] **步骤 2：运行 CLI 测试以验证失败**
 
-Run:
+运行：
 
 ```bash
 npm test -- tests/cli/commands.test.ts -t "allocation|adaptive"
 ```
 
-Expected: FAIL because the options are unknown.
+预期：失败，因为这些选项未知。
 
-- [ ] **Step 3: Parse and validate options**
+- [ ] **步骤 3：解析并验证选项**
 
-In `partitionCommand`:
+在 `partitionCommand` 中：
 
 ```ts
 const allocationValue = args.values.get('--lod-allocation') ?? 'proportional';
@@ -1359,11 +1359,11 @@ if (curveSamples < 4 || curveSamples > 32) {
 }
 ```
 
-Return both values in the `lod` object and add both names to the valued-option set.
+在 `lod` 对象中返回这两个值，并将这两个名称加入带值选项集合。
 
-- [ ] **Step 4: Document CLI usage**
+- [ ] **步骤 4：记录 CLI 用法**
 
-Add to `README.md`:
+添加到 `README.md`：
 
 ```text
 --lod-allocation proportional|adaptive
@@ -1375,18 +1375,18 @@ Add to `README.md`:
   Default: 8.
 ```
 
-- [ ] **Step 5: Run CLI and print validation**
+- [ ] **步骤 5：运行 CLI 和打印验证**
 
-Run:
+运行：
 
 ```bash
 npm test -- tests/cli/commands.test.ts
 npm run typecheck
 ```
 
-Expected: all PASS.
+预期：全部通过。
 
-- [ ] **Step 6: Commit**
+- [ ] **步骤 6：提交**
 
 ```bash
 git add packages/cli/src/commands.ts \
@@ -1397,16 +1397,16 @@ git commit -m "feat(cli): expose adaptive lod allocation"
 
 ---
 
-### Task 7: Run Real-Asset Comparison and Complete Integration
+### 任务 7：运行真实 Asset 比较并完成集成
 
-**Files:**
-- Modify: `ice3-doc/docs/contracts/asset-preparation-contract-v1.md`
-- Modify: `ice3-toolchain/README.md`
-- Modify: `ice3-toolchain/tests/architecture/layout.test.ts` only if new public exports require it
+**文件：**
+- 修改：`ice3-doc/docs/contracts/asset-preparation-contract-v1.md`
+- 修改：`ice3-toolchain/README.md`
+- 仅当新的公共导出需要时，修改 `ice3-toolchain/tests/architecture/layout.test.ts`
 
-- [ ] **Step 1: Run both full suites before the controlled comparison**
+- [ ] **步骤 1：在受控比较之前运行两套完整测试**
 
-Run:
+运行：
 
 ```bash
 cd ../ice3-toolchain
@@ -1418,11 +1418,11 @@ cd ../ice3-engine
 npm run verify
 ```
 
-Expected: zero failures. Engine code should not have changed, so the engine gate proves compatibility.
+预期：零失败。引擎代码不应发生变化，因此引擎门禁可证明兼容性。
 
-- [ ] **Step 2: Generate both modes outside Git**
+- [ ] **步骤 2：在 Git 之外生成两种模式**
 
-Use an environment variable for the controlled source:
+使用环境变量指定受控源：
 
 ```bash
 test -n "$ICE3_CONTROLLED_GLB"
@@ -1458,36 +1458,36 @@ node packages/cli/dist/main.js partition "$ICE3_CONTROLLED_GLB" \
   --json
 ```
 
-Record only aggregate statistics from both JSON reports.
+仅记录两个 JSON 报告中的汇总统计。
 
-- [ ] **Step 3: Evaluate the acceptance gate**
+- [ ] **步骤 3：评估验收门禁**
 
-Require:
+要求：
 
-- `oversizedCoarseChunks === 0`.
-- Every coarse Tile stays within `maxTrianglesPerProxy`.
-- Adaptive `maximumErrorMeters` or the high-percentile unit error is below proportional.
-- Adaptive total coarse triangles do not exceed the configured budget.
-- Generated coarse GLBs pass `validate` and the engine can load the Tileset.
-- No page error or failed request occurs in Chromium or WebKit.
+- `oversizedCoarseChunks === 0`。
+- 每个粗模 Tile 均保持在 `maxTrianglesPerProxy` 以内。
+- 自适应 `maximumErrorMeters` 或高百分位单元误差低于 proportional。
+- 自适应粗模三角形总数不超过配置预算。
+- 生成的粗模 GLB 通过 `validate`，且引擎能够加载 Tileset。
+- Chromium 或 WebKit 中均无页面错误或失败请求。
 
-If the adaptive result does not improve fidelity, keep `proportional` as the default and document the measured reason.
+如果自适应结果没有提高保真度，则保留 `proportional` 作为默认模式，并记录实测原因。
 
-- [ ] **Step 4: Update the shared contract**
+- [ ] **步骤 4：更新共享契约**
 
-In `ice3-doc/docs/contracts/asset-preparation-contract-v1.md`, document:
+在 `ice3-doc/docs/contracts/asset-preparation-contract-v1.md` 中记录：
 
-- `allocationMode`.
-- `curveSamples`.
-- Adaptive allocation statistics.
-- `proportional` compatibility guarantee.
-- The rule that adaptive allocation never changes the Tileset schema.
+- `allocationMode`。
+- `curveSamples`。
+- 自适应分配统计。
+- `proportional` 兼容性保证。
+- 自适应分配绝不更改 Tileset schema 的规则。
 
-In `ice3-toolchain/README.md`, document how adaptive curves are generated, cached, spilled, and cleaned.
+在 `ice3-toolchain/README.md` 中记录自适应曲线的生成、缓存、溢出和清理方式。
 
-- [ ] **Step 5: Audit sensitive and naming constraints**
+- [ ] **步骤 5：审查敏感信息和命名约束**
 
-Run:
+运行：
 
 ```bash
 git status --porcelain=v1
@@ -1495,17 +1495,17 @@ git grep -I -n 'CONTROLLED_ASSET_NAME' -- . ':!package-lock.json' || true
 git ls-files '*.glb' '*.gltf' '*.bin' | wc -l
 ```
 
-Expected:
+预期：
 
-- No controlled source or derived output appears.
-- No customer identifier appears.
-- Tracked model fixtures are only reviewed synthetic assets.
+- 不出现受控源或派生输出。
+- 不出现客户标识符。
+- 跟踪的模型 fixture 仅为已审查的合成 Asset。
 
-- [ ] **Step 6: Remove temporary output**
+- [ ] **步骤 6：移除临时输出**
 
-After recording aggregate results, delete the exact `mktemp` directory created in Step 2. Do not use a broad directory target.
+记录汇总结果后，删除步骤 2 中创建的确切 `mktemp` 目录。不要使用宽泛的目录目标。
 
-- [ ] **Step 7: Run final verification**
+- [ ] **步骤 7：运行最终验证**
 
 ```bash
 cd ../ice3-toolchain
@@ -1519,13 +1519,13 @@ npm run verify
 npm pack --workspaces --dry-run --json
 ```
 
-Expected:
+预期：
 
-- All tests pass.
-- No model-like files appear in package listings.
-- Git worktrees are clean after committing documentation changes.
+- 所有测试均通过。
+- 包列表中不出现类似模型的文件。
+- 提交文档更改后 Git 工作树干净。
 
-- [ ] **Step 8: Commit the final documentation**
+- [ ] **步骤 8：提交最终文档**
 
 ```bash
 cd ../ice3-doc
@@ -1537,7 +1537,7 @@ git add README.md
 git commit -m "docs: describe adaptive lod generation"
 ```
 
-## Related Documents
+## 相关文档
 
-- `ICE3-DOC-IDX-001` — [Documentation index](../README.md)
-- `ICE3-DOC-SPEC-001` — [Adaptive Industrial LOD specification](../specs/2026-10-27-adaptive-industrial-lod-design.md)
+- `ICE3-DOC-IDX-001` — [文档索引](../README.md)
+- `ICE3-DOC-SPEC-001` — [自适应工业 LOD 规范](../specs/2026-10-27-adaptive-industrial-lod-design.md)

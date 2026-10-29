@@ -1,22 +1,22 @@
-# 高可信度污水处理厂三维资产生成 Implementation Plan
+# 高可信度污水处理厂三维资产生成实施计划
 
 > Document ID: ICE3-DOC-PLAN-012
 >
 > Status: Implemented
 >
-> Owner: ICE3 architecture maintainers
+> Owner: ICE3 架构维护者
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **供智能代理工作者使用：** 需要使用子技能：`superpowers:subagent-driven-development`（推荐）或逐项执行本计划的 `superpowers:executing-plans`。步骤使用复选框（`- [ ]`）跟踪。
 
-**Goal:** 用固定版本的成熟三维建模工具替换手写三角面生成器，生成可用于客户演示的虚构污水厂 GLB，同时保留现有 ICE3 预处理、拆分、LOD、合批和选择链路。
+**目标：** 用固定版本的成熟三维建模工具替换手写三角面生成器，生成可用于客户演示的虚构污水厂 GLB，同时保留现有 ICE3 预处理、拆分、LOD、合批和选择链路。
 
-**Architecture:** TypeScript 继续维护设备、工艺、位置和区域数据，并导出稳定的构建 JSON。Blender 5.2.3 无界面 Python 脚本读取 JSON，生成分层几何、材质和语义属性，导出标准 GLB；现有预处理和 Tileset 流水线消费该 GLB。
+**架构：** TypeScript 继续维护设备、工艺、位置和区域数据，并导出稳定的构建 JSON。Blender 5.2.3 无界面 Python 脚本读取 JSON，生成分层几何、材质和语义属性，导出标准 GLB；现有预处理和 Tileset 流水线消费该 GLB。
 
-**Tech Stack:** Node.js 24.22.1 LTS、TypeScript 7、Blender 5.2.3 Python API、glTF 2.0、现有 ICE3 预处理 CLI、Node.js 测试运行器、Playwright、WebGL2
+**技术栈：** Node.js 24.22.1 LTS、TypeScript 7、Blender 5.2.3 Python API、glTF 2.0、现有 ICE3 预处理 CLI、Node.js 测试运行器、Playwright、WebGL2
 
-**Spec:** `../specs/2026-10-28-credible-wastewater-blender-pipeline-design.md`
+**规格：** `../specs/2026-10-28-credible-wastewater-blender-pipeline-design.md`
 
-## Global Constraints
+## 全局约束
 
 - Blender 固定版本为 `5.2.3`；其他版本必须明确失败。
 - Blender 仅用于构建期资产生成，不得进入浏览器运行时。
@@ -30,7 +30,7 @@
 - 不实现 Agent、Prompt 或 AI 专用接口。
 - 只在特性分支开发，测试通过后合入 `main`。
 
-## Review Focus
+## 审查重点
 
 - Blender 缺失或版本不符时必须停止生成并保留旧资产，不能回退到旧几何生成器。
 - GLB 导出必须保留每个设备的 `extras.ice3` 语义对象，分区后仍能选择设备。
@@ -40,7 +40,7 @@
 
 ---
 
-## File Structure
+## 文件结构
 
 ### 文档仓库
 
@@ -87,21 +87,21 @@
 
 ---
 
-### Task 1: Install and Pin Blender
+### 任务 1：安装并固定 Blender 版本
 
-**Files:**
-- Create: `tools/wastewater-plant/blender-runtime.ts`
-- Test: `tests/wastewater/blender-runtime.test.ts`
-- Modify: `README.md`
+**文件：**
+- 创建：`tools/wastewater-plant/blender-runtime.ts`
+- 测试：`tests/wastewater/blender-runtime.test.ts`
+- 修改：`README.md`
 
-**Interfaces:**
-- Produces:
+**接口：**
+- 产出：
   - `SUPPORTED_BLENDER_VERSION = '5.2.3'`
   - `resolveBlenderBinary(explicitPath?: string): string`
   - `readBlenderVersion(binary: string): { version: string; major: number; minor: number; patch: number }`
   - `assertSupportedBlender(binary: string): void`
 
-- [ ] **Step 1: Write the failing test**
+- [ ] **步骤 1：编写失败的测试**
 
 ```ts
 import { test } from 'node:test';
@@ -120,7 +120,7 @@ test('uses the pinned Blender installation', () => {
 });
 ```
 
-- [ ] **Step 2: Run the focused test to verify RED**
+- [ ] **步骤 2：运行聚焦测试并验证 RED**
 
 ```bash
 cd ../ice3-toolchain
@@ -128,18 +128,18 @@ source ~/.nvm/nvm.sh && nvm use 24
 node scripts/run-tests.mjs tests/wastewater/blender-runtime.test.ts
 ```
 
-Expected: FAIL because `blender-runtime.ts` does not exist.
+预期：FAIL，因为 `blender-runtime.ts` 不存在。
 
-- [ ] **Step 3: Install the approved build-time tool**
+- [ ] **步骤 3：安装经批准的构建时工具**
 
 ```bash
 brew install --cask blender
 /Applications/Blender.app/Contents/MacOS/Blender --version
 ```
 
-Expected: the installed version is `5.2.3`.
+预期：安装的版本为 `5.2.3`。
 
-- [ ] **Step 4: Implement version resolution**
+- [ ] **步骤 4：实现版本解析**
 
 ```ts
 import { execFileSync } from 'node:child_process';
@@ -180,24 +180,24 @@ export function assertSupportedBlender(binary: string): void {
 }
 ```
 
-- [ ] **Step 5: Run the focused test to verify GREEN**
+- [ ] **步骤 5：运行聚焦测试并验证 GREEN**
 
 ```bash
 node scripts/run-tests.mjs tests/wastewater/blender-runtime.test.ts
 ```
 
-Expected: `1/1` pass.
+预期：`1/1` 通过。
 
-- [ ] **Step 6: Document the build prerequisite**
+- [ ] **步骤 6：记录构建先决条件**
 
-Add to `README.md`:
+添加到 `README.md`：
 
 ```markdown
 Building the virtual wastewater source GLB requires Blender 5.2.3.
 Set `BLENDER_BIN` when it is installed outside the standard macOS path.
 ```
 
-- [ ] **Step 7: Commit**
+- [ ] **步骤 7：提交**
 
 ```bash
 git add README.md tests/wastewater/blender-runtime.test.ts \
@@ -207,14 +207,14 @@ git commit -m "build(toolchain): pin the wastewater model generator"
 
 ---
 
-### Task 2: Export a Stable Scene Specification
+### 任务 2：导出稳定的场景规格
 
-**Files:**
-- Create: `tools/wastewater-plant/scene-spec.ts`
-- Test: `tests/wastewater/scene-spec.test.ts`
-- Modify: `package.json`
+**文件：**
+- 创建：`tools/wastewater-plant/scene-spec.ts`
+- 测试：`tests/wastewater/scene-spec.test.ts`
+- 修改：`package.json`
 
-**Interfaces:**
+**接口：**
 
 ```ts
 export interface ICEWastewaterSceneSpec {
@@ -238,16 +238,16 @@ export function writeWastewaterSceneSpec(
 ): Promise<void>;
 ```
 
-Consumes:
+消费：
 - `WASTEWATER_EQUIPMENT`
 - `AREA_NAMES`
 - `MAIN_FLOW_TAGS`
 - `RETURN_FLOW_ROUTES`
 
-Produces:
-- deterministic build JSON consumed by `blender/generate.py`
+产出：
+- 由 `blender/generate.py` 消费的确定性构建 JSON
 
-- [ ] **Step 1: Write the failing test**
+- [ ] **步骤 1：编写失败的测试**
 
 ```ts
 import { mkdtemp, readFile, rm } from 'node:fs/promises';
@@ -281,15 +281,15 @@ test('exports deterministic equipment and process topology', async () => {
 });
 ```
 
-- [ ] **Step 2: Run the test to verify RED**
+- [ ] **步骤 2：运行测试并验证 RED**
 
 ```bash
 node scripts/run-tests.mjs tests/wastewater/scene-spec.test.ts
 ```
 
-Expected: FAIL because `scene-spec.ts` does not exist.
+预期：FAIL，因为 `scene-spec.ts` 不存在。
 
-- [ ] **Step 3: Implement deterministic serialization**
+- [ ] **步骤 3：实现确定性序列化**
 
 ```ts
 import { mkdir, rename, rm, writeFile } from 'node:fs/promises';
@@ -348,13 +348,13 @@ export async function writeWastewaterSceneSpec(
 }
 ```
 
-Add script:
+添加脚本：
 
 ```json
 "generate:wastewater-spec": "node --import tsx tools/wastewater-plant/scene-spec.ts --output"
 ```
 
-- [ ] **Step 4: Add a CLI entry to `scene-spec.ts`**
+- [ ] **步骤 4：向 `scene-spec.ts` 添加 CLI 入口**
 
 ```ts
 if (process.argv[1]?.endsWith('scene-spec.ts')) {
@@ -367,16 +367,16 @@ if (process.argv[1]?.endsWith('scene-spec.ts')) {
 }
 ```
 
-- [ ] **Step 5: Run the focused test and typecheck**
+- [ ] **步骤 5：运行聚焦测试和类型检查**
 
 ```bash
 node scripts/run-tests.mjs tests/wastewater/scene-spec.test.ts
 npm run typecheck:tools
 ```
 
-Expected: both pass.
+预期：两者均通过。
 
-- [ ] **Step 6: Commit**
+- [ ] **步骤 6：提交**
 
 ```bash
 git add package.json tests/wastewater/scene-spec.test.ts \
@@ -386,16 +386,16 @@ git commit -m "feat(toolchain): export wastewater build specification"
 
 ---
 
-### Task 3: Bootstrap the Blender Source Generator
+### 任务 3：引导 Blender source 生成器
 
-**Files:**
-- Create: `tools/wastewater-plant/blender/generate.py`
-- Create: `tools/wastewater-plant/blender/export.py`
-- Create: `tools/wastewater-plant/build-blender-source.ts`
-- Create: `tools/wastewater-plant/finalize-source-glb.ts`
-- Test: `tests/wastewater/blender-source.test.ts`
+**文件：**
+- 创建：`tools/wastewater-plant/blender/generate.py`
+- 创建：`tools/wastewater-plant/blender/export.py`
+- 创建：`tools/wastewater-plant/build-blender-source.ts`
+- 创建：`tools/wastewater-plant/finalize-source-glb.ts`
+- 测试：`tests/wastewater/blender-source.test.ts`
 
-**Interfaces:**
+**接口：**
 
 - `build-blender-source.ts` CLI:
   - `--output <glb-path>`
@@ -408,7 +408,7 @@ git commit -m "feat(toolchain): export wastewater build specification"
 - `finalize-source-glb.ts`:
   - `finalizeSourceGlb(inputPath: string, outputPath: string): Promise<void>`
 
-- [ ] **Step 1: Write the failing integration test**
+- [ ] **步骤 1：编写失败的集成测试**
 
 ```ts
 import { mkdtemp, rm } from 'node:fs/promises';
@@ -446,15 +446,15 @@ test('exports a valid source GLB with stable equipment roots', async () => {
 });
 ```
 
-- [ ] **Step 2: Run the test to verify RED**
+- [ ] **步骤 2：运行测试并验证 RED**
 
 ```bash
 node scripts/run-tests.mjs tests/wastewater/blender-source.test.ts
 ```
 
-Expected: FAIL because the Blender build entry does not exist.
+预期：FAIL，因为 Blender 构建入口不存在。
 
-- [ ] **Step 3: Implement the Node wrapper**
+- [ ] **步骤 3：实现 Node 包装器**
 
 ```ts
 import { spawnSync } from 'node:child_process';
@@ -502,7 +502,7 @@ try {
 }
 ```
 
-`finalize-source-glb.ts`:
+`finalize-source-glb.ts`：
 
 ```ts
 import { rename, rm, writeFile } from 'node:fs/promises';
@@ -526,9 +526,9 @@ export async function finalizeSourceGlb(
 }
 ```
 
-- [ ] **Step 4: Create the minimal Blender exporter**
+- [ ] **步骤 4：创建最小 Blender 导出器**
 
-`export.py`:
+`export.py`：
 
 ```python
 import bpy
@@ -557,7 +557,7 @@ def export_glb(output_path: str) -> None:
     )
 ```
 
-`generate.py`:
+`generate.py`：
 
 ```python
 import argparse
@@ -599,15 +599,15 @@ for item in spec["equipment"]:
 export_glb(args.output)
 ```
 
-- [ ] **Step 5: Run the focused test**
+- [ ] **步骤 5：运行聚焦测试**
 
 ```bash
 node scripts/run-tests.mjs tests/wastewater/blender-source.test.ts
 ```
 
-Expected: PASS with 65 unique equipment identities.
+预期：PASS，且具有 65 个唯一设备身份。
 
-- [ ] **Step 6: Commit**
+- [ ] **步骤 6：提交**
 
 ```bash
 git add tests/wastewater/blender-source.test.ts \
@@ -620,17 +620,17 @@ git commit -m "feat(toolchain): bootstrap authored wastewater source"
 
 ---
 
-### Task 4: Add Reusable Geometry and Site Construction
+### 任务 4：添加可复用几何和场地构建
 
-**Files:**
-- Create: `tools/wastewater-plant/blender/geometry.py`
-- Create: `tools/wastewater-plant/blender/site.py`
-- Modify: `tools/wastewater-plant/blender/generate.py`
-- Test: `tests/wastewater/blender-source.test.ts`
+**文件：**
+- 创建：`tools/wastewater-plant/blender/geometry.py`
+- 创建：`tools/wastewater-plant/blender/site.py`
+- 修改：`tools/wastewater-plant/blender/generate.py`
+- 测试：`tests/wastewater/blender-source.test.ts`
 
-**Interfaces:**
+**接口：**
 
-`geometry.py`:
+`geometry.py`：
 
 ```python
 def create_material(name: str, color: str, roughness: float = 0.82)
@@ -647,14 +647,14 @@ def add_railing(name: str, start: tuple[float, float],
 def add_ladder(name: str, x: float, y: float, height: float)
 ```
 
-`site.py`:
+`site.py`：
 
 ```python
 def build_site(asset_id: str) -> bpy.types.Collection
 def build_process_pipes(spec: dict) -> bpy.types.Collection
 ```
 
-- [ ] **Step 1: Extend the failing source test**
+- [ ] **步骤 1：扩展失败的 source 测试**
 
 ```ts
 test('creates the complete site envelope and process infrastructure', async () => {
@@ -674,17 +674,17 @@ test('creates the complete site envelope and process infrastructure', async () =
 });
 ```
 
-- [ ] **Step 2: Run RED**
+- [ ] **步骤 2：运行 RED**
 
 ```bash
 node scripts/run-tests.mjs tests/wastewater/blender-source.test.ts
 ```
 
-Expected: FAIL because the site nodes are absent.
+预期：FAIL，因为场地节点不存在。
 
-- [ ] **Step 3: Implement reusable geometry**
+- [ ] **步骤 3：实现可复用几何**
 
-Implement `geometry.py` with actual Blender operations:
+使用实际 Blender 操作实现 `geometry.py`：
 
 ```python
 import bpy
@@ -732,28 +732,28 @@ def add_curve_pipe(name, points, radius):
     return bpy.context.object
 ```
 
-`site.py` uses these helpers to create named collections for ground, roads, perimeter fence, buildings, pipe racks, and process pipes.
+`site.py` 使用这些辅助程序为地面、道路、周界围栏、建筑、管廊和工艺管道创建命名集合。
 
-- [ ] **Step 4: Implement site layout**
+- [ ] **步骤 4：实现场地布局**
 
-Create:
+创建：
 
-- Ground slab covering `x=-24..294` and `z=-68..112`.
-- Main access road, service road, perimeter road, curbs and markings.
-- Fence segments separated by side to prevent scene-wide proxies.
-- Headworks, chemical, blower, dewatering and administration buildings.
-- Five named building groups with walls, doors, windows, roofs, canopies and roof vents.
-- Process pipes following `mainFlowTags` and `returnFlows`, with supports.
+- 覆盖 `x=-24..294` 和 `z=-68..112` 的地面底板。
+- 主入口道路、检修道路、周界道路、路缘和标线。
+- 按侧边拆分的围栏段，以避免整个场景范围的代理对象。
+- 进水、化学、鼓风机、脱水和行政建筑。
+- 五个命名建筑组，包含墙体、门、窗、屋顶、雨棚和屋顶通风口。
+- 沿 `mainFlowTags` 和 `returnFlows` 布置并带有支架的工艺管道。
 
-- [ ] **Step 5: Run focused test**
+- [ ] **步骤 5：运行聚焦测试**
 
 ```bash
 node scripts/run-tests.mjs tests/wastewater/blender-source.test.ts
 ```
 
-Expected: PASS and the exported GLB contains all site groups.
+预期：PASS，且导出的 GLB 包含所有场地分组。
 
-- [ ] **Step 6: Commit**
+- [ ] **步骤 6：提交**
 
 ```bash
 git add tests/wastewater/blender-source.test.ts \
@@ -765,26 +765,26 @@ git commit -m "feat(toolchain): model wastewater site infrastructure"
 
 ---
 
-### Task 5: Build Detailed Water-Treatment Equipment
+### 任务 5：构建详细的水处理设备
 
-**Files:**
-- Create: `tools/wastewater-plant/blender/equipment.py`
-- Modify: `tools/wastewater-plant/blender/generate.py`
-- Test: `tests/wastewater/blender-source.test.ts`
+**文件：**
+- 创建：`tools/wastewater-plant/blender/equipment.py`
+- 修改：`tools/wastewater-plant/blender/generate.py`
+- 测试：`tests/wastewater/blender-source.test.ts`
 
-**Interfaces:**
+**接口：**
 
 ```python
 def build_equipment(item: dict, materials: dict) -> bpy.types.Object
 ```
 
-Each returned object:
-- Uses `item["tag"]` as the object name.
-- Stores the complete `ice3` extras object.
-- Contains one mesh with multiple material slots.
-- Uses sharp/flat shading.
+每个返回对象：
+- 将 `item["tag"]` 用作对象名称。
+- 存储完整的 `ice3` extras 对象。
+- 包含一个具有多个材质槽的网格。
+- 使用锐利/平坦着色。
 
-- [ ] **Step 1: Write failing detailed-equipment tests**
+- [ ] **步骤 1：编写失败的详细设备测试**
 
 ```ts
 test('models distinct process equipment with presentation-grade detail', async () => {
@@ -804,17 +804,17 @@ test('models distinct process equipment with presentation-grade detail', async (
 });
 ```
 
-- [ ] **Step 2: Run RED**
+- [ ] **步骤 2：运行 RED**
 
 ```bash
 node scripts/run-tests.mjs tests/wastewater/blender-source.test.ts
 ```
 
-Expected: FAIL because equipment objects are still placeholder boxes.
+预期：FAIL，因为设备对象仍是占位盒体。
 
-- [ ] **Step 3: Implement water-treatment prototypes**
+- [ ] **步骤 3：实现水处理原型**
 
-Implement these builders in `equipment.py`:
+在 `equipment.py` 中实现这些构建器：
 
 - `build_inlet`
 - `build_bar_screen`
@@ -826,16 +826,16 @@ Implement these builders in `equipment.py`:
 - `build_biological_reactor`
 - `build_circular_clarifier`
 
-Required construction:
+必需的构建内容：
 
-- Circular clarifier uses a beveled annular wall, separate center feed well, half-bridge truss, center drive, two scraper arms, effluent launder, weir, scum baffle, outlet pipe and ladder.
-- Biological reactor uses three compartments, separated water surfaces, one exposed diffuser cell, center walkway, double-rail perimeter, air headers, valves and diffuser discs.
-- Bar screen uses an inclined bar rack, rake assembly, drive, screenings chute and bin.
-- Pumps use base rails, volute, motor, coupling guard, suction and discharge piping.
+- 圆形澄清池使用倒角环形池壁、独立的中心进水井、半桥桁架、中心驱动、两条刮臂、出水槽、堰、浮渣挡板、出水管和梯子。
+- 生物反应池使用三个隔间、分隔的水面、一个外露曝气单元、中心步道、双侧栏杆、空气集管、阀门和曝气盘。
+- 格栅使用倾斜栅架、耙组件、驱动装置、栅渣滑槽和收集箱。
+- 泵使用底轨、蜗壳、电机、联轴器护罩、吸入管和排出管。
 
-- [ ] **Step 4: Join component meshes by equipment**
+- [ ] **步骤 4：按设备合并组件网格**
 
-Use a helper with this contract:
+使用具有以下契约的辅助函数：
 
 ```python
 def join_parts(parts: list[bpy.types.Object], root_name: str) -> bpy.types.Object:
@@ -849,17 +849,17 @@ def join_parts(parts: list[bpy.types.Object], root_name: str) -> bpy.types.Objec
     return joined
 ```
 
-Only the joined root receives `ice3` extras.
+只有合并后的根节点接收 `ice3` extras。
 
-- [ ] **Step 5: Run focused tests**
+- [ ] **步骤 5：运行聚焦测试**
 
 ```bash
 node scripts/run-tests.mjs tests/wastewater/blender-source.test.ts
 ```
 
-Expected: all detail thresholds and identity checks pass.
+预期：所有细节阈值和身份检查均通过。
 
-- [ ] **Step 6: Commit**
+- [ ] **步骤 6：提交**
 
 ```bash
 git add tests/wastewater/blender-source.test.ts \
@@ -870,15 +870,15 @@ git commit -m "feat(toolchain): model detailed water-treatment equipment"
 
 ---
 
-### Task 6: Build Advanced Treatment, Sludge and UV Equipment
+### 任务 6：构建深度处理、污泥和 UV 设备
 
-**Files:**
-- Modify: `tools/wastewater-plant/blender/equipment.py`
-- Test: `tests/wastewater/blender-source.test.ts`
+**文件：**
+- 修改：`tools/wastewater-plant/blender/equipment.py`
+- 测试：`tests/wastewater/blender-source.test.ts`
 
-**Interfaces:**
+**接口：**
 
-Extends `build_equipment(item, materials)` for:
+扩展 `build_equipment(item, materials)`，使其支持：
 
 - `coagulation-basin`
 - `filter-cell`
@@ -896,7 +896,7 @@ Extends `build_equipment(item, materials)` for:
 - `flare`
 - `uv`
 
-- [ ] **Step 1: Add failing equipment-family assertions**
+- [ ] **步骤 1：添加失败的设备族断言**
 
 ```ts
 test('models advanced and sludge equipment with recognizable assemblies', async () => {
@@ -918,46 +918,46 @@ test('models advanced and sludge equipment with recognizable assemblies', async 
 });
 ```
 
-- [ ] **Step 2: Run RED**
+- [ ] **步骤 2：运行 RED**
 
 ```bash
 node scripts/run-tests.mjs tests/wastewater/blender-source.test.ts
 ```
 
-Expected: FAIL because the advanced/sludge detail contract is not complete.
+预期：FAIL，因为深度处理/污泥细节契约尚未完成。
 
-- [ ] **Step 3: Implement the remaining prototypes**
+- [ ] **步骤 3：实现其余原型**
 
-Required construction:
+必需的构建内容：
 
-- Filter cells: multiple compartments, weirs, troughs, grating walkway and backwash headers.
-- Contact basins: serpentine water channels, dividing walls, gates and disinfectant piping.
-- Chemical tanks: storage vessel, dome/roof, bund, mixer, dosing pump, valves and risers.
-- Blowers: skid, enclosure, intake filter, silencer, motor, flexible connector, check valve and discharge header.
-- Dewatering: sludge tank, flocculation tank, mixer, polymer dosing, screw press, spray water and cake conveyor.
-- Digestors: large beveled cylinder, gas dome, maintenance ring, gas pipe and ladder.
-- Flare: stack, tripod support and gas line.
-- UV: open channel, lamp banks, quartz sleeves, wiping frame and control cabinet.
+- 滤池单元：多个隔间、堰、槽、格栅步道和反冲洗集管。
+- 接触池：蛇形水流通道、隔墙、闸门和消毒管道。
+- 化学罐：储罐、穹顶/顶盖、围堰、混合器、加药泵、阀门和立管。
+- 鼓风机：滑橇、外壳、进气过滤器、消声器、电机、柔性连接、止回阀和排出集管。
+- 脱水设备：污泥池、絮凝池、混合器、聚合物加药、螺旋压榨机、喷水和泥饼输送机。
+- 消化池：大型倒角圆柱、气穹、维护环、气体管道和梯子。
+- 火炬：烟囱、三脚支架和气体管线。
+- UV：开放渠道、灯排、石英套管、擦拭框架和控制柜。
 
-- [ ] **Step 4: Add explicit style by equipment category**
+- [ ] **步骤 4：按设备类别添加明确的样式**
 
-Use distinct dimensions and component layouts:
+使用不同的尺寸和组件布局：
 
-- Biological tanks are long and compartmented.
-- Circular clarifiers are cylindrical with radial bridge structures.
-- Chemical devices are vertical vessels inside square bunds.
-- Sludge equipment forms a connected process chain rather than standalone boxes.
-- UV equipment is a linear channel with repeating lamp banks.
+- 生物池呈狭长且分隔的形式。
+- 圆形澄清池呈圆柱形，并带有径向桥架结构。
+- 化学设备是位于方形围堰内的立式容器。
+- 污泥设备形成相互连接的工艺链，而非独立盒体。
+- UV 设备是带有重复灯排的线性渠道。
 
-- [ ] **Step 5: Run focused test**
+- [ ] **步骤 5：运行聚焦测试**
 
 ```bash
 node scripts/run-tests.mjs tests/wastewater/blender-source.test.ts
 ```
 
-Expected: PASS with total triangles between 150,000 and 300,000.
+预期：PASS，且总三角形数在 150,000 到 300,000 之间。
 
-- [ ] **Step 6: Commit**
+- [ ] **步骤 6：提交**
 
 ```bash
 git add tests/wastewater/blender-source.test.ts \
@@ -967,32 +967,32 @@ git commit -m "feat(toolchain): model advanced and sludge treatment equipment"
 
 ---
 
-### Task 7: Replace the Source Generator and Preserve the Asset Pipeline
+### 任务 7：替换 source 生成器并保留资产流水线
 
-**Files:**
-- Modify: `tools/wastewater-plant/build-example.mjs`
-- Modify: `package.json`
-- Delete: `tools/wastewater-plant/assemblies.ts`
-- Delete: `tools/wastewater-plant/primitives.ts`
-- Delete: `tools/wastewater-plant/scene.ts`
-- Delete: `tools/wastewater-plant/generate.ts`
-- Delete: `tests/wastewater/primitives.test.ts`
-- Modify: `tests/wastewater/pipeline.test.ts`
-- Modify: `README.md`
+**文件：**
+- 修改：`tools/wastewater-plant/build-example.mjs`
+- 修改：`package.json`
+- 删除：`tools/wastewater-plant/assemblies.ts`
+- 删除：`tools/wastewater-plant/primitives.ts`
+- 删除：`tools/wastewater-plant/scene.ts`
+- 删除：`tools/wastewater-plant/generate.ts`
+- 删除：`tests/wastewater/primitives.test.ts`
+- 修改：`tests/wastewater/pipeline.test.ts`
+- 修改：`README.md`
 
-**Interfaces:**
+**接口：**
 
-- `npm run build:wastewater-demo` must call:
+- `npm run build:wastewater-demo` 必须调用：
 
 ```text
 build-blender-source.ts --output <staging>/source/wastewater-plant.glb
 ```
 
-- All downstream commands and output paths remain unchanged.
+- 所有下游命令和输出路径保持不变。
 
-- [ ] **Step 1: Update the integration test first**
+- [ ] **步骤 1：先更新集成测试**
 
-Add:
+添加：
 
 ```ts
 test('checked-in source is produced by the pinned authored generator', async () => {
@@ -1006,28 +1006,28 @@ test('checked-in source is produced by the pinned authored generator', async () 
 });
 ```
 
-- [ ] **Step 2: Run RED**
+- [ ] **步骤 2：运行 RED**
 
 ```bash
 node scripts/run-tests.mjs tests/wastewater/pipeline.test.ts
 ```
 
-Expected: FAIL because the checked-in source still reports the previous generator.
+预期：FAIL，因为检入的 source 仍报告先前的生成器。
 
-- [ ] **Step 3: Confirm the stable generator marker**
+- [ ] **步骤 3：确认稳定的生成器标记**
 
-`build-blender-source.ts` already invokes `finalizeSourceGlb()` from Task 3.
-Verify the generated source reports:
+`build-blender-source.ts` 已在任务 3 中调用 `finalizeSourceGlb()`。
+验证生成的 source 报告：
 
 ```text
 ICE3 authored wastewater pipeline
 ```
 
-Keep the marker constant shared between the finalizer and its test.
+保持终结器和其测试共享的标记常量。
 
-- [ ] **Step 4: Switch build commands**
+- [ ] **步骤 4：切换构建命令**
 
-Change:
+更改：
 
 ```json
 "generate:wastewater":
@@ -1036,7 +1036,7 @@ Change:
   "npm run build && node --import tsx tools/wastewater-plant/build-example.mjs"
 ```
 
-Change `build-example.mjs` source generation:
+更改 `build-example.mjs` 的 source 生成：
 
 ```js
 run(process.execPath, [
@@ -1048,34 +1048,34 @@ run(process.execPath, [
 ]);
 ```
 
-- [ ] **Step 5: Remove the obsolete mesh authoring implementation**
+- [ ] **步骤 5：移除过时的网格编写实现**
 
-Delete the old direct geometry files and their no-longer-relevant tests listed above.
-Keep `equipment.ts`, `layout.ts`, `types.ts`, `scene-spec.ts`,
-`blender-runtime.ts`, `finalize-source-glb.ts`, `verify.ts`, and replacement
-tests.
+删除上面列出的旧直接几何文件及不再相关的测试。
+保留 `equipment.ts`、`layout.ts`、`types.ts`、`scene-spec.ts`、
+`blender-runtime.ts`、`finalize-source-glb.ts`、`verify.ts` 和替换后的
+测试。
 
-- [ ] **Step 6: Rebuild source and downstream assets**
+- [ ] **步骤 6：重建 source 和下游资产**
 
 ```bash
 npm run build:wastewater-demo
 ```
 
-Expected:
-- New source GLB is generated by the authored pipeline.
-- All 65 identities survive source and prepared.
-- Fine and coarse outputs contain multiple files.
-- Existing asset validator passes.
+预期：
+- 新的 source GLB 由编写后的流水线生成。
+- 所有 65 个身份在 source 和 prepared 中均保留。
+- 细模和粗模输出包含多个文件。
+- 现有资产验证器通过。
 
-- [ ] **Step 7: Run toolchain verification**
+- [ ] **步骤 7：运行工具链验证**
 
 ```bash
 npm run verify
 ```
 
-Expected: all typechecks and tests pass.
+预期：所有类型检查和测试均通过。
 
-- [ ] **Step 8: Commit**
+- [ ] **步骤 8：提交**
 
 ```bash
 git add README.md package.json tools/wastewater-plant tests/wastewater
@@ -1084,31 +1084,31 @@ git commit -m "feat(toolchain): switch wastewater assets to authored pipeline"
 
 ---
 
-### Task 8: Validate Visual Quality and Runtime Integration
+### 任务 8：验证视觉质量和运行时集成
 
-**Files:**
-- Modify: `ice3-engine/tests/e2e/wastewater-plant.spec.ts` if element positions change
-- Modify: `README.md` and the asset specification when implementation values change
-- Generated: `ice3-engine/examples/m1/assets/wastewater-plant/**`
+**文件：**
+- 如果元素位置发生变化，修改：`ice3-engine/tests/e2e/wastewater-plant.spec.ts`
+- 如果实施值发生变化，修改：`README.md` 和资产规格
+- 生成：`ice3-engine/examples/m1/assets/wastewater-plant/**`
 
-**Interfaces:**
+**接口：**
 
-- Consumes the source GLB produced by Task 7.
-- Produces the final prepared, fine, coarse and Tileset assets.
+- 消费任务 7 生成的 source GLB。
+- 产出最终的 prepared、细模、粗模和 Tileset 资产。
 
-- [ ] **Step 1: Add fixed-camera visual smoke assertions**
+- [ ] **步骤 1：添加固定相机视觉冒烟断言**
 
-Add tests that:
+添加以下测试：
 
-- Load the default virtual plant.
-- Set a total-plant camera pose.
-- Assert at least 60 equipment identities are resident after idle.
-- Set a close camera pose for `SC-101`.
-- Click the projected bridge center and assert the selected ID is exactly
+- 加载默认虚拟污水处理厂。
+- 设置全厂相机姿态。
+- 断言空闲后至少驻留 60 个设备身份。
+- 为 `SC-101` 设置近距相机姿态。
+- 点击投影后的桥中心，并断言选中的 ID 精确为
   `ice3-virtual-wwtp/equipment/SC-101`.
-- Assert the selection panel is visible and contains a non-empty device name.
+- 断言选择面板可见，并包含非空设备名称。
 
-- [ ] **Step 2: Run browser tests**
+- [ ] **步骤 2：运行浏览器测试**
 
 ```bash
 npx playwright test tests/e2e/wastewater-plant.spec.ts \
@@ -1117,9 +1117,9 @@ npx playwright test tests/e2e/wastewater-plant.spec.ts \
   --project=webkit --workers=1 --repeat-each=2
 ```
 
-Expected: all repetitions pass without page errors or failed asset requests.
+预期：所有重复运行均通过，且没有页面错误或失败的资产请求。
 
-- [ ] **Step 3: Validate deterministic authored output**
+- [ ] **步骤 3：验证确定性编写输出**
 
 ```bash
 npm run build:wastewater-demo
@@ -1128,9 +1128,9 @@ npm run build:wastewater-demo
 shasum -a 256 ../ice3-engine/examples/m1/assets/wastewater-plant/source/wastewater-plant.glb
 ```
 
-Expected: identical SHA-256 values.
+预期：SHA-256 值相同。
 
-- [ ] **Step 4: Audit generated assets**
+- [ ] **步骤 4：审计生成的资产**
 
 ```bash
 git status --short
@@ -1139,9 +1139,9 @@ find ../ice3-engine/examples/m1/assets -maxdepth 1 \
   -name '.wastewater-plant.staging-*'
 ```
 
-Expected: no local previews, customer assets or staging directories.
+预期：没有本地预览、客户资产或暂存目录。
 
-- [ ] **Step 5: Run complete verification**
+- [ ] **步骤 5：运行完整验证**
 
 ```bash
 cd ../ice3-toolchain
@@ -1150,38 +1150,37 @@ cd ../ice3-engine
 npm run verify
 ```
 
-Expected:
-- Toolchain tests all pass.
-- Engine unit and integration tests all pass.
-- Chromium and WebKit tests all pass.
+预期：
+- 工具链测试全部通过。
+- 引擎单元和集成测试全部通过。
+- Chromium 和 WebKit 测试全部通过。
 
-- [ ] **Step 6: Capture visual review frames**
+- [ ] **步骤 6：截取视觉审查画面**
 
-Generate synthetic-only screenshots at:
+在以下位置生成仅含合成内容的截图：
 
-- plant overview;
-- secondary clarifier close-up;
-- biological reactor walkway and diffuser detail;
-- sludge dewatering and digester area.
+- 污水厂总览；
+- 二沉池近景；
+- 生物反应池步道和曝气器细节；
+- 污泥脱水和消化池区域。
 
-Review for:
+审查以下方面：
 
-- recognizable process zoning;
-- no floating or interpenetrating components;
-- no disappeared elongated equipment after LOD collapse;
-- no large empty terrain dominating the initial camera.
+- 工艺分区是否清晰可辨；
+- 是否有悬空或相互穿插的组件；
+- LOD 折叠后是否有长条形设备消失；
+- 初始相机是否被大面积空旷地形占据。
 
-- [ ] **Step 7: Commit generated assets and final documentation**
+- [ ] **步骤 7：提交生成的资产和最终文档**
 
 ```bash
 git add examples/m1/assets/wastewater-plant tests/e2e/wastewater-plant.spec.ts
 git commit -m "feat(example): ship authored wastewater plant assets"
 ```
 
-- [ ] **Step 8: Merge feature branches**
+- [ ] **步骤 8：合并功能分支**
 
-Review both feature branches from their recorded merge bases. Merge only after
-all tests and visual checks pass.
+从记录的合并基点审查两个功能分支。仅在所有测试和视觉检查通过后合并。
 
 ```bash
 git switch main
@@ -1189,7 +1188,7 @@ git merge --no-ff feat/blender-wastewater-model
 git merge --no-ff feat/blender-wastewater-demo
 ```
 
-## Related Documents
+## 相关文档
 
-- `ICE3-DOC-IDX-001` — [Documentation index](../README.md)
-- `ICE3-DOC-SPEC-008` — [Wastewater Blender pipeline specification](../specs/2026-10-28-credible-wastewater-blender-pipeline-design.md)
+- `ICE3-DOC-IDX-001` — [文档索引](../README.md)
+- `ICE3-DOC-SPEC-008` — [污水处理 Blender 流水线规格](../specs/2026-10-28-credible-wastewater-blender-pipeline-design.md)

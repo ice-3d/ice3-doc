@@ -6,7 +6,6 @@
 >
 > Owner: ICE3 architecture maintainers
 >
-> English summary: Define camera-driven Tileset request scheduling, residency, prefetching, and bounded scene commits.
 
 | 项目 | 内容 |
 | --- | --- |

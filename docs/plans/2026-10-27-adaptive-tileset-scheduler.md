@@ -1,58 +1,58 @@
-# Adaptive Tileset Scheduler Implementation Plan
+# 自适应 Tileset 调度器实施计划
 
 > Document ID: ICE3-DOC-PLAN-003
 >
 > Status: Implemented
 >
-> Owner: ICE3 architecture maintainers
+> Owner: ICE3 架构维护者
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **面向智能体执行者：** 必需子技能：使用 superpowers:subagent-driven-development（推荐）或 superpowers:executing-plans 按任务逐步实施本计划。步骤使用复选框（`- [ ]`）语法跟踪。
 
-**Goal:** Replace eager all-tile loading with a camera-driven resident work set that culls, prefetches, commits, and unloads Tileset partitions under explicit limits.
+**目标：** 用由相机驱动的驻留工作集替换全量即时 Tile 加载，在明确限制下对 Tileset 分区执行剔除、预取、提交和卸载。
 
-**Architecture:** A pure core frustum and runtime work-set planner decide which tiles are visible, useful for prefetch, or safe to evict. The Tileset handle owns bounded network and commit queues, keeps every partition under a removable container, and recalculates the work set after camera or viewport changes.
+**架构：** 纯核心视锥和运行时工作集规划器决定哪些 Tile 可见、适合预取或可安全驱逐。Tileset 句柄负责有界网络队列和提交队列，将每个分区置于可移除容器下，并在相机或视口变化后重新计算工作集。
 
-**Tech Stack:** TypeScript 7, Node.js 24.22.1 LTS, WebGL2, Node.js test runner, Playwright, OGC 3D Tiles 1.1, ICE3 core/runtime packages.
+**技术栈：** TypeScript 7、Node.js 24.22.1 LTS、WebGL2、Node.js 测试运行器、Playwright、OGC 3D Tiles 1.1、ICE3 core/runtime 包。
 
-**Spec:** `../specs/2026-10-27-adaptive-tileset-scheduler-design.md`
+**规范：** `../specs/2026-10-27-adaptive-tileset-scheduler-design.md`
 
-## Global Constraints
+## 全局约束
 
-- Use Node.js 24.22.1 LTS from `.nvmrc`.
-- Develop on `feature/adaptive-tileset-scheduler`; merge to `main` only after the full gate passes.
-- Follow RED-GREEN-REFACTOR for every behavior change.
-- Do not use competitor, vendor, or third-party product names in code, comments, documentation, tests, diagnostics, or commit messages.
-- Do not expose a real customer model or any derived partition in Git, test fixtures, screenshots, logs, or packages.
-- Keep the existing OGC 3D Tiles 1.1 format and Prepared GLB content unchanged.
-- Camera is required for Tileset scheduling.
-- Defaults: 2 concurrent tile requests, 24 resident tiles, 256 MiB resident geometry bytes, 10% prefetch margin, 20% unload margin, 1 committed tile per frame.
-- Visible partitions are never omitted to satisfy a residency budget.
-- A partition is always represented by one removable scene container, even with identity transform.
-- Unloading clears selection if the selected node belongs to the removed partition.
-- `whenComplete()` is removed; `whenIdle()` waits for the current work set, not future camera changes.
-- LOD, implicit tiling, parent-content refinement, external tilesets, and `region` remain unsupported.
-- Do not add runtime dependencies.
+- 使用 `.nvmrc` 指定的 Node.js 24.22.1 LTS。
+- 在 `feature/adaptive-tileset-scheduler` 分支上开发；仅在完整门禁通过后合入 `main`。
+- 每项行为变更都遵循 RED-GREEN-REFACTOR。
+- 不要在代码、注释、文档、测试、诊断或提交消息中使用竞品、厂商或第三方产品名称。
+- 不要在 Git、测试 fixture、截图、日志或包中暴露真实客户模型或任何派生分区。
+- 保持现有 OGC 3D Tiles 1.1 格式和 Prepared GLB 内容不变。
+- Tileset 调度需要相机。
+- 默认值：2 个并发 Tile 请求、24 个驻留 Tile、256 MiB 驻留几何字节、10% 预取边距、20% 卸载边距、每帧提交 1 个 Tile。
+- 绝不为了满足驻留预算而省略可见分区。
+- 即使使用单位变换，每个分区也始终由一个可移除场景容器表示。
+- 如果选中的 Node 属于被移除的分区，卸载会清除 Selection。
+- `whenComplete()` 已移除；`whenIdle()` 等待当前工作集，不等待未来的相机变化。
+- LOD、隐式 tiling、父内容细化、外部 tilesets 和 `region` 仍不受支持。
+- 不要添加运行时依赖。
 
-## Review Focus
+## 审查重点
 
-- A visible set larger than `maxResidentTiles` must continue to load completely; budget pressure may warn but must never create undisplayed visible equipment.
-- A camera change while tiles are loading or waiting to commit must discard stale queued work without creating orphaned nodes or retaining old cache entries.
-- Resizing the viewport changes the frustum aspect and must invalidate the previous work set even when camera position and target are unchanged.
-- Unloading the partition containing the selected device must clear selection before disposal so picking and the selection panel cannot reference a disposed node.
-- A failed offscreen prefetch must remain a tile-local failure and must not turn the whole Tileset into a fatal error.
+- 大于 `maxResidentTiles` 的可见集必须继续完整加载；预算压力可以发出警告，但绝不能导致可见设备无法显示。
+- 在 Tile 正在加载或等待提交时发生相机变化，必须丢弃过期排队工作，且不得创建孤立 Node 或保留旧缓存条目。
+- 即使相机位置和目标不变，调整视口大小仍会改变视锥宽高比，因此必须使先前的工作集失效。
+- 卸载包含选中设备的分区时，必须在处置前清除 Selection，使拾取和 Selection 面板无法引用已处置的 Node。
+- 离屏预取失败必须保持为 Tile 局部失败，不得使整个 Tileset 变成致命错误。
 
 ---
 
-### Task 1: Core Frustum Bounds Testing
+### 任务 1：核心视锥边界测试
 
-**Files:**
-- Create: `ice3-engine/packages/core/src/culling/ICEFrustum.ts`
-- Create: `ice3-engine/packages/core/tests/ICEFrustum.test.ts`
-- Modify: `ice3-engine/packages/core/src/index.ts`
+**文件：**
+- 新建：`ice3-engine/packages/core/src/culling/ICEFrustum.ts`
+- 新建：`ice3-engine/packages/core/tests/ICEFrustum.test.ts`
+- 修改：`ice3-engine/packages/core/src/index.ts`
 
-**Interfaces:**
-- Consumes: `ICEMatrix4`, `ICEGeometryBounds`.
-- Produces:
+**接口：**
+- 使用：`ICEMatrix4`、`ICEGeometryBounds`。
+- 产出：
 
 ```ts
 export class ICEFrustum {
@@ -61,9 +61,9 @@ export class ICEFrustum {
 }
 ```
 
-- [ ] **Step 1: Write failing frustum tests**
+- [ ] **步骤 1：编写失败的视锥测试**
 
-Create `packages/core/tests/ICEFrustum.test.ts`:
+创建 `packages/core/tests/ICEFrustum.test.ts`：
 
 ```ts
 import { test } from 'node:test';
@@ -116,7 +116,7 @@ test('handles flat and point bounds deterministically', () => {
 });
 ```
 
-- [ ] **Step 2: Run RED**
+- [ ] **步骤 2：运行 RED**
 
 ```bash
 cd ../ice3-engine
@@ -124,11 +124,11 @@ nvm use
 npm test -- packages/core/tests/ICEFrustum.test.ts
 ```
 
-Expected: FAIL because `ICEFrustum` does not exist.
+预期：失败，因为 `ICEFrustum` 尚不存在。
 
-- [ ] **Step 3: Implement core frustum extraction**
+- [ ] **步骤 3：实现核心视锥提取**
 
-Implement six normalized planes from view-projection rows:
+从视图投影矩阵行实现六个规范化平面：
 
 ```text
 left   = row4 + row1
@@ -139,22 +139,20 @@ near   = row4 + row3
 far    = row4 - row3
 ```
 
-Use the positive vertex of the AABB for each plane. Return `false` when the
-positive vertex is outside by more than `margin`. Validate finite bounds and
-reject negative margin.
+对每个平面使用 AABB 的正顶点。当正顶点超出 `margin` 时返回 `false`。验证边界为有限值，并拒绝负边距。
 
-Export from `packages/core/src/index.ts`.
+从 `packages/core/src/index.ts` 导出。
 
-- [ ] **Step 4: Verify GREEN**
+- [ ] **步骤 4：验证 GREEN**
 
 ```bash
 npm test -- packages/core/tests/ICEFrustum.test.ts
 npm test
 ```
 
-Expected: all pass.
+预期：全部通过。
 
-- [ ] **Step 5: Commit**
+- [ ] **步骤 5：提交**
 
 ```bash
 git add packages/core/src/culling/ICEFrustum.ts \
@@ -164,17 +162,16 @@ git commit -m "feat(core): add frustum bounds testing"
 
 ---
 
-### Task 2: Pure Tileset Work-Set Planner
+### 任务 2：纯 Tileset 工作集规划器
 
-**Files:**
-- Create: `ice3-engine/packages/runtime/src/asset/ICETilesetScheduler.ts`
-- Create: `ice3-engine/packages/runtime/tests/TilesetScheduler.test.ts`
-- Modify: `ice3-engine/packages/runtime/src/index.ts`
+**文件：**
+- 新建：`ice3-engine/packages/runtime/src/asset/ICETilesetScheduler.ts`
+- 新建：`ice3-engine/packages/runtime/tests/TilesetScheduler.test.ts`
+- 修改：`ice3-engine/packages/runtime/src/index.ts`
 
-**Interfaces:**
-- Consumes: `ICEFrustum`, camera, viewport, asset bounds, Tileset tiles, and
-  resident tile byte estimates.
-- Produces:
+**接口：**
+- 使用：`ICEFrustum`、相机、视口、Asset 边界、Tileset Tile 和驻留 Tile 字节估计值。
+- 产出：
 
 ```ts
 export interface ICETilesetSchedulerOptions {
@@ -204,9 +201,9 @@ export class ICETilesetScheduler {
 }
 ```
 
-- [ ] **Step 1: Write failing scheduler tests**
+- [ ] **步骤 1：编写失败的调度器测试**
 
-Create a helper that produces tiles on x = 0, 100, 200:
+创建一个辅助函数，在 x = 0、100、200 处生成 Tile：
 
 ```ts
 import { test } from 'node:test';
@@ -312,40 +309,36 @@ test('changes the visible set when the viewport aspect changes', () => {
 });
 ```
 
-- [ ] **Step 2: Run RED**
+- [ ] **步骤 2：运行 RED**
 
 ```bash
 npm test -- packages/runtime/tests/TilesetScheduler.test.ts
 ```
 
-Expected: FAIL because scheduler does not exist.
+预期：失败，因为调度器尚不存在。
 
-- [ ] **Step 3: Implement the pure planner**
+- [ ] **步骤 3：实现纯规划器**
 
-Implement:
+实现：
 
-1. Validate all ratios and budgets before use.
-2. Calculate scene radius from the diagonal of `assetBounds`.
-3. Build frustums with margins
-   `sceneRadius * prefetchMarginRatio` and
-   `sceneRadius * unloadMarginRatio`.
-4. Partition tiles into strict visible, prefetch, and retain sets.
-5. Sort visible first and then by center distance to camera position, with tile
-   ID tie-break.
-6. Combine visible and prefetch for `ordered`.
-7. Set `budgetExceeded` when resident count or bytes exceed configured limits.
-8. Never remove visible tiles because of that flag.
-9. Return immutable arrays and a frozen `retainIds` set wrapper represented as
-   a readonly set backed by a new `Set` on every call.
+1. 使用前验证所有比例和预算。
+2. 根据 `assetBounds` 的对角线计算场景半径。
+3. 使用 `sceneRadius * prefetchMarginRatio` 和 `sceneRadius * unloadMarginRatio` 作为边距构建视锥。
+4. 将 Tile 分为严格可见集、预取集和保留集。
+5. 先按可见优先排序，再按中心到相机位置的距离排序，最后以 Tile ID 作为平局判定。
+6. 将可见和预取 Tile 合并为 `ordered`。
+7. 当驻留数量或字节超过配置限制时设置 `budgetExceeded`。
+8. 绝不因该标志移除可见 Tile。
+9. 返回不可变数组，以及冻结的 `retainIds` 集合包装；该包装表示为只读集合，并在每次调用时由新的 `Set` 支持。
 
-- [ ] **Step 4: Verify GREEN**
+- [ ] **步骤 4：验证 GREEN**
 
 ```bash
 npm test -- packages/runtime/tests/TilesetScheduler.test.ts
 npm test
 ```
 
-- [ ] **Step 5: Commit**
+- [ ] **步骤 5：提交**
 
 ```bash
 git add packages/runtime/src/asset/ICETilesetScheduler.ts \
@@ -355,20 +348,20 @@ git commit -m "feat(runtime): plan camera-driven tile work sets"
 
 ---
 
-### Task 3: Per-URL Asset Cache Release
+### 任务 3：按 URL 释放 Asset 缓存
 
-**Files:**
-- Modify: `ice3-engine/packages/runtime/src/asset/ICEAssetLoader.ts`
-- Modify: `ice3-engine/packages/runtime/tests/AssetLoader.test.ts`
+**文件：**
+- 修改：`ice3-engine/packages/runtime/src/asset/ICEAssetLoader.ts`
+- 修改：`ice3-engine/packages/runtime/tests/AssetLoader.test.ts`
 
-**Interfaces:**
-- Extends `ICEAssetLoader.clear(url?: string): void`.
-- With no argument, preserves current behavior and clears all cached URLs.
-- With a URL, removes only that URL and its legacy warning marker.
+**接口：**
+- 扩展 `ICEAssetLoader.clear(url?: string): void`。
+- 不传参数时保留当前行为，清除所有已缓存 URL。
+- 传入 URL 时，仅移除该 URL 及其 legacy 警告标记。
 
-- [ ] **Step 1: Write the failing cache test**
+- [ ] **步骤 1：编写失败的缓存测试**
 
-Append:
+追加：
 
 ```ts
 it('clears one cached URL without clearing another', async () => {
@@ -386,18 +379,17 @@ it('clears one cached URL without clearing another', async () => {
 });
 ```
 
-- [ ] **Step 2: Run RED**
+- [ ] **步骤 2：运行 RED**
 
 ```bash
 npm test -- packages/runtime/tests/AssetLoader.test.ts -t "clears one"
 ```
 
-Expected: FAIL because `clear` ignores the URL argument and fetch is called four
-times as each cleared load is distinct.
+预期：失败，因为 `clear` 忽略 URL 参数，并且由于每次清除后的加载都不同，fetch 被调用四次。
 
-- [ ] **Step 3: Implement selective clear**
+- [ ] **步骤 3：实现选择性清除**
 
-Change `clear` to:
+将 `clear` 改为：
 
 ```ts
 clear(url?: string): void {
@@ -411,7 +403,7 @@ clear(url?: string): void {
 }
 ```
 
-- [ ] **Step 4: Verify GREEN and commit**
+- [ ] **步骤 4：验证 GREEN 并提交**
 
 ```bash
 npm test -- packages/runtime/tests/AssetLoader.test.ts
@@ -423,25 +415,24 @@ git commit -m "feat(runtime): release individual asset cache entries"
 
 ---
 
-### Task 4: Camera-Driven Tileset State and Resident Containers
+### 任务 4：相机驱动的 Tileset 状态和驻留容器
 
-**Files:**
-- Modify: `ice3-engine/packages/runtime/src/asset/ICETilesetLoader.ts`
-- Modify: `ice3-engine/packages/runtime/tests/TilesetLoader.test.ts`
-- Modify: `ice3-engine/examples/m1/global.d.ts`
-- Modify: `ice3-engine/docs/api/m1.md`
+**文件：**
+- 修改：`ice3-engine/packages/runtime/src/asset/ICETilesetLoader.ts`
+- 修改：`ice3-engine/packages/runtime/tests/TilesetLoader.test.ts`
+- 修改：`ice3-engine/examples/m1/global.d.ts`
+- 修改：`ice3-engine/docs/api/m1.md`
 
-**Interfaces:**
-- `ICETilesetLoaderOptions.camera` becomes required.
-- Extends state with `'evicted'`.
-- Extends stats with `visible`, `resident`, `residentBytes`, `evicted`.
-- Replaces `whenComplete()` with `whenIdle()`.
-- Every committed tile is always wrapped by
-  `${assetId}:tile:${tileId}`.
+**接口：**
+- `ICETilesetLoaderOptions.camera` 变为必填。
+- 扩展状态，增加 `'evicted'`。
+- 扩展统计，增加 `visible`、`resident`、`residentBytes`、`evicted`。
+- 用 `whenIdle()` 替换 `whenComplete()`。
+- 每个已提交 Tile 始终由 `${assetId}:tile:${tileId}` 包装。
 
-- [ ] **Step 1: Update loader tests for required camera and work-set stats**
+- [ ] **步骤 1：更新加载器测试，覆盖必填相机和工作集统计**
 
-Give every `ICETilesetLoader` construction in the test file a camera. Add:
+为测试文件中的每个 `ICETilesetLoader` 构造传入相机。添加：
 
 ```ts
 it('uses one removable container per committed partition', async () => {
@@ -472,18 +463,17 @@ it('uses one removable container per committed partition', async () => {
 });
 ```
 
-- [ ] **Step 2: Run RED**
+- [ ] **步骤 2：运行 RED**
 
 ```bash
 npm test -- packages/runtime/tests/TilesetLoader.test.ts -t "removable container"
 ```
 
-Expected: FAIL because identity-transform partitions are currently added as
-multiple scene roots and `whenIdle` does not exist.
+预期：失败，因为单位变换分区当前会作为多个场景根添加，且 `whenIdle` 尚不存在。
 
-- [ ] **Step 3: Refactor tile ownership**
+- [ ] **步骤 3：重构 Tile 所有权**
 
-Implement an internal record:
+实现内部记录：
 
 ```ts
 interface ICEResidentTile {
@@ -494,18 +484,15 @@ interface ICEResidentTile {
 }
 ```
 
-Maintain `resident: Map<string, ICEResidentTile>` and always create a container
-with identity or tile transform. Move all GLB roots under that container.
+维护 `resident: Map<string, ICEResidentTile>`，并始终创建使用单位变换或 Tile 变换的容器。将所有 GLB 根移入该容器下。
 
-Compute a tile's bytes from its unique geometry TypedArrays before releasing the
-temporary GLB handle. Track the sum in `residentBytes`.
+在释放临时 GLB 句柄前，根据 Tile 唯一几何 TypedArray 计算其字节数。在 `residentBytes` 中跟踪总和。
 
-Update states for all tiles to `evicted` initially; scheduling changes desired
-but not loaded tiles to `pending`.
+初始将所有 Tile 状态更新为 `evicted`；调度会将期望但尚未加载的 Tile 改为 `pending`。
 
-- [ ] **Step 4: Add `whenIdle` without changing network behavior**
+- [ ] **步骤 4：添加 `whenIdle`，同时不改变网络行为**
 
-Implement waiter records containing the IDs being awaited:
+实现包含所等待 ID 的 waiter 记录：
 
 ```ts
 interface ICEIdleWaiter {
@@ -514,11 +501,9 @@ interface ICEIdleWaiter {
 }
 ```
 
-`whenIdle()` resolves when none of its watched IDs is pending, loading, or in the
-commit queue. A camera change that queues unrelated IDs must not extend an older
-waiter.
+当其监视的 ID 均不处于 pending、loading 或提交队列中时，`whenIdle()` 完成。使无关 ID 排队的相机变化不得延长较早的 waiter。
 
-- [ ] **Step 5: Verify GREEN**
+- [ ] **步骤 5：验证 GREEN**
 
 ```bash
 npm test -- packages/runtime/tests/TilesetLoader.test.ts
@@ -526,9 +511,9 @@ npm run typecheck
 npm test
 ```
 
-Expected: all pass after tests that referenced `whenComplete` use `whenIdle`.
+预期：引用 `whenComplete` 的测试改为使用 `whenIdle` 后，全部通过。
 
-- [ ] **Step 6: Commit**
+- [ ] **步骤 6：提交**
 
 ```bash
 git add packages/runtime/src/asset/ICETilesetLoader.ts \
@@ -539,16 +524,16 @@ git commit -m "feat(runtime): track resident tileset containers"
 
 ---
 
-### Task 5: Camera Updates, Bounded Queues, and Dynamic Unload
+### 任务 5：相机更新、有界队列和动态卸载
 
-**Files:**
-- Modify: `ice3-engine/packages/runtime/src/asset/ICETilesetLoader.ts`
-- Modify: `ice3-engine/packages/runtime/tests/TilesetLoader.test.ts`
-- Modify: `ice3-engine/docs/diagnostics.md`
+**文件：**
+- 修改：`ice3-engine/packages/runtime/src/asset/ICETilesetLoader.ts`
+- 修改：`ice3-engine/packages/runtime/tests/TilesetLoader.test.ts`
+- 修改：`ice3-engine/docs/diagnostics.md`
 
-**Interfaces:**
-- Consumes: `ICETilesetScheduler`.
-- Produces loader options:
+**接口：**
+- 使用：`ICETilesetScheduler`。
+- 产出加载器选项：
 
 ```ts
 maxConcurrentTiles?: number;
@@ -559,9 +544,9 @@ unloadMarginRatio?: number;
 maxCommitsPerFrame?: number;
 ```
 
-- [ ] **Step 1: Write failing view-change and unload tests**
+- [ ] **步骤 1：编写失败的视图变化和卸载测试**
 
-Use a request response map with tile-specific GLBs and camera poses:
+使用包含特定 Tile GLB 和相机姿态的请求响应映射：
 
 ```ts
 it('unloads a partition after the camera leaves it', async () => {
@@ -600,7 +585,7 @@ it('unloads a partition after the camera leaves it', async () => {
 });
 ```
 
-Add the stale-idle test:
+添加过期空闲测试：
 
 ```ts
 it('does not extend an older idle wait after the camera changes', async () => {
@@ -636,7 +621,7 @@ it('does not extend an older idle wait after the camera changes', async () => {
 });
 ```
 
-Add the visible-over-budget test:
+添加可见内容超出预算测试：
 
 ```ts
 it('keeps all visible tiles when the soft resident budget is exceeded', async () => {
@@ -673,7 +658,7 @@ it('keeps all visible tiles when the soft resident budget is exceeded', async ()
 });
 ```
 
-Add the offscreen-prefetch failure test:
+添加离屏预取失败测试：
 
 ```ts
 it('keeps an offscreen prefetch failure local to that tile', async () => {
@@ -710,39 +695,35 @@ it('keeps an offscreen prefetch failure local to that tile', async () => {
 });
 ```
 
-- [ ] **Step 2: Run RED**
+- [ ] **步骤 2：运行 RED**
 
 ```bash
 npm test -- packages/runtime/tests/TilesetLoader.test.ts \
   -t "leaves it|older idle|resident budget|offscreen prefetch"
 ```
 
-Expected: FAIL because loading still consumes the original full list and never
-re-evaluates the camera.
+预期：失败，因为加载仍会消耗原始完整列表，且从不重新评估相机。
 
-- [ ] **Step 3: Integrate the scheduler**
+- [ ] **步骤 3：集成调度器**
 
-Implement:
+实现：
 
-1. Validate all scheduler options in constructor.
-2. Hook `AFTER_RENDER` to queue one asynchronous work-set update.
-3. Compute camera/viewport signature; skip unchanged work.
-4. Pass current resident byte map to `ICETilesetScheduler.update`.
-5. Replace the request queue with the scheduler's ordered visible/prefetch IDs.
-6. Do not enqueue prefetch IDs when `budgetExceeded`, except visible IDs.
-7. Re-check `retainIds` after a tile load completes and before commit.
-8. Discard stale completed candidates, dispose their temporary scene, and clear
-   their URL cache.
+1. 在构造函数中验证所有调度器选项。
+2. 挂接 `AFTER_RENDER`，将一次异步工作集更新排入队列。
+3. 计算相机/视口签名；跳过未变化的工作。
+4. 将当前驻留字节映射传给 `ICETilesetScheduler.update`。
+5. 用调度器排序后的可见/预取 ID 替换请求队列。
+6. 当 `budgetExceeded` 时不要将预取 ID 入队，可见 ID 除外。
+7. Tile 加载完成之后、提交之前重新检查 `retainIds`。
+8. 丢弃过期的已完成候选，处置其临时场景，并清除其 URL 缓存。
 
-- [ ] **Step 4: Implement budget warning**
+- [ ] **步骤 4：实现预算警告**
 
-When real resident count or bytes first exceeds a soft budget, report one
-`ICE3_TILESET_RESIDENT_BUDGET_EXCEEDED` warning. Do not unload visible tiles.
-Reset the warning flag when resident values return below both limits.
+当实际驻留数量或字节首次超过软预算时，报告一次 `ICE3_TILESET_RESIDENT_BUDGET_EXCEEDED` 警告。不要卸载可见 Tile。当驻留值重新低于两项限制时重置警告标志。
 
-- [ ] **Step 5: Implement one-commit-per-frame**
+- [ ] **步骤 5：实现每帧一次提交**
 
-Maintain a commit queue and schedule with:
+维护提交队列并使用以下方式调度：
 
 ```ts
 requestAnimationFrame(() => {
@@ -750,31 +731,27 @@ requestAnimationFrame(() => {
 });
 ```
 
-Commit at most `maxCommitsPerFrame` candidates. After each commit call
-`engine.requestRender('tileset-tile-committed')` once. Tests may stub
-`requestAnimationFrame` with a microtask-backed implementation.
+每帧最多提交 `maxCommitsPerFrame` 个候选。每次提交后调用一次 `engine.requestRender('tileset-tile-committed')`。测试可以使用基于微任务的实现来 stub `requestAnimationFrame`。
 
-- [ ] **Step 6: Implement unload**
+- [ ] **步骤 6：实现卸载**
 
-Before removing a container, collect all descendant IDs. If any intersects
-`engine.getSelection()`, call `engine.setSelection([])`.
+移除容器前，收集所有后代 ID。如果其中任一 ID 与 `engine.getSelection()` 相交，则调用 `engine.setSelection([])`。
 
-Then:
+然后：
 
-1. Remove the container with `dispose: true`.
-2. Delete the resident record.
-3. Subtract its bytes.
-4. Call `assetLoader.clear(contentUri)`.
-5. Set state to `evicted`.
-6. Emit `TILESET_TILE_UNLOADED`.
-7. Request one render.
+1. 以 `dispose: true` 移除容器。
+2. 删除驻留记录。
+3. 减去其字节数。
+4. 调用 `assetLoader.clear(contentUri)`。
+5. 将状态设置为 `evicted`。
+6. 发出 `TILESET_TILE_UNLOADED`。
+7. 请求一次渲染。
 
-- [ ] **Step 7: Remove `whenComplete` and update docs**
+- [ ] **步骤 7：移除 `whenComplete` 并更新文档**
 
-Update API docs, package exports, the example, and all tests to use
-`whenIdle()`. Add the two new diagnostic codes to `docs/diagnostics.md`.
+更新 API 文档、包导出、示例和所有测试，改用 `whenIdle()`。将两个新诊断代码添加到 `docs/diagnostics.md`。
 
-- [ ] **Step 8: Verify GREEN**
+- [ ] **步骤 8：验证 GREEN**
 
 ```bash
 npm test -- packages/runtime/tests/TilesetLoader.test.ts
@@ -782,7 +759,7 @@ npm run typecheck
 npm test
 ```
 
-- [ ] **Step 9: Commit**
+- [ ] **步骤 9：提交**
 
 ```bash
 git add packages/runtime/src/asset/ICETilesetLoader.ts \
@@ -793,27 +770,26 @@ git commit -m "feat(runtime): schedule and unload visible tiles"
 
 ---
 
-### Task 6: Work-Set UI and End-to-End Behavior
+### 任务 6：工作集 UI 和端到端行为
 
-**Files:**
-- Modify: `ice3-engine/examples/m1/main.ts`
-- Modify: `ice3-engine/examples/m1/index.html`
-- Modify: `ice3-engine/examples/m1/styles.css`
-- Modify: `ice3-engine/examples/m1/global.d.ts`
-- Modify: `ice3-engine/tests/e2e/m1.spec.ts`
+**文件：**
+- 修改：`ice3-engine/examples/m1/main.ts`
+- 修改：`ice3-engine/examples/m1/index.html`
+- 修改：`ice3-engine/examples/m1/styles.css`
+- 修改：`ice3-engine/examples/m1/global.d.ts`
+- 修改：`ice3-engine/tests/e2e/m1.spec.ts`
 
-**Interfaces:**
-- Consumes: work-set `stats`, `whenReady()`, `whenIdle()`, and
-  `TILESET_TILE_UNLOADED`.
-- Produces UI text:
+**接口：**
+- 使用：工作集 `stats`、`whenReady()`、`whenIdle()` 和 `TILESET_TILE_UNLOADED`。
+- 产出 UI 文本：
 
 ```text
 驻留 3 · 可见 1 · 预取中 1 · 总计 4
 ```
 
-- [ ] **Step 1: Write failing E2E work-set tests**
+- [ ] **步骤 1：编写失败的 E2E 工作集测试**
 
-Add a camera-pose test helper to `window.__ice3M1`:
+向 `window.__ice3M1` 添加相机姿态测试辅助函数：
 
 ```ts
 setCameraPose(
@@ -822,7 +798,7 @@ setCameraPose(
 ): void;
 ```
 
-Add:
+添加：
 
 ```ts
 test('loads and unloads with the visible work set', async ({ page }) => {
@@ -848,38 +824,36 @@ test('loads and unloads with the visible work set', async ({ page }) => {
 });
 ```
 
-Add a test that zooms while focus is on an object, then verifies its selection is
-cleared after moving to another region.
+添加一个测试：在焦点位于某个对象上时进行缩放，然后验证移动到另一个区域后其 Selection 已被清除。
 
-- [ ] **Step 2: Run RED**
+- [ ] **步骤 2：运行 RED**
 
 ```bash
 npm run test:e2e -- --project=chromium -g "visible work set"
 ```
 
-Expected: FAIL because the example still displays global completion and has no
-camera-pose helper.
+预期：失败，因为示例仍显示全局完成状态，且没有相机姿态辅助函数。
 
-- [ ] **Step 3: Update the example**
+- [ ] **步骤 3：更新示例**
 
-Implement:
+实现：
 
-1. Progress text uses `驻留 / 可见 / 预取中 / 总计`.
-2. Hide the initial loading overlay after `whenReady`.
-3. Use `whenIdle()` and status `当前视角已就绪`.
-4. On camera movement, status `正在更新当前视角`.
-5. Preserve partial failure status.
-6. Expose `setCameraPose` for deterministic browser verification.
-7. Keep black background, flat color, selection highlight, and info panel.
+1. 进度文本使用 `驻留 / 可见 / 预取中 / 总计`。
+2. 在 `whenReady` 后隐藏初始加载遮罩。
+3. 使用 `whenIdle()`，状态设为 `当前视角已就绪`。
+4. 相机移动时，状态设为 `正在更新当前视角`。
+5. 保留部分失败状态。
+6. 暴露 `setCameraPose`，用于确定性的浏览器验证。
+7. 保留黑色背景、平面颜色、Selection 高亮和信息面板。
 
-- [ ] **Step 4: Verify GREEN**
+- [ ] **步骤 4：验证 GREEN**
 
 ```bash
 npm run test:e2e -- --project=chromium tests/e2e/m1.spec.ts
 npm run typecheck:example
 ```
 
-- [ ] **Step 5: Commit**
+- [ ] **步骤 5：提交**
 
 ```bash
 git add examples/m1 tests/e2e/m1.spec.ts
@@ -888,31 +862,31 @@ git commit -m "feat(example): visualize camera-driven tile work sets"
 
 ---
 
-### Task 7: Full Verification and Real-Asset Quantification
+### 任务 7：完整验证和真实 Asset 量化
 
-**Files:**
-- Modify: `ice3-engine/README.md`
-- Modify: `ice3-engine/docs/api/m1.md`
-- Modify: `ice3-engine/docs/diagnostics.md`
-- Modify: `ice3-doc/docs/contracts/asset-preparation-contract-v1.md`
+**文件：**
+- 修改：`ice3-engine/README.md`
+- 修改：`ice3-engine/docs/api/m1.md`
+- 修改：`ice3-engine/docs/diagnostics.md`
+- 修改：`ice3-doc/docs/contracts/asset-preparation-contract-v1.md`
 
-**Interfaces:**
-- Consumes all prior tasks.
-- Produces final runtime documentation and performance evidence.
+**接口：**
+- 使用所有先前任务。
+- 产出最终运行时文档和性能证据。
 
-- [ ] **Step 1: Document the scheduler**
+- [ ] **步骤 1：记录调度器**
 
-Document:
+记录：
 
-- Required camera.
-- The six options and defaults.
-- Working-set semantics and soft budget.
-- `whenReady()` versus `whenIdle()`.
-- New states and events.
-- No `whenComplete()`.
-- LOD remains future work.
+- 必填相机。
+- 六个选项及其默认值。
+- 工作集语义和软预算。
+- `whenReady()` 与 `whenIdle()` 的区别。
+- 新状态和事件。
+- 不再有 `whenComplete()`。
+- LOD 仍属于未来工作。
 
-- [ ] **Step 2: Run full repository gates**
+- [ ] **步骤 2：运行仓库完整门禁**
 
 ```bash
 cd ../ice3-engine
@@ -921,22 +895,22 @@ npm run verify
 npm pack --workspaces --dry-run
 ```
 
-Expected:
+预期：
 
-- architecture and type checks pass;
-- all existing and new unit tests pass;
-- all Chromium and WebKit E2E tests pass;
-- package dry-run contains no controlled asset.
+- 架构和类型检查通过；
+- 所有现有和新增单元测试通过；
+- 所有 Chromium 和 WebKit E2E 测试通过；
+- 包 dry-run 不包含受控 Asset。
 
-- [ ] **Step 3: Run controlled real-asset work-set measurement**
+- [ ] **步骤 3：运行受控真实 Asset 工作集测量**
 
-Generate the same local real asset into `/tmp/ice3-scheduler-smoke` with:
+使用以下参数将同一本地真实 Asset 生成到 `/tmp/ice3-scheduler-smoke`：
 
 ```bash
 --skip-edges --max-triangles 500000 --max-bytes 33554432
 ```
 
-Use a temporary page and public ICE3 API. Record aggregate values only:
+使用临时页面和公共 ICE3 API。仅记录汇总值：
 
 ```text
 totalPartitions
@@ -950,35 +924,34 @@ timeToFirstVisibleContentMs
 timeToFocusedIdleMs
 ```
 
-Do not print model names, node names, paths, screenshots, or geometry.
+不要打印模型名称、Node 名称、路径、截图或几何。
 
-Expected:
+预期：
 
-- overview may retain more than the soft budget because visible completeness wins;
-- focused resident count is strictly below total partitions;
-- moving away decreases resident count and bytes;
-- no page errors.
+- 总览视图可能保留超过软预算的内容，因为可见完整性优先；
+- 聚焦时的驻留数量严格低于总分区数；
+- 移开后驻留数量和字节数减少；
+- 无页面错误。
 
-- [ ] **Step 4: Clean temporary data and audit the repository**
+- [ ] **步骤 4：清理临时数据并审查仓库**
 
-Delete only `/tmp/ice3-scheduler-smoke`.
+仅删除 `/tmp/ice3-scheduler-smoke`。
 
 ```bash
 git status --short --ignored
 git ls-files | rg -i '\.(glb|gltf|bin)$'
 ```
 
-Expected: only reviewed synthetic fixtures are tracked and no controlled asset
-appears in status, index, history, or package contents.
+预期：仅跟踪已审查的合成 fixture，且受控 Asset 不出现在 status、index、history 或包内容中。
 
-- [ ] **Step 5: Re-run final full gate**
+- [ ] **步骤 5：重新运行最终完整门禁**
 
 ```bash
 npm run verify
 npm pack --workspaces --dry-run
 ```
 
-- [ ] **Step 6: Commit documentation**
+- [ ] **步骤 6：提交文档**
 
 ```bash
 git add README.md docs/api/m1.md docs/diagnostics.md
@@ -990,9 +963,9 @@ git -C ../ice3-doc \
   commit -m "docs: define adaptive tileset runtime behavior"
 ```
 
-- [ ] **Step 7: Merge verified branches**
+- [ ] **步骤 7：合并已验证分支**
 
-After confirming both repositories are clean:
+确认两个仓库均干净后：
 
 ```bash
 git switch main
@@ -1001,16 +974,13 @@ git merge --no-ff feature/adaptive-tileset-scheduler \
 git branch -d feature/adaptive-tileset-scheduler
 ```
 
-Run `npm run verify` once more after the merge.
+合并后再次运行 `npm run verify`。
 
-## Execution Recommendation
+## 执行建议
 
-Native execution is recommended. The frustum, scheduler decision object, and
-loader state machine share exact IDs and lifecycle conditions across many tests;
-one continuous implementation session reduces interface mismatch. The final full
-gate still provides independent regression coverage.
+建议使用原生执行。视锥、调度器决策对象和加载器状态机在许多测试中共享精确 ID 和生命周期条件；连续实施会话可减少接口不匹配。最终完整门禁仍提供独立的回归覆盖。
 
-## Related Documents
+## 相关文档
 
-- `ICE3-DOC-IDX-001` — [Documentation index](../README.md)
-- `ICE3-DOC-SPEC-002` — [Adaptive Tileset scheduler specification](../specs/2026-10-27-adaptive-tileset-scheduler-design.md)
+- `ICE3-DOC-IDX-001` — [文档索引](../README.md)
+- `ICE3-DOC-SPEC-002` — [自适应 Tileset 调度器规范](../specs/2026-10-27-adaptive-tileset-scheduler-design.md)

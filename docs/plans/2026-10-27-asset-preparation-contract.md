@@ -1,110 +1,110 @@
-# Asset Preparation Contract v1 Implementation Plan
+# Asset Preparation Contract v1 实施计划
 
 > Document ID: ICE3-DOC-PLAN-004
 >
 > Status: Implemented
 >
-> Owner: ICE3 architecture maintainers
+> Owner: ICE3 架构维护者
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **面向智能体执行者：** 必需子技能：使用 superpowers:subagent-driven-development（推荐）或 superpowers:executing-plans 按任务逐步实施本计划。步骤使用复选框（`- [ ]`）语法跟踪。
 
-**Goal:** Implement the shared GLB contract, budget evaluation, optional report, engine consumption, and cross-repository verification defined by Asset Preparation Contract v1.
+**目标：** 实施 Asset Preparation Contract v1 定义的共享 GLB 契约、预算评估、可选报告、引擎消费和跨仓库验证。
 
-**Architecture:** Toolchain computes canonical metrics and embeds a small runtime contract in each prepared GLB, then optionally writes a deterministic sidecar report for CI and UI use. The engine validates and exposes the embedded contract while continuing to reject assets that require runtime conversion; the report is never required at runtime.
+**架构：** 工具链计算规范指标，并将小型运行时契约嵌入每个 Prepared GLB，然后可选地写入确定性 sidecar 报告供 CI 和 UI 使用。引擎验证并暴露嵌入的契约，同时继续拒绝需要运行时转换的 Asset；运行时从不需要该报告。
 
-**Tech Stack:** TypeScript, Node.js 24.22.1 LTS, ESM, npm workspaces, GLB, Node.js test runner, Playwright
+**技术栈：** TypeScript、Node.js 24.22.1 LTS、ESM、npm workspaces、GLB、Node.js 测试运行器、Playwright
 
-**Spec:** `../../contracts/asset-preparation-contract-v1.md`
+**规范：** `../../contracts/asset-preparation-contract-v1.md`
 
-**Repositories:** `ice3-toolchain`, `ice3-engine`
+**仓库：** `ice3-toolchain`、`ice3-engine`
 
-## Global Constraints
+## 全局约束
 
-- Use Node.js 24.22.1 LTS and npm 11 or newer.
-- Toolchain output remains a standard single-JSON/single-BIN GLB.
-- Runtime conversion remains forbidden: `runtimeConversionRequired` must be `false`.
-- The GLB is the authoritative runtime artifact; the JSON report is optional.
-- Do not add runtime dependencies.
-- Keep `@ice3/core` independent of DOM, Canvas, GPU, and sibling packages.
-- Do not import private source paths across repositories.
-- No real customer model, derived preview, source path, screenshot, or report may be committed.
-- Automated fixtures must be synthetic or explicitly distributable.
-- Do not use competitor or vendor product names in code, docs, comments, commits, or examples.
-- Use a feature branch in each repository and merge to that repository's `main` only after its full verification gate passes.
-- Toolchain and engine migrations must remain compatible: existing prepared assets without a contract load with `ICE3_ASSET_CONTRACT_MISSING`.
-- Exact optional property types are enabled in engine TypeScript; conditionally spread optional values.
+- 使用 Node.js 24.22.1 LTS 和 npm 11 或更高版本。
+- 工具链输出仍为标准的单 JSON/单 BIN GLB。
+- 仍禁止运行时转换：`runtimeConversionRequired` 必须为 `false`。
+- GLB 是权威运行时制品；JSON 报告为可选内容。
+- 不要添加运行时依赖。
+- 保持 `@ice3/core` 独立于 DOM、Canvas、GPU 和同级包。
+- 不要跨仓库导入私有源路径。
+- 不得提交真实客户模型、派生预览、源路径、截图或报告。
+- 自动化 fixture 必须是合成的或明确可分发的。
+- 不要在代码、文档、注释、提交或示例中使用竞品或厂商产品名称。
+- 在每个仓库中使用功能分支，并仅在该仓库完整验证门禁通过后合入其 `main`。
+- 工具链和引擎的迁移必须保持兼容：没有契约的现有 Prepared Asset 通过 `ICE3_ASSET_CONTRACT_MISSING` 加载。
+- 引擎 TypeScript 已启用精确可选属性类型；条件式展开可选值。
 
-## Review Focus
+## 审查重点
 
-- A reported budget at the exact soft or hard boundary must not be classified as exceeding that boundary.
-- Embedding `encodedBytes` must converge to a stable final GLB rather than reporting budget status against the provisional file.
-- Reports must be deterministic and must not disclose source paths or customer filenames.
-- Old assets without `contractVersion` must load with a warning, while unsupported major versions and runtime-conversion requests must fail.
-- Runtime metrics must distinguish declared asset counts, actual instantiated counts, and renderer draw/GPU metrics.
+- 恰好位于软限制或硬限制边界的已报告预算不得被归类为超过该边界。
+- 嵌入 `encodedBytes` 时必须收敛到稳定的最终 GLB，而不是基于临时文件报告预算状态。
+- 报告必须具有确定性，且不得披露源路径或客户文件名。
+- 没有 `contractVersion` 的旧 Asset 必须带警告加载，而不受支持的主版本和运行时转换请求必须失败。
+- 运行时指标必须区分声明的 Asset 数量、实际实例化数量和渲染器绘制/GPU 指标。
 
-## File Structure
+## 文件结构
 
 ### `ice3-toolchain`
 
-**Create**
+**新建**
 
-- `packages/toolchain-core/src/output/assetContract.ts`: shared contract types, constants, metric normalization, and budget result shapes.
-- `packages/toolchain-core/src/output/evaluateAssetBudget.ts`: built-in budget profiles and deterministic threshold evaluation.
-- `packages/toolchain-core/src/output/createAssetReport.ts`: canonical sidecar report construction.
-- `tests/output/assetContract.test.ts`: contract and report shape tests.
-- `tests/output/evaluateAssetBudget.test.ts`: boundary and profile tests.
+- `packages/toolchain-core/src/output/assetContract.ts`：共享契约类型、常量、指标规范化和预算结果结构。
+- `packages/toolchain-core/src/output/evaluateAssetBudget.ts`：内置预算配置文件和确定性阈值评估。
+- `packages/toolchain-core/src/output/createAssetReport.ts`：规范 sidecar 报告构建。
+- `tests/output/assetContract.test.ts`：契约和报告结构测试。
+- `tests/output/evaluateAssetBudget.test.ts`：边界和配置文件测试。
 
-**Modify**
+**修改**
 
-- `packages/toolchain-core/src/output/buildPreparedGLB.ts`: compute metrics and embed contract; finalize byte-dependent budget status.
-- `packages/toolchain-core/src/output/validatePreparedGLB.ts`: validate the embedded contract.
-- `packages/toolchain-core/src/index.ts`: export contract and budget APIs.
-- `packages/cli/src/commands.ts`: budget selection, report output, and warning exit policy.
-- `tests/cli/commands.test.ts`: CLI behavior.
-- `fixtures/prepared-cube.glb`: regenerated synthetic contract fixture.
-- `fixtures/prepared-cube.report.json`: regenerated synthetic report.
-- `README.md`: command and budget documentation.
+- `packages/toolchain-core/src/output/buildPreparedGLB.ts`：计算指标并嵌入契约；最终确定依赖字节数的预算状态。
+- `packages/toolchain-core/src/output/validatePreparedGLB.ts`：验证嵌入的契约。
+- `packages/toolchain-core/src/index.ts`：导出契约和预算 API。
+- `packages/cli/src/commands.ts`：预算选择、报告输出和警告退出策略。
+- `tests/cli/commands.test.ts`：CLI 行为。
+- `fixtures/prepared-cube.glb`：重新生成的合成契约 fixture。
+- `fixtures/prepared-cube.report.json`：重新生成的合成报告。
+- `README.md`：命令和预算文档。
 
 ### `ice3-engine`
 
-**Modify**
+**修改**
 
-- `packages/assets/src/ICEPreparedGLB.ts`: contract snapshot types.
-- `packages/assets/src/ICEProfileValidator.ts`: contract compatibility checks.
-- `packages/assets/src/ICEGLBReader.ts`: contract and extended metric extraction.
-- `packages/assets/tests/createFixture.ts`: contract fixture metadata.
-- `packages/assets/tests/GLBReader.test.ts`: old/new contract behavior.
-- `packages/runtime/src/asset/ICEAssetLoader.ts`: expose contract in `ICEAssetHandle`.
-- `packages/runtime/tests/AssetLoader.test.ts`: handle contract exposure.
-- `packages/renderer/src/types.ts`: read-only renderer metrics on the backend contract.
-- `packages/renderer/src/FakeRendererBackend.ts`: deterministic test metrics.
-- `packages/runtime/src/ICE3.ts`: runtime diagnostics integration.
-- `packages/runtime/tests/EngineLifecycle.test.ts`: diagnostics integration.
-- `examples/m1/assets/prepared-cube.glb`: copied synthetic contract fixture.
-- `README.md` and `docs/api/m1.md`: consume the canonical contract.
-- `docs/diagnostics.md`: stable contract diagnostics.
+- `packages/assets/src/ICEPreparedGLB.ts`：契约快照类型。
+- `packages/assets/src/ICEProfileValidator.ts`：契约兼容性检查。
+- `packages/assets/src/ICEGLBReader.ts`：契约和扩展指标提取。
+- `packages/assets/tests/createFixture.ts`：契约 fixture 元数据。
+- `packages/assets/tests/GLBReader.test.ts`：旧/新契约行为。
+- `packages/runtime/src/asset/ICEAssetLoader.ts`：在 `ICEAssetHandle` 中暴露契约。
+- `packages/runtime/tests/AssetLoader.test.ts`：句柄契约暴露。
+- `packages/renderer/src/types.ts`：后端契约上的只读渲染器指标。
+- `packages/renderer/src/FakeRendererBackend.ts`：确定性测试指标。
+- `packages/runtime/src/ICE3.ts`：运行时诊断集成。
+- `packages/runtime/tests/EngineLifecycle.test.ts`：诊断集成。
+- `examples/m1/assets/prepared-cube.glb`：复制的合成契约 fixture。
+- `README.md` 和 `docs/api/m1.md`：消费规范契约。
+- `docs/diagnostics.md`：稳定契约诊断。
 
 ---
 
-### Task 1: Define Toolchain Contract Types and Canonical Metrics
+### 任务 1：定义工具链契约类型和规范指标
 
-**Repository:** `ice3-toolchain`
+**仓库：** `ice3-toolchain`
 
-**Files:**
-- Create: `packages/toolchain-core/src/output/assetContract.ts`
-- Create: `tests/output/assetContract.test.ts`
-- Modify: `tests/output/buildPreparedGLB.test.ts`
-- Modify: `packages/toolchain-core/src/index.ts`
+**文件：**
+- 新建：`packages/toolchain-core/src/output/assetContract.ts`
+- 新建：`tests/output/assetContract.test.ts`
+- 修改：`tests/output/buildPreparedGLB.test.ts`
+- 修改：`packages/toolchain-core/src/index.ts`
 
-**Interfaces:**
-- Produces: `ICE_ASSET_CONTRACT_VERSION = '1.0'`.
-- Produces: `ICEAssetMetrics` with `encodedBytes`, `jsonChunkBytes`, `binChunkBytes`, node/depth/mesh/primitive/triangle/edge/material/selection metrics.
-- Produces: `ICEAssetPreparation` and `ICEAssetContract`.
-- Produces: `contractStats(metrics): ICEAssetContractStats`.
+**接口：**
+- 产出：`ICE_ASSET_CONTRACT_VERSION = '1.0'`。
+- 产出：`ICEAssetMetrics`，包含 `encodedBytes`、`jsonChunkBytes`、`binChunkBytes`，以及 Node/深度/Mesh/primitive/三角形/边/Material/Selection 指标。
+- 产出：`ICEAssetPreparation` 和 `ICEAssetContract`。
+- 产出：`contractStats(metrics): ICEAssetContractStats`。
 
-- [ ] **Step 1: Write failing contract metric tests**
+- [ ] **步骤 1：编写失败的契约指标测试**
 
-Create `tests/output/assetContract.test.ts`:
+创建 `tests/output/assetContract.test.ts`：
 
 ```ts
 import { test } from 'node:test';
@@ -141,7 +141,7 @@ test('exposes only the stable runtime stats subset', () => {
 });
 ```
 
-Add a builder assertion in `buildPreparedGLB.test.ts`:
+在 `buildPreparedGLB.test.ts` 中添加构建器断言：
 
 ```ts
 expect(built.metrics).toMatchObject({
@@ -156,22 +156,21 @@ expect(built.metrics).toMatchObject({
 });
 ```
 
-Replace the older four-field `first.stats` expectation with the extended
-stats object so the test reflects the new canonical shape.
+将较早的四个字段 `first.stats` 预期替换为扩展统计对象，使测试反映新的规范结构。
 
-- [ ] **Step 2: Verify RED**
+- [ ] **步骤 2：验证 RED**
 
-Run:
+运行：
 
 ```bash
 npm test -- tests/output/assetContract.test.ts tests/output/buildPreparedGLB.test.ts
 ```
 
-Expected: FAIL because the contract module and `built.metrics` do not exist.
+预期：失败，因为契约模块和 `built.metrics` 尚不存在。
 
-- [ ] **Step 3: Implement contract types**
+- [ ] **步骤 3：实现契约类型**
 
-Create `assetContract.ts`:
+创建 `assetContract.ts`：
 
 ```ts
 export const ICE_ASSET_CONTRACT_VERSION = '1.0';
@@ -229,7 +228,7 @@ export interface ICEAssetContract {
 }
 ```
 
-Extend `ICEPreparedGLB` return:
+扩展 `ICEPreparedGLB` 返回值：
 
 ```ts
 export interface ICEPreparedGLB {
@@ -239,7 +238,7 @@ export interface ICEPreparedGLB {
 }
 ```
 
-Compute `maxNodeDepth` with a deterministic recursive function:
+使用确定性递归函数计算 `maxNodeDepth`：
 
 ```ts
 const nodeDepth = (index: number, visiting = new Set<number>()): number => {
@@ -256,24 +255,20 @@ const maxNodeDepth = sceneNodeIndices.length === 0
   : Math.max(...sceneNodeIndices.map((index) => nodeDepth(index)));
 ```
 
-Compute `selectionGroupCount` as the number of unique source-node indices that
-own at least one triangle primitive. This matches the current contract where
-one named mesh node is one equipment unit. Compute material count from
-`outputMaterials.length`. `encodedBytes`, JSON chunk, and BIN chunk sizes may
-initially be `0`; Task 3 finalizes byte metrics after packing.
+将 `selectionGroupCount` 计算为拥有至少一个三角形 primitive 的唯一源 Node 索引数量。这符合当前契约中一个命名 Mesh Node 就是一个设备单元的约定。根据 `outputMaterials.length` 计算 Material 数量。`encodedBytes`、JSON 块和 BIN 块大小初始可以为 `0`；任务 3 会在打包后最终确定字节指标。
 
-- [ ] **Step 4: Verify GREEN**
+- [ ] **步骤 4：验证 GREEN**
 
-Run:
+运行：
 
 ```bash
 npm test -- tests/output/assetContract.test.ts tests/output/buildPreparedGLB.test.ts
 npm run typecheck
 ```
 
-Expected: PASS.
+预期：通过。
 
-- [ ] **Step 5: Commit**
+- [ ] **步骤 5：提交**
 
 ```bash
 git add packages/toolchain-core/src/output/assetContract.ts \
@@ -286,23 +281,23 @@ git commit -m "feat(toolchain): define asset contract metrics"
 
 ---
 
-### Task 2: Implement Budget Profiles and Boundary Evaluation
+### 任务 2：实现预算配置文件和边界评估
 
-**Repository:** `ice3-toolchain`
+**仓库：** `ice3-toolchain`
 
-**Files:**
-- Create: `packages/toolchain-core/src/output/evaluateAssetBudget.ts`
-- Create: `tests/output/evaluateAssetBudget.test.ts`
-- Modify: `packages/toolchain-core/src/index.ts`
+**文件：**
+- 新建：`packages/toolchain-core/src/output/evaluateAssetBudget.ts`
+- 新建：`tests/output/evaluateAssetBudget.test.ts`
+- 修改：`packages/toolchain-core/src/index.ts`
 
-**Interfaces:**
-- Consumes: `ICEAssetMetrics`.
-- Produces: `ICEBudgetLimit`, `ICEBudgetProfile`, `ICEBudgetCheck`, `ICEBudgetResult`.
-- Produces: `BUDGET_PROFILES`, `evaluateAssetBudget()`, `validateBudgetProfile()`.
+**接口：**
+- 使用：`ICEAssetMetrics`。
+- 产出：`ICEBudgetLimit`、`ICEBudgetProfile`、`ICEBudgetCheck`、`ICEBudgetResult`。
+- 产出：`BUDGET_PROFILES`、`evaluateAssetBudget()`、`validateBudgetProfile()`。
 
-- [ ] **Step 1: Write failing boundary tests**
+- [ ] **步骤 1：编写失败的边界测试**
 
-Create `tests/output/evaluateAssetBudget.test.ts`:
+创建 `tests/output/evaluateAssetBudget.test.ts`：
 
 ```ts
 import { test } from 'node:test';
@@ -353,19 +348,19 @@ test('rejects malformed custom budget profiles', () => {
 });
 ```
 
-- [ ] **Step 2: Verify RED**
+- [ ] **步骤 2：验证 RED**
 
-Run:
+运行：
 
 ```bash
 npm test -- tests/output/evaluateAssetBudget.test.ts
 ```
 
-Expected: FAIL because the module does not exist.
+预期：失败，因为模块尚不存在。
 
-- [ ] **Step 3: Implement evaluator and profiles**
+- [ ] **步骤 3：实现评估器和配置文件**
 
-Create:
+创建：
 
 ```ts
 export interface ICEBudgetLimit {
@@ -398,7 +393,7 @@ export interface ICEBudgetResult {
 }
 ```
 
-Use the exact soft/hard limits from the contract:
+使用契约中的确切软/硬限制：
 
 ```ts
 export const BUDGET_PROFILES: Record<string, ICEBudgetProfile> = {
@@ -418,7 +413,7 @@ export const BUDGET_PROFILES: Record<string, ICEBudgetProfile> = {
 };
 ```
 
-Classification:
+分类规则：
 
 ```ts
 const checkStatus = (
@@ -432,25 +427,22 @@ const checkStatus = (
 };
 ```
 
-Overall status is `error` if any error, otherwise `warning` if any warning, otherwise `pass`.
+如果存在任何错误，总体状态为 `error`；否则若存在任何警告，则为 `warning`；否则为 `pass`。
 
-`validateBudgetProfile(value)` requires a nonempty string `id`, a `limits`
-array, known metric IDs, finite nonnegative integers for both limits, and
-`softLimit <= hardLimit`. It returns a frozen normalized profile and throws
-`ICE3_TOOL_INVALID_BUDGET` otherwise.
+`validateBudgetProfile(value)` 要求 `id` 为非空字符串、`limits` 为数组、指标 ID 已知、两项限制均为有限非负整数，且 `softLimit <= hardLimit`。它返回冻结的规范化配置文件，否则抛出 `ICE3_TOOL_INVALID_BUDGET`。
 
-- [ ] **Step 4: Verify GREEN**
+- [ ] **步骤 4：验证 GREEN**
 
-Run:
+运行：
 
 ```bash
 npm test -- tests/output/evaluateAssetBudget.test.ts
 npm run typecheck
 ```
 
-Expected: PASS.
+预期：通过。
 
-- [ ] **Step 5: Commit**
+- [ ] **步骤 5：提交**
 
 ```bash
 git add packages/toolchain-core/src/output/evaluateAssetBudget.ts \
@@ -461,26 +453,26 @@ git commit -m "feat(toolchain): evaluate asset budgets"
 
 ---
 
-### Task 3: Embed the Final Contract in Prepared GLB
+### 任务 3：将最终契约嵌入 Prepared GLB
 
-**Repository:** `ice3-toolchain`
+**仓库：** `ice3-toolchain`
 
-**Files:**
-- Modify: `packages/toolchain-core/src/output/assetContract.ts`
-- Modify: `packages/toolchain-core/src/output/buildPreparedGLB.ts`
-- Modify: `packages/toolchain-core/src/output/validatePreparedGLB.ts`
-- Modify: `tests/output/buildPreparedGLB.test.ts`
-- Modify: `tests/output/validatePreparedGLB.test.ts`
+**文件：**
+- 修改：`packages/toolchain-core/src/output/assetContract.ts`
+- 修改：`packages/toolchain-core/src/output/buildPreparedGLB.ts`
+- 修改：`packages/toolchain-core/src/output/validatePreparedGLB.ts`
+- 修改：`tests/output/buildPreparedGLB.test.ts`
+- 修改：`tests/output/validatePreparedGLB.test.ts`
 
-**Interfaces:**
-- Consumes: `ICEBudgetProfile`, `evaluateAssetBudget()`, `contractStats()`.
-- Produces: `ICEBuildOptions.budget?: ICEBudgetProfile`.
-- Produces: `ICEAssetContract.budget` with `{ profile, status, warningCount, errorCount }`.
-- Produces: final GLB `asset.extras.ice3.contractVersion`, extended `stats`, `preparation`, and `budget`.
+**接口：**
+- 使用：`ICEBudgetProfile`、`evaluateAssetBudget()`、`contractStats()`。
+- 产出：`ICEBuildOptions.budget?: ICEBudgetProfile`。
+- 产出：`ICEAssetContract.budget`，包含 `{ profile, status, warningCount, errorCount }`。
+- 产出：最终 GLB 的 `asset.extras.ice3.contractVersion`、扩展 `stats`、`preparation` 和 `budget`。
 
-- [ ] **Step 1: Write failing embedded-contract tests**
+- [ ] **步骤 1：编写失败的嵌入契约测试**
 
-Add to `buildPreparedGLB.test.ts`:
+添加到 `buildPreparedGLB.test.ts`：
 
 ```ts
 test('embeds preparation, extended stats, and budget status', () => {
@@ -508,7 +500,7 @@ test('embeds preparation, extended stats, and budget status', () => {
 });
 ```
 
-Add to `validatePreparedGLB.test.ts`:
+添加到 `validatePreparedGLB.test.ts`：
 
 ```ts
 test('rejects runtime conversion and unsupported contract versions', () => {
@@ -530,7 +522,7 @@ test('rejects runtime conversion and unsupported contract versions', () => {
 });
 ```
 
-Use the existing `rewriteJSON()` helper from that test file to define:
+使用该测试文件中现有的 `rewriteJSON()` 辅助函数定义：
 
 ```ts
 const mutateProfile = (
@@ -543,7 +535,7 @@ const mutateProfile = (
 });
 ```
 
-Define `readProfile()` beside the build test:
+在构建测试旁定义 `readProfile()`：
 
 ```ts
 const readProfile = (bytes: Uint8Array): Record<string, unknown> => {
@@ -557,19 +549,19 @@ const readProfile = (bytes: Uint8Array): Record<string, unknown> => {
 };
 ```
 
-- [ ] **Step 2: Verify RED**
+- [ ] **步骤 2：验证 RED**
 
-Run:
+运行：
 
 ```bash
 npm test -- tests/output/buildPreparedGLB.test.ts tests/output/validatePreparedGLB.test.ts
 ```
 
-Expected: FAIL because the GLB does not contain contract, preparation, or budget fields.
+预期：失败，因为 GLB 不包含 contract、preparation 或 budget 字段。
 
-- [ ] **Step 3: Implement two-pass finalization**
+- [ ] **步骤 3：实现两轮最终化**
 
-Add a helper in `buildPreparedGLB.ts`:
+在 `buildPreparedGLB.ts` 中添加辅助函数：
 
 ```ts
 const packWithContract = (
@@ -605,7 +597,7 @@ const packWithContract = (
 };
 ```
 
-Add the budget member to `ICEAssetContract`:
+向 `ICEAssetContract` 添加 budget 成员：
 
 ```ts
 readonly budget: Readonly<{
@@ -616,7 +608,7 @@ readonly budget: Readonly<{
 }>;
 ```
 
-Define the two helpers used above:
+定义上面使用的两个辅助函数：
 
 ```ts
 const withContract = (
@@ -661,13 +653,13 @@ const measurePackedMetrics = (
 };
 ```
 
-`measurePackedMetrics()` must:
+`measurePackedMetrics()` 必须：
 
-- Read the actual JSON chunk padded byte length and BIN chunk length from the packed GLB.
-- Set `encodedBytes` to `packed.byteLength`.
-- Preserve the structural metrics from the builder.
+- 从打包后的 GLB 读取实际 JSON 块填充后字节长度和 BIN 块长度。
+- 将 `encodedBytes` 设置为 `packed.byteLength`。
+- 保留构建器提供的结构指标。
 
-The `asset.extras.ice3` object must include:
+`asset.extras.ice3` 对象必须包含：
 
 ```ts
 {
@@ -702,30 +694,27 @@ The `asset.extras.ice3` object must include:
 }
 ```
 
-Validation must:
+验证必须：
 
-- Accept a profile missing contract fields for backward compatibility.
-- Require `contractVersion === '1.0'` when present.
-- Require `preparation.runtimeConversionRequired === false`.
-- Require all extended stats to equal structural counts.
-- Require `errorCount > 0` if and only if `status === 'error'`, and reject
-  `warningCount`/`errorCount` combinations that contradict the status.
-- For built-in budget profile IDs, recompute the result from the embedded
-  metrics and require exact agreement. Custom profile limits live in the
-  optional report; the embedded custom-profile summary is shape-validated.
+- 为向后兼容，接受缺少契约字段的配置文件。
+- 存在时要求 `contractVersion === '1.0'`。
+- 要求 `preparation.runtimeConversionRequired === false`。
+- 要求所有扩展统计与结构计数一致。
+- 当且仅当 `status === 'error'` 时要求 `errorCount > 0`，并拒绝与状态矛盾的 `warningCount`/`errorCount` 组合。
+- 对于内置预算配置文件 ID，根据嵌入指标重新计算结果并要求完全一致。自定义配置文件限制保存在可选报告中；嵌入的自定义配置文件摘要只做结构验证。
 
-- [ ] **Step 4: Verify GREEN**
+- [ ] **步骤 4：验证 GREEN**
 
-Run:
+运行：
 
 ```bash
 npm test -- tests/output/buildPreparedGLB.test.ts tests/output/validatePreparedGLB.test.ts
 npm run typecheck
 ```
 
-Expected: PASS.
+预期：通过。
 
-- [ ] **Step 5: Commit**
+- [ ] **步骤 5：提交**
 
 ```bash
 git add packages/toolchain-core/src/output/buildPreparedGLB.ts \
@@ -737,26 +726,26 @@ git commit -m "feat(toolchain): embed asset preparation contract"
 
 ---
 
-### Task 4: Generate Sidecar Reports and Enforce CLI Budgets
+### 任务 4：生成 sidecar 报告并执行 CLI 预算
 
-**Repository:** `ice3-toolchain`
+**仓库：** `ice3-toolchain`
 
-**Files:**
-- Create: `packages/toolchain-core/src/output/createAssetReport.ts`
-- Create: `tests/output/createAssetReport.test.ts`
-- Modify: `packages/toolchain-core/src/index.ts`
-- Modify: `packages/cli/src/commands.ts`
-- Modify: `tests/cli/commands.test.ts`
-- Modify: `README.md`
+**文件：**
+- 新建：`packages/toolchain-core/src/output/createAssetReport.ts`
+- 新建：`tests/output/createAssetReport.test.ts`
+- 修改：`packages/toolchain-core/src/index.ts`
+- 修改：`packages/cli/src/commands.ts`
+- 修改：`tests/cli/commands.test.ts`
+- 修改：`README.md`
 
-**Interfaces:**
-- Consumes: final GLB bytes, build metrics, validation, and budget result.
-- Produces: `ICEAssetReport`, `createAssetReport()`.
-- Produces CLI flags: `--report <file>`, `--budget <profile-or-json>`, `--warnings-as-errors`.
+**接口：**
+- 使用：最终 GLB 字节、构建指标、验证和预算结果。
+- 产出：`ICEAssetReport`、`createAssetReport()`。
+- 产出 CLI 标志：`--report <file>`、`--budget <profile-or-json>`、`--warnings-as-errors`。
 
-- [ ] **Step 1: Write failing report and CLI tests**
+- [ ] **步骤 1：编写失败的报告和 CLI 测试**
 
-Add to `tests/output/createAssetReport.test.ts`:
+添加到 `tests/output/createAssetReport.test.ts`：
 
 ```ts
 test('creates a deterministic report without source paths', () => {
@@ -799,7 +788,7 @@ test('creates a deterministic report without source paths', () => {
 });
 ```
 
-Add CLI tests:
+添加 CLI 测试：
 
 ```ts
 test('build writes a report and fails hard budgets before publishing GLB', async () => {
@@ -848,25 +837,21 @@ test('build writes a report and fails hard budgets before publishing GLB', async
 });
 ```
 
-- [ ] **Step 2: Verify RED**
+- [ ] **步骤 2：验证 RED**
 
-Run:
+运行：
 
 ```bash
 npm test -- tests/output/createAssetReport.test.ts tests/cli/commands.test.ts
 ```
 
-Expected: FAIL because report generation and CLI flags do not exist.
+预期：失败，因为报告生成和 CLI 标志尚不存在。
 
-- [ ] **Step 3: Implement report and CLI behavior**
+- [ ] **步骤 3：实现报告和 CLI 行为**
 
-Report shape follows the contract exactly. `createAssetReport()` sorts budget
-checks by a fixed metric order and diagnostics by `code`, then `message`. It
-never adds timestamps or absolute paths. Report status is `error` when any
-error diagnostic or budget error exists, otherwise `warning` when any warning
-diagnostic or budget warning exists, otherwise `pass`.
+报告结构严格遵循契约。`createAssetReport()` 按固定指标顺序对预算检查排序，并按 `code`、再按 `message` 对诊断排序。它绝不添加时间戳或绝对路径。当存在任何错误诊断或预算错误时，报告状态为 `error`；否则当存在任何警告诊断或预算警告时为 `warning`；否则为 `pass`。
 
-Create the public report types:
+创建公共报告类型：
 
 ```ts
 export interface ICEAssetReportDiagnostic {
@@ -910,7 +895,7 @@ export interface ICEAssetReport {
 }
 ```
 
-Compute the source digest from the original source file bytes:
+根据原始源文件字节计算源摘要：
 
 ```ts
 const sourceDigest = `sha256:${
@@ -918,7 +903,7 @@ const sourceDigest = `sha256:${
 }`;
 ```
 
-Read the tool version at CLI startup:
+在 CLI 启动时读取工具版本：
 
 ```ts
 const packageJson = JSON.parse(await readFile(
@@ -928,7 +913,7 @@ const packageJson = JSON.parse(await readFile(
 const toolVersion = packageJson.version;
 ```
 
-Budget selection:
+预算选择：
 
 ```ts
 const resolveBudget = async (
@@ -943,18 +928,17 @@ const resolveBudget = async (
 };
 ```
 
-Build behavior:
+构建行为：
 
-1. Resolve source and budget.
-2. Build final GLB.
-3. Reject and return nonzero when budget status is `error`.
-4. Return nonzero for `warning` only when `--warnings-as-errors` is present;
-   do not publish either artifact in this mode.
-5. Write optional report to a temporary file before GLB publication.
-6. Write GLB through its temporary file and rename both.
-7. If report write fails, report `ICE3_TOOL_REPORT_WRITE_FAILED` and do not publish GLB.
+1. 解析源和预算。
+2. 构建最终 GLB。
+3. 当预算状态为 `error` 时拒绝并返回非零值。
+4. 仅当存在 `--warnings-as-errors` 时，对 `warning` 返回非零值；此模式下不要发布任一制品。
+5. 在发布 GLB 前将可选报告写入临时文件。
+6. 通过临时文件写入 GLB，并重命名两者。
+7. 如果报告写入失败，报告 `ICE3_TOOL_REPORT_WRITE_FAILED`，且不要发布 GLB。
 
-Command parsing adds:
+命令解析添加：
 
 ```ts
 new Set([
@@ -966,11 +950,11 @@ new Set([
 ])
 ```
 
-`--warnings-as-errors` remains a flag.
+`--warnings-as-errors` 仍为标志。
 
-- [ ] **Step 4: Verify GREEN**
+- [ ] **步骤 4：验证 GREEN**
 
-Run:
+运行：
 
 ```bash
 npm test -- tests/output/createAssetReport.test.ts tests/cli/commands.test.ts
@@ -978,9 +962,9 @@ npm run typecheck
 npm run verify
 ```
 
-Expected: PASS.
+预期：通过。
 
-- [ ] **Step 5: Commit**
+- [ ] **步骤 5：提交**
 
 ```bash
 git add packages/toolchain-core/src/output/createAssetReport.ts \
@@ -994,25 +978,25 @@ git commit -m "feat(cli): write asset reports and enforce budgets"
 
 ---
 
-### Task 5: Read and Validate the Contract in Engine Assets
+### 任务 5：在引擎 Asset 中读取并验证契约
 
-**Repository:** `ice3-engine`
+**仓库：** `ice3-engine`
 
-**Files:**
-- Modify: `packages/assets/src/ICEPreparedGLB.ts`
-- Modify: `packages/assets/src/ICEProfileValidator.ts`
-- Modify: `packages/assets/src/ICEGLBReader.ts`
-- Modify: `packages/assets/tests/createFixture.ts`
-- Modify: `packages/assets/tests/GLBReader.test.ts`
+**文件：**
+- 修改：`packages/assets/src/ICEPreparedGLB.ts`
+- 修改：`packages/assets/src/ICEProfileValidator.ts`
+- 修改：`packages/assets/src/ICEGLBReader.ts`
+- 修改：`packages/assets/tests/createFixture.ts`
+- 修改：`packages/assets/tests/GLBReader.test.ts`
 
-**Interfaces:**
-- Produces: `ICEPreparedContract` and `ICEPreparedStats`.
-- Produces: `ICEPreparedAssetSnapshot.contract`.
-- Produces diagnostics: `ICE3_ASSET_CONTRACT_MISSING`, `ICE3_ASSET_CONTRACT_UNSUPPORTED`, `ICE3_ASSET_STATS_MISMATCH`.
+**接口：**
+- 产出：`ICEPreparedContract` 和 `ICEPreparedStats`。
+- 产出：`ICEPreparedAssetSnapshot.contract`。
+- 产出诊断：`ICE3_ASSET_CONTRACT_MISSING`、`ICE3_ASSET_CONTRACT_UNSUPPORTED`、`ICE3_ASSET_STATS_MISMATCH`。
 
-- [ ] **Step 1: Write failing reader tests**
+- [ ] **步骤 1：编写失败的读取器测试**
 
-Add:
+添加：
 
 ```ts
 test('reads v1 contract, preparation, extended stats, and budget', () => {
@@ -1054,19 +1038,19 @@ test('loads legacy assets without a contract', () => {
 });
 ```
 
-- [ ] **Step 2: Verify RED**
+- [ ] **步骤 2：验证 RED**
 
-Run:
+运行：
 
 ```bash
 npm test -- packages/assets/tests/GLBReader.test.ts
 ```
 
-Expected: FAIL because the contract snapshot does not exist.
+预期：失败，因为契约快照尚不存在。
 
-- [ ] **Step 3: Implement contract read and compatibility**
+- [ ] **步骤 3：实现契约读取和兼容性**
 
-Types:
+类型：
 
 ```ts
 export interface ICEPreparedStats {
@@ -1101,40 +1085,37 @@ export interface ICEPreparedContract {
 }
 ```
 
-Validator order:
+验证器顺序：
 
-1. Existing base profile validation.
-2. If `contractVersion` is absent, set `status: 'legacy'`.
-3. If present and not a supported `1.x`, throw `ICE3_ASSET_CONTRACT_UNSUPPORTED`.
-4. Reject `preparation.runtimeConversionRequired !== false`.
-5. Validate all embedded stat fields are nonnegative integers.
-6. After reading all meshes/materials, compute actual counts and compare to embedded stats; throw `ICE3_ASSET_STATS_MISMATCH`.
+1. 执行现有基础配置文件验证。
+2. 如果 `contractVersion` 不存在，设置 `status: 'legacy'`。
+3. 如果存在但不是受支持的 `1.x`，抛出 `ICE3_ASSET_CONTRACT_UNSUPPORTED`。
+4. 拒绝 `preparation.runtimeConversionRequired !== false`。
+5. 验证所有嵌入统计字段均为非负整数。
+6. 读取所有 Mesh/Material 后，计算实际数量并与嵌入统计比较；抛出 `ICE3_ASSET_STATS_MISMATCH`。
 
-For legacy stats, fill missing fields with actual structural counts.
+对于 legacy 统计，使用实际结构计数填充缺失字段。
 
-Extend `FixtureOptions`:
+扩展 `FixtureOptions`：
 
 ```ts
 readonly contract?: 'active' | 'legacy' | 'unsupported' | 'conversion';
 ```
 
-Default to `active` for newly created fixture GLBs. The fixture builder must
-emit `contractVersion`, extended `stats`, `preparation`, and `budget`; the
-`legacy` mode omits those fields, `unsupported` writes version `2.0`, and
-`conversion` writes `runtimeConversionRequired: true`.
+新建 fixture GLB 时默认使用 `active`。fixture 构建器必须输出 `contractVersion`、扩展 `stats`、`preparation` 和 `budget`；`legacy` 模式省略这些字段，`unsupported` 写入版本 `2.0`，`conversion` 写入 `runtimeConversionRequired: true`。
 
-- [ ] **Step 4: Verify GREEN**
+- [ ] **步骤 4：验证 GREEN**
 
-Run:
+运行：
 
 ```bash
 npm test -- packages/assets
 npm run typecheck
 ```
 
-Expected: PASS.
+预期：通过。
 
-- [ ] **Step 5: Commit**
+- [ ] **步骤 5：提交**
 
 ```bash
 git add packages/assets/src/ICEPreparedGLB.ts \
@@ -1147,27 +1128,27 @@ git commit -m "feat(assets): read asset preparation contract"
 
 ---
 
-### Task 6: Expose Contract and Runtime Metrics
+### 任务 6：暴露契约和运行时指标
 
-**Repository:** `ice3-engine`
+**仓库：** `ice3-engine`
 
-**Files:**
-- Modify: `packages/runtime/src/asset/ICEAssetLoader.ts`
-- Modify: `packages/runtime/tests/AssetLoader.test.ts`
-- Modify: `packages/renderer/src/types.ts`
-- Modify: `packages/renderer/src/FakeRendererBackend.ts`
-- Modify: `packages/runtime/src/ICE3.ts`
-- Modify: `packages/runtime/tests/EngineLifecycle.test.ts`
+**文件：**
+- 修改：`packages/runtime/src/asset/ICEAssetLoader.ts`
+- 修改：`packages/runtime/tests/AssetLoader.test.ts`
+- 修改：`packages/renderer/src/types.ts`
+- 修改：`packages/renderer/src/FakeRendererBackend.ts`
+- 修改：`packages/runtime/src/ICE3.ts`
+- 修改：`packages/runtime/tests/EngineLifecycle.test.ts`
 
-**Interfaces:**
-- Produces: `ICEAssetHandle.contract: ICEPreparedContract`.
-- Produces: `ICERendererBackend.stats?: ICERendererStats`.
-- Produces: `ICEEngineDiagnostics.renderer`.
-- Produces: `ICE3.reportDiagnostic(code, message, severity?)`.
+**接口：**
+- 产出：`ICEAssetHandle.contract: ICEPreparedContract`。
+- 产出：`ICERendererBackend.stats?: ICERendererStats`。
+- 产出：`ICEEngineDiagnostics.renderer`。
+- 产出：`ICE3.reportDiagnostic(code, message, severity?)`。
 
-- [ ] **Step 1: Write failing API and diagnostics tests**
+- [ ] **步骤 1：编写失败的 API 和诊断测试**
 
-Add:
+添加：
 
 ```ts
 test('exposes the declared asset contract on the handle', async () => {
@@ -1206,20 +1187,20 @@ test('emits a warning when loading a legacy asset', async () => {
 });
 ```
 
-- [ ] **Step 2: Verify RED**
+- [ ] **步骤 2：验证 RED**
 
-Run:
+运行：
 
 ```bash
 npm test -- packages/runtime/tests/AssetLoader.test.ts \
   packages/runtime/tests/EngineLifecycle.test.ts
 ```
 
-Expected: FAIL because the handle and diagnostics fields do not exist.
+预期：失败，因为句柄和诊断字段尚不存在。
 
-- [ ] **Step 3: Implement public runtime metadata**
+- [ ] **步骤 3：实现公共运行时元数据**
 
-Extend:
+扩展：
 
 ```ts
 export interface ICEAssetHandle {
@@ -1232,9 +1213,9 @@ export interface ICEAssetHandle {
 }
 ```
 
-Return `cached.snapshot.contract` and `cached.snapshot.stats` from `load()`.
+从 `load()` 返回 `cached.snapshot.contract` 和 `cached.snapshot.stats`。
 
-Renderer contract:
+渲染器契约：
 
 ```ts
 export interface ICERendererStats {
@@ -1248,11 +1229,9 @@ export interface ICERendererBackend {
 }
 ```
 
-Extend `FakeRendererBackend` options with optional `stats` and default it to
-`{ drawCalls: 0, renderedMeshes: 0, gpuBytes: 0 }`. WebGL2 backend already has a
-compatible `stats` getter.
+为 `FakeRendererBackend` 选项添加可选 `stats`，默认值为 `{ drawCalls: 0, renderedMeshes: 0, gpuBytes: 0 }`。WebGL2 后端已经具有兼容的 `stats` getter。
 
-Diagnostics:
+诊断：
 
 ```ts
 readonly renderer: Readonly<{
@@ -1262,9 +1241,9 @@ readonly renderer: Readonly<{
 }>;
 ```
 
-Use `this.backend.stats ?? { drawCalls: 0, renderedMeshes: 0, gpuBytes: 0 }`.
+使用 `this.backend.stats ?? { drawCalls: 0, renderedMeshes: 0, gpuBytes: 0 }`。
 
-Promote the engine's existing private diagnostic recorder to:
+将引擎现有的私有诊断记录器提升为：
 
 ```ts
 reportDiagnostic(
@@ -1279,8 +1258,7 @@ reportDiagnostic(
 }
 ```
 
-Replace internal `recordDiagnostic()` calls with `reportDiagnostic()`. After a
-legacy asset is read, `ICEAssetLoader` calls:
+将内部 `recordDiagnostic()` 调用替换为 `reportDiagnostic()`。读取 legacy Asset 后，`ICEAssetLoader` 调用：
 
 ```ts
 this.engine.reportDiagnostic(
@@ -1290,18 +1268,18 @@ this.engine.reportDiagnostic(
 );
 ```
 
-- [ ] **Step 4: Verify GREEN**
+- [ ] **步骤 4：验证 GREEN**
 
-Run:
+运行：
 
 ```bash
 npm test -- packages/runtime packages/renderer
 npm run typecheck
 ```
 
-Expected: PASS.
+预期：通过。
 
-- [ ] **Step 5: Commit**
+- [ ] **步骤 5：提交**
 
 ```bash
 git add packages/runtime/src/asset/ICEAssetLoader.ts \
@@ -1315,30 +1293,30 @@ git commit -m "feat(runtime): expose asset contract diagnostics"
 
 ---
 
-### Task 7: Freeze and Verify the Cross-Repository Contract
+### 任务 7：冻结并验证跨仓库契约
 
-**Repositories:** `ice3-toolchain`, `ice3-engine`, `ice3-doc`
+**仓库：** `ice3-toolchain`、`ice3-engine`、`ice3-doc`
 
-**Files:**
-- Modify: `ice3-toolchain/fixtures/prepared-cube.glb`
-- Modify: `ice3-toolchain/fixtures/prepared-cube.report.json`
-- Modify: `ice3-engine/examples/m1/assets/prepared-cube.glb`
-- Modify: `ice3-engine/packages/assets/tests/GLBReader.test.ts`
-- Modify: `ice3-toolchain/tests/fixtures/contract.test.ts`
-- Modify: `ice3-engine/README.md`
-- Modify: `ice3-toolchain/README.md`
-- Modify: `ice3-engine/docs/api/m1.md`
-- Modify: `ice3-engine/docs/diagnostics.md`
-- Modify: `ice3-doc/README.md`
+**文件：**
+- 修改：`ice3-toolchain/fixtures/prepared-cube.glb`
+- 修改：`ice3-toolchain/fixtures/prepared-cube.report.json`
+- 修改：`ice3-engine/examples/m1/assets/prepared-cube.glb`
+- 修改：`ice3-engine/packages/assets/tests/GLBReader.test.ts`
+- 修改：`ice3-toolchain/tests/fixtures/contract.test.ts`
+- 修改：`ice3-engine/README.md`
+- 修改：`ice3-toolchain/README.md`
+- 修改：`ice3-engine/docs/api/m1.md`
+- 修改：`ice3-engine/docs/diagnostics.md`
+- 修改：`ice3-doc/README.md`
 
-**Interfaces:**
-- Consumes: final contract-enabled toolchain output.
-- Produces: identical synthetic GLB fixture in both repositories.
-- Produces: documentation links to the canonical contract.
+**接口：**
+- 使用：启用契约后的最终工具链输出。
+- 产出：两个仓库中完全相同的合成 GLB fixture。
+- 产出：指向规范契约的文档链接。
 
-- [ ] **Step 1: Regenerate synthetic fixtures**
+- [ ] **步骤 1：重新生成合成 fixture**
 
-Run in `ice3-toolchain`:
+在 `ice3-toolchain` 中运行：
 
 ```bash
 node packages/cli/dist/main.js build tests/fixtures/cube.gltf \
@@ -1349,16 +1327,16 @@ node packages/cli/dist/main.js build tests/fixtures/cube.gltf \
   --json
 ```
 
-Copy only the synthetic GLB to the engine:
+仅将合成 GLB 复制到引擎：
 
 ```bash
 cp fixtures/prepared-cube.glb \
   ../ice3-engine/examples/m1/assets/prepared-cube.glb
 ```
 
-- [ ] **Step 2: Add failing cross-repository identity tests**
+- [ ] **步骤 2：添加失败的跨仓库一致性测试**
 
-Toolchain:
+工具链：
 
 ```ts
 test('fixture report matches the frozen GLB contract', async () => {
@@ -1372,7 +1350,7 @@ test('fixture report matches the frozen GLB contract', async () => {
 });
 ```
 
-Use this local helper in the toolchain fixture test:
+在工具链 fixture 测试中使用以下本地辅助函数：
 
 ```ts
 const readProfile = (bytes: Uint8Array): {
@@ -1388,7 +1366,7 @@ const readProfile = (bytes: Uint8Array): {
 };
 ```
 
-Engine:
+引擎：
 
 ```ts
 test('frozen toolchain fixture exposes the v1 contract', async () => {
@@ -1406,20 +1384,20 @@ test('frozen toolchain fixture exposes the v1 contract', async () => {
 });
 ```
 
-- [ ] **Step 3: Verify fixture hash equality**
+- [ ] **步骤 3：验证 fixture 哈希一致**
 
-Run from the shared workspace:
+从共享 Workspace 运行：
 
 ```bash
 shasum -a 256 ice3-toolchain/fixtures/prepared-cube.glb \
   ice3-engine/examples/m1/assets/prepared-cube.glb
 ```
 
-Expected: two identical hashes.
+预期：两个哈希完全相同。
 
-- [ ] **Step 4: Update documentation and diagnostics**
+- [ ] **步骤 4：更新文档和诊断**
 
-Both repository READMEs state:
+两个仓库的 README 均声明：
 
 ```md
 Cross-repository asset formats, shared metrics, budgets, compatibility, and
@@ -1427,35 +1405,35 @@ diagnostic codes are defined by the canonical
 `ice3-doc/docs/contracts/asset-preparation-contract-v1.md` contract.
 ```
 
-Engine diagnostics table adds:
+引擎诊断表添加：
 
 - `ICE3_ASSET_CONTRACT_MISSING`
 - `ICE3_ASSET_CONTRACT_UNSUPPORTED`
 - `ICE3_ASSET_STATS_MISMATCH`
 - `ICE3_TOOL_RUNTIME_CONVERSION_REQUIRED`
 
-Toolchain documentation adds report and budget flags.
+工具链文档添加报告和预算标志。
 
-- [ ] **Step 5: Run full verification in both repositories**
+- [ ] **步骤 5：在两个仓库中运行完整验证**
 
-Toolchain:
+工具链：
 
 ```bash
 npm run verify
 ```
 
-Engine:
+引擎：
 
 ```bash
 npm run verify
 npm pack --workspaces --dry-run
 ```
 
-Expected: all architecture, type, unit, integration, Chromium, and WebKit tests pass; packaged files contain no customer assets.
+预期：所有架构、类型、单元、集成、Chromium 和 WebKit 测试均通过；打包文件不包含客户 Asset。
 
-- [ ] **Step 6: Audit names and assets**
+- [ ] **步骤 6：审查名称和 Asset**
 
-In each repository:
+在每个仓库中：
 
 ```bash
 git status --short --branch
@@ -1464,12 +1442,11 @@ git ls-files '*.glb' '*.gltf'
 git status --short --ignored
 ```
 
-Manually review every changed document and source file against `AGENTS.md`.
-Only the synthetic `prepared-cube.glb` fixtures may be tracked.
+根据 `AGENTS.md` 手动审查每个已更改的文档和源文件。仅可跟踪合成的 `prepared-cube.glb` fixture。
 
-- [ ] **Step 7: Commit and merge each repository**
+- [ ] **步骤 7：提交并合并每个仓库**
 
-Toolchain:
+工具链：
 
 ```bash
 git add fixtures/prepared-cube.glb fixtures/prepared-cube.report.json \
@@ -1479,7 +1456,7 @@ git switch main
 git merge --ff-only feature/asset-preparation-contract
 ```
 
-Engine:
+引擎：
 
 ```bash
 git add examples/m1/assets/prepared-cube.glb \
@@ -1490,7 +1467,7 @@ git switch main
 git merge --ff-only feature/asset-preparation-contract
 ```
 
-Documentation:
+文档：
 
 ```bash
 git add README.md
@@ -1499,11 +1476,9 @@ git switch main
 git merge --ff-only docs/asset-contract-implementation-plan
 ```
 
-After all repositories are green on `main`, restart the M1 preview and
-verify the local synthetic fixture and the locally supplied model without
-committing or screenshotting customer content.
+所有仓库在 `main` 上均通过后，重启 M1 预览，并验证本地合成 fixture 和本地提供的模型，不得提交客户内容或对其截图。
 
-## Related Documents
+## 相关文档
 
-- `ICE3-DOC-IDX-001` — [Documentation index](../README.md)
+- `ICE3-DOC-IDX-001` — [文档索引](../README.md)
 - `ICE3-DOC-CTR-001` — [Asset Preparation Contract v1](../contracts/asset-preparation-contract-v1.md)
