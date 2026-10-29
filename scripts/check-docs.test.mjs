@@ -185,6 +185,16 @@ test('rejects an English-only heading', () => {
   assert.equal(violations[0].line, 1);
 });
 
+test('accepts a heading made only from controlled technical terms', () => {
+  assert.deepEqual(
+    findLanguageViolations(
+      '# ICE3 Industrial Semantic Core\n\n当前 package 提供语义能力。\n',
+      'README.md',
+    ),
+    [],
+  );
+});
+
 test('rejects an English-only prose paragraph', () => {
   const violations = findLanguageViolations([
     '# 示例',

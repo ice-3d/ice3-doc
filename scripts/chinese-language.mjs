@@ -2,6 +2,37 @@ const CJK_PATTERN = /\p{Script=Han}/u;
 const LATIN_WORD_PATTERN = /[A-Za-z][A-Za-z0-9_.:/-]*/g;
 const FENCE_PATTERN = /^\s*(```|~~~)/;
 const HEADING_PATTERN = /^#{1,6}\s+(.+)$/;
+const CONTROLLED_HEADING_TERMS = new Set([
+  'adr',
+  'agent',
+  'api',
+  'asset',
+  'cli',
+  'console',
+  'core',
+  'demo',
+  'documentation',
+  'engine',
+  'glb',
+  'gltf',
+  'ice3',
+  'industrial',
+  'lod',
+  'm0',
+  'm1',
+  'model',
+  'ogc',
+  'runtime',
+  'scene',
+  'selection',
+  'semantic',
+  'studio',
+  'tileset',
+  'toolchain',
+  '3d',
+  'water',
+  'webgl',
+]);
 
 export function findLanguageViolations(source, relativePath) {
   if (!supportsLanguagePolicy(relativePath)) return [];
@@ -48,7 +79,11 @@ export function findLanguageViolations(source, relativePath) {
     if (heading) {
       flushParagraph();
       const value = stripMarkdownTargets(heading[1]);
-      if (!CJK_PATTERN.test(value) && latinWordCount(value) >= 3) {
+      if (
+        !CJK_PATTERN.test(value)
+        && latinWordCount(value) >= 3
+        && !isControlledTechnicalHeading(value)
+      ) {
         violations.push({
           code: 'ICE3_DOC_ENGLISH_HEADING',
           line: lineNumber,
@@ -88,4 +123,12 @@ function stripMarkdownTargets(value) {
 
 function latinWordCount(value) {
   return value.match(LATIN_WORD_PATTERN)?.length ?? 0;
+}
+
+function isControlledTechnicalHeading(value) {
+  const words = value
+    .replace(/`[^`\n]*`/g, '')
+    .match(/[\p{L}\p{N}]+/gu);
+  return Boolean(words?.length)
+    && words.every((word) => CONTROLLED_HEADING_TERMS.has(word.toLowerCase()));
 }
