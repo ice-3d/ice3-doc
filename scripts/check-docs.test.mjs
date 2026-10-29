@@ -23,6 +23,42 @@ test('accepts one titled document with valid metadata', async () => {
   assert.deepEqual(report.errors, []);
 });
 
+test('excludes root repository agent instructions from product documentation', async () => {
+  const root = await mkdtemp(join(tmpdir(), 'ice3-docs-'));
+  try {
+    await writeFile(join(root, 'README.md'), [
+      '# Placeholder Repository',
+      '',
+      '> Document ID: ICE3-DOC-RM-001',
+      '>',
+      '> Status: Placeholder',
+      '>',
+      '> Owner: Documentation tests',
+      '',
+      'No public implementation exists yet.',
+      '',
+    ].join('\n'));
+    await writeFile(join(root, 'AGENTS.md'), [
+      '# Repository Agent Instructions',
+      '',
+      '> Document ID: ICE3-DOC-POL-001',
+      '>',
+      '> Status: Active',
+      '>',
+      '> Owner: Documentation tests',
+      '',
+      'These instructions govern repository work.',
+      '',
+    ].join('\n'));
+
+    const report = await checkRepository(root, { expectedArea: 'DOC' });
+    assert.equal(report.documentCount, 1);
+    assert.deepEqual(report.errors, []);
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
 test('rejects duplicate IDs and missing metadata', async () => {
   const report = await checkRepository(invalidFixtureRoot, { expectedArea: 'DOC' });
   const errors = report.errors.join('\n');

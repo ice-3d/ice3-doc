@@ -253,6 +253,7 @@ export async function checkRepository(root, options = {}) {
 }
 
 async function markdownFiles(root) {
+  const repositoryPolicyPath = join(root, 'AGENTS.md');
   if (await pathExists(join(root, '.git'))) {
     const output = execFileSync(
       'git',
@@ -262,7 +263,8 @@ async function markdownFiles(root) {
     return output
       .split('\0')
       .filter((file) => file && !file.startsWith('scripts/fixtures/'))
-      .map((file) => join(root, file));
+      .map((file) => join(root, file))
+      .filter((file) => file !== repositoryPolicyPath);
   }
   const files = [];
   async function visit(directory) {
@@ -278,7 +280,10 @@ async function markdownFiles(root) {
   }
   await visit(root);
   return files
-    .filter((file) => !relative(root, file).startsWith('scripts/fixtures/'))
+    .filter((file) => (
+      file !== repositoryPolicyPath
+      && !relative(root, file).startsWith('scripts/fixtures/')
+    ))
     .sort();
 }
 
