@@ -45,7 +45,7 @@
 | `ICE3-DOC-SPEC-009` | [Industrial Semantic Layer](specs/2026-10-28-industrial-semantic-layer-design.md) | Implemented | 定义 industrial workspace core |
 | `ICE3-DOC-SPEC-010` | [Synthetic Wastewater Plant Asset](specs/2026-10-28-synthetic-wastewater-plant-asset-design.md) | Implemented | 定义确定性的合成 Asset 生成 |
 | `ICE3-DOC-SPEC-011` | [文档系统](specs/2026-10-29-documentation-system-design.md) | Implemented | 定义公开文档 contract |
-| `ICE3-DOC-SPEC-012` | [全中文文档改版](specs/2026-10-29-chinese-documentation-policy-design.md) | Draft | 定义中文叙述边界、迁移顺序与自动校验 |
+| `ICE3-DOC-SPEC-012` | [全中文文档改版](specs/2026-10-29-chinese-documentation-policy-design.md) | Implemented | 定义中文叙述边界、迁移顺序与自动校验 |
 
 ## 实施计划
 
@@ -66,4 +66,4 @@
 | `ICE3-DOC-PLAN-013` | [Industrial Semantic Core](plans/2026-10-28-industrial-semantic-core.md) | Implemented | 实现 semantic core |
 | `ICE3-DOC-PLAN-014` | [Synthetic Wastewater Plant Asset](plans/2026-10-28-synthetic-wastewater-plant-asset.md) | Implemented | 实现合成 Asset 输出 |
 | `ICE3-DOC-PLAN-015` | [文档系统](plans/2026-10-29-documentation-system.md) | Implemented | 实现本文档系统 |
-| `ICE3-DOC-PLAN-016` | [全中文文档改版](plans/2026-10-29-chinese-documentation-policy.md) | Draft | 迁移全部产品文档并启用中文叙述门禁 |
+| `ICE3-DOC-PLAN-016` | [全中文文档改版](plans/2026-10-29-chinese-documentation-policy.md) | Implemented | 迁移全部产品文档并启用中文叙述门禁 |

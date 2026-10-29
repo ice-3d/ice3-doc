@@ -2,7 +2,7 @@
 
 > Document ID: ICE3-DOC-SPEC-012
 >
-> Status: Draft
+> Status: Implemented
 >
 > Owner: ICE3 documentation maintainers
 

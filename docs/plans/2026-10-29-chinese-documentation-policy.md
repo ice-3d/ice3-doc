@@ -2,7 +2,7 @@
 
 > Document ID: ICE3-DOC-PLAN-016
 >
-> Status: Draft
+> Status: Implemented
 >
 > Owner: ICE3 documentation maintainers
 >
@@ -145,7 +145,7 @@ test('excludes legal notices and source fixtures by path', () => {
 运行：
 
 ```bash
-export PATH=/Users/felix/.nvm/versions/node/v24.22.1/bin:$PATH
+nvm use 24.22.1
 node --test scripts/check-docs.test.mjs
 ```
 
@@ -261,7 +261,7 @@ test('language file CLI checks only the requested path', () => {
 运行：
 
 ```bash
-export PATH=/Users/felix/.nvm/versions/node/v24.22.1/bin:$PATH
+nvm use 24.22.1
 npm test
 npm run docs:check
 ```
@@ -356,7 +356,7 @@ test('accepts a Chinese specification without an English summary', async () => {
 运行：
 
 ```bash
-export PATH=/Users/felix/.nvm/versions/node/v24.22.1/bin:$PATH
+nvm use 24.22.1
 node --test --test-name-pattern="without an English summary" scripts/check-docs.test.mjs
 ```
 
@@ -415,7 +415,7 @@ OGC 3D Tiles
 - [ ] **步骤 6：运行测试与文档检查**
 
 ```bash
-export PATH=/Users/felix/.nvm/versions/node/v24.22.1/bin:$PATH
+nvm use 24.22.1
 npm test
 npm run docs:check
 ```
@@ -491,7 +491,7 @@ done
 在 `ice3-doc` 中运行：
 
 ```bash
-export PATH=/Users/felix/.nvm/versions/node/v24.22.1/bin:$PATH
+nvm use 24.22.1
 node scripts/check-language-files.mjs --root ../ice3-agent-console \
   AGENTS.md README.md docs/README.md
 node scripts/check-language-files.mjs --root ../ice3-doc \
@@ -551,7 +551,7 @@ Contract 文档中的 normative key、JSON、指标列和 Diagnostic code 不得
 
 ```bash
 cd ice3-doc
-export PATH=/Users/felix/.nvm/versions/node/v24.22.1/bin:$PATH
+nvm use 24.22.1
 node scripts/check-docs.mjs --root . --language
 ```
 
@@ -640,7 +640,7 @@ git commit -m "docs: localize shared architecture and contracts"
 - [ ] **步骤 5：逐仓库运行语言、链接与测试门禁**
 
 ```bash
-export PATH=/Users/felix/.nvm/versions/node/v24.22.1/bin:$PATH
+nvm use 24.22.1
 cd ../ice3-agent-console && npm run docs:check && cd ../ice3-doc
 node scripts/check-language-files.mjs --root ../ice3-agent-console \
   AGENTS.md README.md docs/README.md docs/architecture.md \
@@ -751,7 +751,7 @@ ice3-engine/docs/specs/*.md
 
 ```bash
 cd ice3-doc
-export PATH=/Users/felix/.nvm/versions/node/v24.22.1/bin:$PATH
+nvm use 24.22.1
 node scripts/check-language-files.mjs --root ../ice3-agent-console .
 node scripts/check-language-files.mjs --root ../ice3-doc .
 node scripts/check-language-files.mjs --root ../ice3-engine .
@@ -817,7 +817,7 @@ test('runs the language gate by default', async () => {
 - [ ] **步骤 2：运行并确认失败**
 
 ```bash
-export PATH=/Users/felix/.nvm/versions/node/v24.22.1/bin:$PATH
+nvm use 24.22.1
 node --test --test-name-pattern="language gate by default" scripts/check-docs.test.mjs
 ```
 
@@ -844,7 +844,7 @@ const report = await checkRepository(validFixtureRoot, {
 
 ```bash
 cd ice3-doc
-export PATH=/Users/felix/.nvm/versions/node/v24.22.1/bin:$PATH
+nvm use 24.22.1
 npm test
 npm run docs:check
 npm run docs:check:workspace
@@ -880,7 +880,7 @@ git commit -m "docs: enforce Chinese narrative by default"
 
 ```bash
 cd ice3-doc
-export PATH=/Users/felix/.nvm/versions/node/v24.22.1/bin:$PATH
+nvm use 24.22.1
 npm test
 npm run docs:check
 npm run docs:check:workspace
@@ -968,7 +968,7 @@ git -C ice3-doc commit -m "docs: repair localized document navigation"
 - [ ] **步骤 1：在功能分支运行各仓库验证**
 
 ```bash
-export PATH=/Users/felix/.nvm/versions/node/v24.22.1/bin:$PATH
+nvm use 24.22.1
 
 cd ice3-agent-console && npm run verify
 cd ../ice3-engine && npm run verify
@@ -1016,7 +1016,7 @@ done
 - [ ] **步骤 4：在 `main` 上重跑最终门禁**
 
 ```bash
-export PATH=/Users/felix/.nvm/versions/node/v24.22.1/bin:$PATH
+nvm use 24.22.1
 
 cd ice3-doc
 npm test
