@@ -308,6 +308,42 @@ test('language file CLI checks only the requested path', () => {
   assert.match(result.stderr, /ICE3_DOC_ENGLISH_HEADING/);
 });
 
+test('language file CLI ignores dependencies and execution workspace', async () => {
+  const root = await mkdtemp(join(tmpdir(), 'ice3-language-'));
+  try {
+    await mkdir(join(root, 'node_modules'), { recursive: true });
+    await mkdir(join(root, '.superpowers', 'sdd'), { recursive: true });
+    await writeFile(
+      join(root, 'README.md'),
+      '# 文档\n\n本文档使用中文叙述。\n',
+    );
+    await writeFile(
+      join(root, 'node_modules', 'README.md'),
+      '# Dependency\n\nThis dependency documentation uses English prose.\n',
+    );
+    await writeFile(
+      join(root, '.superpowers', 'sdd', 'README.md'),
+      '# Scratch\n\nThis execution workspace uses English prose.\n',
+    );
+
+    const result = spawnSync(
+      process.execPath,
+      [
+        join(scriptsDirectory, 'check-language-files.mjs'),
+        '--root',
+        root,
+        '.',
+      ],
+      { encoding: 'utf8' },
+    );
+
+    assert.equal(result.status, 0, result.stderr);
+    assert.match(result.stdout, /1 Markdown files use Chinese narrative/);
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
 test('CLI reports JSON and a non-zero status for invalid documentation', () => {
   const result = spawnSync(
     process.execPath,

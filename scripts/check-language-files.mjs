@@ -11,6 +11,15 @@ import {
 } from 'node:path';
 import { findLanguageViolations } from './chinese-language.mjs';
 
+const IGNORED_DIRECTORIES = new Set([
+  '.git',
+  '.superpowers',
+  'dist',
+  'node_modules',
+  'playwright-report',
+  'test-results',
+]);
+
 const rootIndex = process.argv.indexOf('--root');
 const root = resolve(
   rootIndex >= 0 && process.argv[rootIndex + 1]
@@ -61,6 +70,7 @@ async function collectMarkdownFiles(path, files) {
   if (!details.isDirectory()) return;
 
   for (const entry of await readdir(path, { withFileTypes: true })) {
+    if (entry.isDirectory() && IGNORED_DIRECTORIES.has(entry.name)) continue;
     const child = join(path, entry.name);
     if (entry.isDirectory()) {
       await collectMarkdownFiles(child, files);
