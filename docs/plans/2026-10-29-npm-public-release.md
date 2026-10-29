@@ -2,7 +2,7 @@
 
 > Document ID: ICE3-DOC-PLAN-017
 >
-> Status: Active
+> Status: Implemented
 >
 > Owner: ICE3 architecture maintainers
 
@@ -57,24 +57,24 @@
 - 产出：`npm run release:package`，生成可发布 `packages/ice3/dist`。
 - 产出：`npm run release:check`，生成本地 tarball 并检查包内容。
 
-- [ ] **步骤 1：编写失败的 manifest test**
+- [x] **步骤 1：编写失败的 manifest test**
 
 断言 `packages/ice3/package.json` 使用 `ice3@0.1.0`、无 `private`、无私有依赖和
 有效 exports；其他四个 workspace package 保持 private。
 
-- [ ] **步骤 2：确认测试失败**
+- [x] **步骤 2：确认测试失败**
 
 运行：`npm test -- tests/release/package.test.ts`
 
-- [ ] **步骤 3：增加 esbuild release build**
+- [x] **步骤 3：增加 esbuild release build**
 
 先生成 TypeScript 声明，再把四个内部 package 的 `.d.ts` 复制到 facade 的
 `dist/_types/`，把 bare `@ice3/*` declaration import 重写为相对路径，最后用 esbuild
 生成单一 `dist/index.js`。
 
-- [ ] **步骤 4：更新 package metadata 和 README**
+- [x] **步骤 4：更新 package metadata 和 README**
 
-- [ ] **步骤 5：验证**
+- [x] **步骤 5：验证**
 
 运行：`npm run release:package && npm run release:check && npm run verify`
 
@@ -92,18 +92,18 @@
 
 - 产出：`@ice3/industrial-core@0.1.0`。
 
-- [ ] **步骤 1：编写失败的 release metadata test**
+- [x] **步骤 1：编写失败的 release metadata test**
 
 断言 package 名为 `@ice3/industrial-core`、版本 `0.1.0`、不是 private，并保留零
 runtime dependency。
 
-- [ ] **步骤 2：确认测试失败**
+- [x] **步骤 2：确认测试失败**
 
 运行：`npm test -- tests/architecture/package-boundaries.test.mjs`
 
-- [ ] **步骤 3：更新 package metadata、README 和 LICENSE**
+- [x] **步骤 3：更新 package metadata、README 和 LICENSE**
 
-- [ ] **步骤 4：验证**
+- [x] **步骤 4：验证**
 
 运行：`npm run verify && npm pack --workspace @ice3/industrial-core --dry-run`
 
@@ -125,23 +125,23 @@ runtime dependency。
 - 产出：`@ice3/toolchain@0.1.0`。
 - 产出：可执行命令 `ice3-tool`。
 
-- [ ] **步骤 1：编写失败的 manifest test**
+- [x] **步骤 1：编写失败的 manifest test**
 
 断言 package 名称、版本、CLI bin、public access 和第三方 runtime dependencies；
 `@ice3/toolchain-core` 继续 private。
 
-- [ ] **步骤 2：确认测试失败**
+- [x] **步骤 2：确认测试失败**
 
 运行：`npm test -- tests/release/package.test.ts`
 
-- [ ] **步骤 3：增加 esbuild release build**
+- [x] **步骤 3：增加 esbuild release build**
 
 打包 CLI 和私有 core，外部化 `@gltf-transform/*`、`draco3dgltf` 和
 `meshoptimizer`，保留可执行 shebang 与 source map。
 
-- [ ] **步骤 4：更新 package metadata、README、LICENSE 和第三方声明**
+- [x] **步骤 4：更新 package metadata、README、LICENSE 和第三方声明**
 
-- [ ] **步骤 5：验证**
+- [x] **步骤 5：验证**
 
 运行：`npm run release:package && npm run release:check && npm run verify`
 
@@ -156,10 +156,10 @@ runtime dependency。
 - 消费：三个 `npm pack` tarball。
 - 产出：空目录安装、Engine import、Industrial import 和 CLI execution 验证。
 
-- [ ] **步骤 1：运行三个仓库的 release package 命令**
-- [ ] **步骤 2：在空目录安装三个 tarball**
-- [ ] **步骤 3：执行最小 import 和 `npx ice3-tool --help`**
-- [ ] **步骤 4：记录 package 大小、文件和运行结果**
+- [x] **步骤 1：运行三个仓库的 release package 命令**
+- [x] **步骤 2：在空目录安装三个 tarball**
+- [x] **步骤 3：执行最小 import 和 `ice3-tool` 入口**
+- [x] **步骤 4：记录 package 大小、文件和运行结果**
 
 ### Task 5：发布与收尾
 
@@ -172,7 +172,7 @@ runtime dependency。
 - 消费：已验证 tarball。
 - 产出：npm 上的三个公开 package。
 
-- [ ] **步骤 1：确认当前 npm 用户已拥有 `@ice3` scope**
-- [ ] **步骤 2：依次发布 `ice3`、`@ice3/industrial-core`、`@ice3/toolchain`**
-- [ ] **步骤 3：从 registry 重新安装并验证**
-- [ ] **步骤 4：更新计划状态并合并各仓库分支**
+- [x] **步骤 1：确认当前 npm 用户已拥有 `@ice3` scope**
+- [x] **步骤 2：依次发布 `ice3`、`@ice3/industrial-core`、`@ice3/toolchain`**
+- [x] **步骤 3：从 registry 重新安装并验证**
+- [x] **步骤 4：更新计划状态并合并各仓库分支**
