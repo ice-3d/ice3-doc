@@ -14,6 +14,7 @@ import {
   resolve,
 } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { findLanguageViolations } from './chinese-language.mjs';
 
 const AREA_BY_REPOSITORY = {
   'ice3-agent-console': 'AGENT',
@@ -77,6 +78,30 @@ export async function checkRepository(root, options = {}) {
   for (const path of await markdownFiles(repositoryRoot)) {
     const source = await readFile(path, 'utf8');
     documents.push(parseDocument(path, source));
+  }
+
+  if (options.language) {
+    for (const document of documents) {
+      const displayPath = relative(repositoryRoot, document.path);
+      for (const violation of findLanguageViolations(
+        document.source,
+        displayPath,
+      )) {
+        errors.push(
+          `${displayPath}:${violation.line}: ${violation.code}: ${violation.message}`,
+        );
+      }
+    }
+
+    const repositoryPolicyPath = join(repositoryRoot, 'AGENTS.md');
+    if (await fileExists(repositoryPolicyPath)) {
+      const source = await readFile(repositoryPolicyPath, 'utf8');
+      for (const violation of findLanguageViolations(source, 'AGENTS.md')) {
+        errors.push(
+          `AGENTS.md:${violation.line}: ${violation.code}: ${violation.message}`,
+        );
+      }
+    }
   }
 
   const ids = new Map();
@@ -410,11 +435,14 @@ function parseArgs(argv) {
     workspaceRoot: undefined,
     expectedArea: undefined,
     json: false,
+    language: false,
   };
   for (let index = 0; index < argv.length; index += 1) {
     const argument = argv[index];
     if (argument === '--json') {
       options.json = true;
+    } else if (argument === '--language') {
+      options.language = true;
     } else if (argument === '--root' && argv[index + 1]) {
       options.root = argv[++index];
     } else if (argument === '--workspace-root' && argv[index + 1]) {
@@ -446,6 +474,7 @@ async function main() {
       ...(options.workspaceRoot
         ? { workspaceRoot: resolve(options.workspaceRoot) }
         : {}),
+      language: options.language,
     }));
   }
   const valid = reports.every((report) => report.valid);

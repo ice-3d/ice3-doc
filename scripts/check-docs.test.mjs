@@ -12,6 +12,7 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import test from 'node:test';
 import { checkRepository } from './check-docs.mjs';
+import { findLanguageViolations } from './chinese-language.mjs';
 
 const scriptsDirectory = dirname(fileURLToPath(import.meta.url));
 const fixtures = join(scriptsDirectory, 'fixtures');
@@ -113,6 +114,140 @@ test('rejects local absolute paths', async () => {
   } finally {
     await rm(root, { recursive: true, force: true });
   }
+});
+
+test('accepts Chinese narrative with retained technical terms', () => {
+  const source = [
+    '# 场景与 Selection',
+    '',
+    '当前 Selection 保存在 Scene 中，并在相机变化后保持稳定。',
+    '',
+  ].join('\n');
+
+  assert.deepEqual(findLanguageViolations(source, 'README.md'), []);
+});
+
+test('rejects an English-only heading', () => {
+  const violations = findLanguageViolations(
+    '# Scene and Selection\n\n当前 Selection 保持稳定。\n',
+    'README.md',
+  );
+
+  assert.equal(violations[0].code, 'ICE3_DOC_ENGLISH_HEADING');
+  assert.equal(violations[0].line, 1);
+});
+
+test('rejects an English-only prose paragraph', () => {
+  const violations = findLanguageViolations([
+    '# 示例',
+    '',
+    'The current selection remains stable while the camera moves through the scene.',
+    '',
+  ].join('\n'), 'README.md');
+
+  assert.equal(violations[0].code, 'ICE3_DOC_ENGLISH_PROSE');
+  assert.equal(violations[0].line, 3);
+});
+
+test('ignores English inside fenced and inline code', () => {
+  const source = [
+    '# 示例',
+    '',
+    '使用 `findSelectionById` 查询当前 Selection。',
+    '',
+    '```ts',
+    'const selection = findSelectionById("device-01");',
+    'console.log(selection);',
+    '```',
+    '',
+  ].join('\n');
+
+  assert.deepEqual(findLanguageViolations(source, 'README.md'), []);
+});
+
+test('accepts technical table values without Chinese descriptions', () => {
+  const source = [
+    '# 字段',
+    '',
+    '| Field | Type |',
+    '| --- | --- |',
+    '| selectionId | string |',
+    '| nodeId | string |',
+    '',
+  ].join('\n');
+
+  assert.deepEqual(findLanguageViolations(source, 'README.md'), []);
+});
+
+test('excludes legal notices and source fixtures by path', () => {
+  const english = '# Third Party Notices\n\nUpstream license text remains unchanged.\n';
+  assert.deepEqual(
+    findLanguageViolations(english, 'THIRD_PARTY_NOTICES.md'),
+    [],
+  );
+  assert.deepEqual(
+    findLanguageViolations(
+      english,
+      'tests/fixtures/3d-tiles-1.1-schema/SOURCE.md',
+    ),
+    [],
+  );
+});
+
+test('flags English AGENTS prose without requiring an index entry', async () => {
+  const root = await mkdtemp(join(tmpdir(), 'ice3-docs-'));
+  try {
+    await writeFile(join(root, 'README.md'), [
+      '# 占位仓库',
+      '',
+      '> Document ID: ICE3-DOC-RM-001',
+      '>',
+      '> Status: Placeholder',
+      '>',
+      '> Owner: Documentation tests',
+      '',
+      '当前没有公开实现。',
+      '',
+    ].join('\n'));
+    await writeFile(join(root, 'AGENTS.md'), [
+      '# Repository Rules And Verification',
+      '',
+      '> Document ID: ICE3-DOC-POL-001',
+      '>',
+      '> Status: Active',
+      '>',
+      '> Owner: Documentation tests',
+      '',
+      'All repository changes must follow the verification rules.',
+      '',
+    ].join('\n'));
+
+    const report = await checkRepository(root, {
+      expectedArea: 'DOC',
+      language: true,
+    });
+    const errors = report.errors.join('\n');
+    assert.match(errors, /AGENTS\.md:1: ICE3_DOC_ENGLISH_HEADING/);
+    assert.doesNotMatch(errors, /index does not link/);
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
+test('language file CLI checks only the requested path', () => {
+  const result = spawnSync(
+    process.execPath,
+    [
+      join(scriptsDirectory, 'check-language-files.mjs'),
+      '--root',
+      invalidFixtureRoot,
+      'README.md',
+    ],
+    { encoding: 'utf8' },
+  );
+
+  assert.notEqual(result.status, 0);
+  assert.match(result.stderr, /ICE3_DOC_ENGLISH_HEADING/);
 });
 
 test('CLI reports JSON and a non-zero status for invalid documentation', () => {
