@@ -60,3 +60,4 @@
 | `ICE3-DOC-PLAN-013` | [Industrial Semantic Core](plans/2026-10-28-industrial-semantic-core.md) | Implemented | Implement the semantic core |
 | `ICE3-DOC-PLAN-014` | [Synthetic Wastewater Plant Asset](plans/2026-10-28-synthetic-wastewater-plant-asset.md) | Implemented | Implement synthetic asset outputs |
 | `ICE3-DOC-PLAN-015` | [Documentation System](plans/2026-10-29-documentation-system.md) | Implemented | Implement this documentation system |
+| `ICE3-DOC-PLAN-016` | [全中文文档改版](plans/2026-10-29-chinese-documentation-policy.md) | Draft | 迁移全部产品文档并启用中文叙述门禁 |
