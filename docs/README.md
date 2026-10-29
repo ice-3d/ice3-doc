@@ -68,4 +68,4 @@
 | `ICE3-DOC-PLAN-014` | [Synthetic Wastewater Plant Asset](plans/2026-10-28-synthetic-wastewater-plant-asset.md) | Implemented | 实现合成 Asset 输出 |
 | `ICE3-DOC-PLAN-015` | [文档系统](plans/2026-10-29-documentation-system.md) | Implemented | 实现本文档系统 |
 | `ICE3-DOC-PLAN-016` | [全中文文档改版](plans/2026-10-29-chinese-documentation-policy.md) | Implemented | 迁移全部产品文档并启用中文叙述门禁 |
-| `ICE3-DOC-PLAN-017` | [npm 公开发布](plans/2026-10-29-npm-public-release.md) | Active | 实现三个公开 package 的构建、验证与发布 |
+| `ICE3-DOC-PLAN-017` | [npm 公开发布](plans/2026-10-29-npm-public-release.md) | Implemented | 实现三个公开 package 的构建、验证与发布 |
