@@ -17,12 +17,14 @@ const CONTROLLED_HEADING_TERMS = new Set([
   'gltf',
   'ice3',
   'industrial',
+  'json',
   'lod',
   'm0',
   'm1',
   'model',
   'ogc',
   'runtime',
+  'report',
   'scene',
   'selection',
   'semantic',
@@ -127,6 +129,7 @@ function latinWordCount(value) {
 
 function isControlledTechnicalHeading(value) {
   const words = value
+    .replace(/^\d+(?:\.\d+)*\.?\s*/, '')
     .replace(/`[^`\n]*`/g, '')
     .match(/[\p{L}\p{N}]+/gu);
   return Boolean(words?.length)
