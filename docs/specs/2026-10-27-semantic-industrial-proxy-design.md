@@ -6,7 +6,6 @@
 >
 > Owner: ICE3 architecture maintainers
 >
-> English summary: Define conservative OBB and cylinder semantic proxies with quality gates and QEM fallback.
 
 | 项目 | 内容 |
 | --- | --- |

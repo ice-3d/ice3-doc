@@ -1,4 +1,4 @@
-# ICE3 Documentation System Design Specification
+# ICE3 文档系统设计规格
 
 > Document ID: ICE3-DOC-SPEC-011
 >
@@ -6,36 +6,33 @@
 >
 > Owner: ICE3 documentation maintainers
 
-## Purpose
+## 目标
 
-This specification defines the documentation system for all ICE3 repositories. Its
-purpose is to make every repository understandable, navigable, and verifiable by
-a developer who has no prior project context.
+本规格定义所有 ICE3 仓库的文档系统，使没有项目背景的开发者也能理解、导航并验证每个
+仓库。
 
-The documentation system must answer four questions without requiring tribal
-knowledge:
+文档系统必须在不依赖内部口头知识的情况下回答四个问题：
 
-1. What is this repository and what is it not?
-2. How does it fit with the other ICE3 repositories?
-3. What are the important technical decisions behind it?
-4. How can a developer install, run, use, debug, and verify it?
+1. 这个仓库是什么，不是什么？
+2. 它如何与其他 ICE3 仓库协作？
+3. 其背后有哪些重要技术决策？
+4. 开发者如何安装、运行、使用、调试和验证它？
 
-This specification defines document identity, document taxonomy, repository
-coverage, reference rules, lifecycle, migration, and automated validation. It
-does not define the runtime architecture or asset format itself; those remain
-owned by their canonical design and contract documents.
+本规格定义 Document identity、taxonomy、repository coverage、reference rule、
+lifecycle、migration 和 automated validation。它不定义 Runtime architecture 或
+Asset format；这些内容仍由各自的权威设计和 contract 管理。
 
-## Audience
+## 读者
 
-- New contributors who need a reliable onboarding path.
-- Application developers who consume public ICE3 packages.
-- Tool authors who prepare, validate, partition, and publish assets.
-- Maintainers who need to locate authoritative contracts and decisions.
-- Reviewers who need to verify that documentation and implementation agree.
+- 需要可靠入门路径的新贡献者。
+- 使用公开 ICE3 package 的应用开发者。
+- 准备、验证、拆分和发布 Asset 的工具作者。
+- 需要定位权威 contract 和决策的维护者。
+- 需要验证文档与实现一致的审查者。
 
-## Scope
+## 范围
 
-This specification applies to all Markdown documentation in:
+本规格适用于以下仓库中的全部 Markdown 文档：
 
 - `ice3-agent-console`
 - `ice3-doc`
@@ -45,85 +42,70 @@ This specification applies to all Markdown documentation in:
 - `ice3-toolchain`
 - `ice3-water-demo`
 
-It includes repository READMEs, indexes, architecture documents, architecture
-decision records, guides, API references, contracts, specifications,
-implementation plans, repository policies, source notices, and third-party
-references.
+范围包括 repository README、index、architecture document、ADR、guide、API
+reference、contract、Spec、implement plan、repository policy、source notice 和
+third-party reference。
 
-Root `AGENTS.md` files are repository governance inputs rather than product
-documentation. Each repository owns one and keeps it aligned with that
-repository's actual responsibilities. Governance files are excluded from the
-product-document index requirement and automated product-document validation.
+根目录 `AGENTS.md` 是仓库治理输入，不属于产品文档。每个仓库拥有自己的文件，并使其
+与实际职责一致。治理文件不进入产品文档索引要求和自动产品文档验证。
 
-The `LICENSE` files use the unmodified MIT license text and are not subject to
-the Markdown document metadata rule.
+`LICENSE` 使用未修改的 MIT 许可证文本，不适用 Markdown document metadata 规则。
 
-## Goals
+## 目标清单
 
-- Give every Markdown document a clear title and permanent internal identifier.
-- Provide a complete navigation path from every repository README.
-- Separate entry points, architecture, decisions, usage, reference material,
-  specifications, plans, and policies.
-- Establish one canonical authority for every shared contract.
-- Make cross-repository references valid on GitHub after publication.
-- Preserve historical design and implementation context without presenting it
-  as current usage guidance.
-- Prevent local paths, temporary links, and undocumented placeholders from
-  entering the public documentation set.
-- Make documentation completeness and link integrity mechanically verifiable.
+- 为每份 Markdown 提供清晰标题和永久内部 ID。
+- 从每个 repository README 提供完整导航路径。
+- 分离入口、架构、决策、使用、参考、Spec、Plan 和 policy。
+- 为每个 shared contract 建立唯一权威。
+- 确保发布后的 GitHub cross-repository reference 有效。
+- 保留历史设计背景，但不将其作为当前使用指引。
+- 阻止 local path、temporary link 和未说明 placeholder 进入公开文档。
+- 让文档完整性和链接完整性可以机械验证。
 
-## Non-Goals
+## 非目标
 
-- Generating a documentation website in this phase.
-- Publishing every internal implementation detail.
-- Duplicating the canonical asset contract in each repository.
-- Rewriting the technical conclusions of historical design or implementation
-  documents.
-- Adding product claims or usage instructions for unimplemented repository
-  capabilities.
-- Maintaining multiple translations of every document.
+- 本阶段生成 documentation website。
+- 公开所有内部 implementation detail。
+- 在每个仓库重复维护权威 Asset contract。
+- 改写历史设计或实施文档的技术结论。
+- 为未实现能力增加产品声明或使用说明。
+- 为每份文档维护多个翻译版本。
 
-## Documentation Principles
+## 文档原则
 
-### Entry before detail
+### 先入口后细节
 
-Each repository starts with a concise README that explains purpose, boundaries,
-quick start, verification, and document navigation. Detailed material lives in
-focused documents linked from the README.
+每个仓库以简洁 README 开始，说明目标、边界、快速开始、验证和文档导航。详细内容
+位于 README 链接的专题文档中。
 
-### Decision before implementation detail
+### 先决策后实现细节
 
-Architecture decisions record the problem, selected approach, alternatives,
-consequences, and affected documents. Implementation guides then explain how to
-apply the decision.
+ADR 记录问题、选定方案、备选方案、影响和关联文档。实施指南再说明如何应用该决策。
 
-### One canonical definition
+### 单一权威定义
 
-Shared formats, diagnostics, compatibility rules, and metrics are defined once
-in `ice3-doc`. Other repositories link to that definition and describe only
-their implementation.
+共享 format、Diagnostic、compatibility rule 和 metric 只在 `ice3-doc` 定义一次。
+其他仓库链接该定义，只描述自身实现。
 
-### Current versus historical
+### 当前与历史分离
 
-Current API and operational guidance must be clearly separated from approved
-designs and plans that have already been implemented. Historical documents
-remain available for traceability.
+当前 API 和操作指南必须与已实现的设计和 Plan 清楚分开。历史文档继续保留，以支持
+追溯。
 
-### Stable identity
+### 稳定 Identity
 
-Document identifiers survive file moves and title edits. A future document may
-reuse a path, but it must never reuse an existing document identifier.
+Document ID 在文件移动和标题修改后保持不变。未来文档可以复用路径，但不得复用已有
+Document ID。
 
-### Verification by default
+### 默认验证
 
-Every documented command must have a verification path. A command that cannot be
-run from a fresh clone must state its prerequisites and expected result.
+每个文档化 command 都必须有验证路径。无法从全新 clone 运行的 command 必须说明前置
+条件和预期结果。
 
 ## Document Identity
 
-Every product Markdown document starts with exactly one level-one heading
-followed by a metadata block. Repository `AGENTS.md` files retain the same
-header shape so readers can identify and reference the governing policy:
+每份产品 Markdown 以一个一级标题开始，随后是 metadata block。仓库 `AGENTS.md`
+使用相同 header 形状，便于读者识别和引用治理规则：
 
 ```md
 # Human-readable title
@@ -136,26 +118,26 @@ header shape so readers can identify and reference the governing policy:
 
 ```
 
-The document identifier format is:
+Document ID 格式为：
 
 ```text
 ICE3-<AREA>-<TYPE>-<NNN>
 ```
 
-Requirements:
+要求：
 
-- `AREA` identifies the owning project.
-- `TYPE` identifies the document class.
-- `NNN` is a zero-padded, three-digit sequence within one `AREA` and `TYPE`.
-- Identifiers are globally unique across the ICE3 documentation set.
-- Identifiers are immutable after commit.
-- Numbers are never reused after a document is removed.
-- New numbers use the next unused value in their `AREA` and `TYPE` namespace.
-- The identifier is stored in the document body, not inferred from the filename.
+- `AREA` 标识所属项目。
+- `TYPE` 标识文档类别。
+- `NNN` 是同一 `AREA` 和 `TYPE` 下的三位补零序号。
+- Identifier 在 ICE3 文档集中全局唯一。
+- Commit 后 Identifier 不可修改。
+- 文档删除后编号不得复用。
+- 新编号使用 `AREA` 和 `TYPE` namespace 中下一个未使用值。
+- Identifier 存于文档正文，不根据 filename 推断。
 
-## Area Codes
+## Area Code
 
-| Area | Code | Repository |
+| 领域 | Code | 仓库 |
 |---|---|---|
 | Agent Console | `AGENT` | `ice3-agent-console` |
 | Shared documentation | `DOC` | `ice3-doc` |
@@ -165,9 +147,9 @@ Requirements:
 | Toolchain | `TOOL` | `ice3-toolchain` |
 | Water demo | `WATER` | `ice3-water-demo` |
 
-## Document Types
+## Document Type
 
-| Type | Code | Purpose |
+| 类型 | Code | 用途 |
 |---|---|---|
 | README | `RM` | Repository entry point and navigation |
 | Index | `IDX` | Catalog of related documents |
@@ -182,11 +164,11 @@ Requirements:
 | Reference | `REF` | Lookup material such as formats, diagnostics, CLI syntax, or sources |
 | Notice | `NOTICE` | Third-party copyright, attribution, or license notice |
 
-## Status Lifecycle
+## Status 生命周期
 
-The permitted lifecycle states are:
+允许的 lifecycle state 为：
 
-| Status | Meaning |
+| Status | 含义 |
 |---|---|
 | `Draft` | Under review and not yet authoritative |
 | `Approved` | Accepted design that is not yet fully implemented |
@@ -196,134 +178,129 @@ The permitted lifecycle states are:
 | `Deprecated` | Must no longer be used for new work |
 | `Placeholder` | Reserved repository with no implemented capability yet |
 
-Transition rules:
+状态转换规则：
 
-- A specification starts as `Draft`.
-- Maintainer approval changes it to `Approved`.
-- Completion of the accepted scope changes a plan or specification to
-  `Implemented`.
-- Superseded material changes to `Historical` or `Deprecated`.
-- An empty repository uses `Placeholder` until implementation begins.
+- Spec 从 `Draft` 开始。
+- Maintainer 批准后改为 `Approved`。
+- 接受范围完成后，Plan 或 Spec 改为 `Implemented`。
+- 被替代内容改为 `Historical` 或 `Deprecated`。
+- 空仓库在实施开始前使用 `Placeholder`。
 
-## Required Heading Structure
+## 必需 Heading 结构
 
 ### Repository README
 
-Every implemented repository README contains:
+每个已实现 repository README 包含：
 
-1. Purpose.
-2. Current capabilities and explicit boundaries.
-3. Repository relationships.
-4. Prerequisites.
-5. Quick start.
-6. Primary workflows.
-7. Verification.
-8. Documentation map.
-9. AI-assisted development disclosure.
-10. License.
+1. 目标。
+2. 当前能力和明确边界。
+3. Repository relationship。
+4. 前置条件。
+5. 快速开始。
+6. 主要 workflow。
+7. 验证。
+8. Documentation map。
+9. AI-assisted development disclosure。
+10. 许可证。
 
-Commands must show the working directory only when it is not the repository
-root. Cross-repository commands must begin from this repository root and use the
-published cross-repository URL guidance for links.
+Command 仅在 working directory 不是 repository root 时说明该目录。跨仓库 command
+从本 repository root 开始，并使用已发布的 cross-repository URL 规范。
 
-### Architecture Document
+### 架构文档
 
-Every architecture document contains:
+每份 architecture document 包含：
 
-1. System context.
-2. Component responsibilities.
-3. Dependency direction.
-4. Primary data flow.
-5. Public and private boundaries.
-6. Failure behavior.
-7. Related decisions.
-8. Related specifications and references.
+1. System context。
+2. Component 职责。
+3. Dependency direction。
+4. 主要 data flow。
+5. Public/private boundary。
+6. Failure behavior。
+7. 关联决策。
+8. 关联 Spec 和 reference。
 
-### Architecture Decision Record
+### 架构决策记录（ADR）
 
-Every decision record contains:
+每份 decision record 包含：
 
-1. Context and problem.
-2. Decision.
-3. Considered alternatives.
-4. Consequences and trade-offs.
-5. Compatibility impact.
-6. Verification approach.
-7. Supersession links.
+1. 背景和问题。
+2. 决策。
+3. 备选方案。
+4. 影响与 trade-off。
+5. Compatibility impact。
+6. Verification approach。
+7. Supersession link。
 
-### Usage Guide
+### 使用指南
 
-Every usage guide contains:
+每份 usage guide 包含：
 
-1. Intended outcome.
-2. Prerequisites.
-3. Inputs and assumptions.
-4. Ordered procedure.
-5. Expected result.
-6. Failure diagnosis.
-7. Related API and reference documents.
+1. 目标结果。
+2. 前置条件。
+3. Input 和 assumption。
+4. 有序步骤。
+5. 预期结果。
+6. Failure diagnosis。
+7. 关联 API 和 reference 文档。
 
-### API or Reference Document
+### API 或 Reference 文档
 
-Every API or reference document contains:
+每份 API 或 reference 文档包含：
 
-1. Supported scope.
-2. Unsupported scope.
-3. Stable public names.
-4. Input and output shapes.
-5. Lifecycle and error behavior.
-6. Complete executable examples.
-7. Versioning or compatibility policy.
-8. Related contract identifiers.
+1. 支持范围。
+2. 不支持范围。
+3. 稳定 public name。
+4. Input/output shape。
+5. Lifecycle 和 error 行为。
+6. 完整可执行示例。
+7. Versioning 或 compatibility policy。
+8. 关联 contract Identifier。
 
-### Specification and Implementation Plan
+### Spec 与 Implementation Plan
 
-Existing technical content is preserved. Each document receives the standard
-metadata block and a related-document section. Plans identify the specification
-they implement. Specifications identify their governing decisions and contracts.
+现有技术内容保持不变。每份文档包含标准 metadata block 和关联文档章节。Plan 指出
+其实现的 Spec；Spec 指出治理该设计的决策和 contract。
 
 ### Placeholder README
 
-An empty repository contains only:
+空仓库只包含：
 
-1. Title and metadata.
-2. Repository purpose.
-3. `Placeholder` status.
-4. A statement that no public API, commands, or architecture exist yet.
-5. AI-assisted development disclosure.
-6. License.
+1. 标题和 metadata。
+2. Repository 目标。
+3. `Placeholder` Status。
+4. 尚无 public API、command 或 architecture 的说明。
+5. AI-assisted development disclosure。
+6. 许可证。
 
-Placeholders must not imply that functionality exists.
+Placeholder 不得暗示功能已经存在。
 
-## Canonical Source-of-Truth Model
+## 权威 Source-of-Truth 模型
 
-The following material is canonical in `ice3-doc`:
+以下内容以 `ice3-doc` 为权威：
 
-- Cross-repository architecture.
-- Prepared asset and format contracts.
-- Shared compatibility rules.
-- Shared budgets and metrics.
-- Shared diagnostic identifiers.
-- Cross-repository decisions.
+- Cross-repository architecture。
+- Prepared Asset 和 format contract。
+- Shared compatibility rule。
+- Shared budget 和 metric。
+- Shared Diagnostic ID。
+- Cross-repository decision。
 
-The following material is canonical in its owning repository:
+以下内容以所属仓库为权威：
 
-- Public package APIs.
-- CLI behavior.
-- Runtime architecture.
-- Application protocols.
-- Installation and operational procedures.
-- Repository-specific engineering policies.
+- Public package API。
+- CLI 行为。
+- Runtime 架构。
+- Application Protocol。
+- 安装和操作步骤。
+- Repository-specific engineering policy。
 
-An owning repository may summarize a canonical contract to explain local usage,
-but it must link to the canonical document and must not establish a competing
-definition.
+所属仓库可以摘要权威 contract 来解释本地用法，但必须链接权威文档，不得建立竞争定义。
 
-## Repository Documentation Matrix
+## Repository 文档矩阵
 
 ### `ice3-doc`
 
-| ID | Document | Status target |
+| ID | 文档 | Status 目标 |
 |---|---|---|
 | `ICE3-DOC-RM-001` | README | Active |
 | `ICE3-DOC-IDX-001` | Documentation index | Active |
@@ -340,7 +317,7 @@ definition.
 
 ### `ice3-engine`
 
-| ID | Document | Status target |
+| ID | 文档 | Status 目标 |
 |---|---|---|
 | `ICE3-ENG-RM-001` | README | Active |
 | `ICE3-ENG-IDX-001` | Documentation index | Active |
@@ -360,7 +337,7 @@ definition.
 
 ### `ice3-toolchain`
 
-| ID | Document | Status target |
+| ID | 文档 | Status 目标 |
 |---|---|---|
 | `ICE3-TOOL-RM-001` | README | Active |
 | `ICE3-TOOL-IDX-001` | Documentation index | Active |
@@ -379,7 +356,7 @@ definition.
 
 ### `ice3-agent-console`
 
-| ID | Document | Status target |
+| ID | 文档 | Status 目标 |
 |---|---|---|
 | `ICE3-AGENT-RM-001` | README | Active |
 | `ICE3-AGENT-IDX-001` | Documentation index | Active |
@@ -396,7 +373,7 @@ definition.
 
 ### `ice3-industrial`
 
-| ID | Document | Status target |
+| ID | 文档 | Status 目标 |
 |---|---|---|
 | `ICE3-IND-RM-001` | README | Active |
 | `ICE3-IND-IDX-001` | Documentation index | Active |
@@ -410,75 +387,70 @@ definition.
 
 ### `ice3-studio`
 
-| ID | Document | Status target |
+| ID | 文档 | Status 目标 |
 |---|---|---|
 | `ICE3-STUDIO-RM-001` | Placeholder README | Placeholder |
 
 ### `ice3-water-demo`
 
-| ID | Document | Status target |
+| ID | 文档 | Status 目标 |
 |---|---|---|
 | `ICE3-WATER-RM-001` | Placeholder README | Placeholder |
 
-## Document Reference Model
+## Document Reference 模型
 
-Each substantive document ends with a related-document section. At minimum it
-lists the stable identifiers and titles of:
+每份实质性文档以关联文档章节结束，至少列出以下内容的稳定 ID 和标题：
 
-- Its parent overview or index.
-- The governing decision.
-- The affected specification or contract.
-- The implementation plan when one exists.
-- The API, guide, or reference a reader should use next.
+- 其父级 overview 或 index。
+- 治理该文档的决策。
+- 受影响的 Spec 或 contract。
+- 存在时对应的 implementation plan。
+- 读者下一步应使用的 API、guide 或 reference。
 
-### Same-repository links
+### 同仓库链接
 
-Use a relative Markdown link from the current document:
+使用当前文档出发的相对 Markdown 链接：
 
 ```md
 [M1 Asset API](../api/m1.md)
 ```
 
-Links must target tracked files. Anchors must match generated GitHub heading
-slugs.
+链接目标必须是 tracked file，anchor 必须匹配 GitHub 生成的 heading slug。
 
-### Cross-repository links
+### 跨仓库链接
 
-Use the published GitHub URL:
+使用已发布的 GitHub URL：
 
 ```text
 https://github.com/ice-3d/ice3-<repository>/blob/main/<path>
 ```
 
-Examples:
+示例：
 
 ```text
 https://github.com/ice-3d/ice3-doc/blob/main/docs/contracts/asset-preparation-contract-v1.md
 https://github.com/ice-3d/ice3-engine/blob/main/docs/api/m1.md
 ```
 
-Do not use sibling-directory links such as `../ice3-engine` in public
-documentation because GitHub repositories are independent.
+公开文档不得使用 `../ice3-engine` 这类 sibling-directory link，因为 GitHub
+repository 相互独立。
 
-### Identity references
+### Identity Reference
 
-When a link target is not public yet, use the document identifier as text and
-explicitly state that the link is established after publication. Do not emit a
-known-broken URL.
+目标尚未公开时，使用 Document Identifier 作为文本，并明确说明发布后建立链接。不得
+输出已知失效 URL。
 
-### Reference integrity
+### Reference 完整性
 
-- A document may link to several related documents.
-- A document must not claim authority delegated to another canonical document.
-- A decision that changes shared behavior must link to its replacement or
-  affected contract.
-- A superseded document must link to its replacement.
-- Indexes must include every product Markdown document owned by their
-  repository, except `LICENSE`, root `AGENTS.md`, and generated temporary files.
+- 一份文档可以链接多个关联文档。
+- 文档不得声明拥有已委派给其他权威文档的权力。
+- 改变共享行为的决策必须链接替代文档或受影响 contract。
+- 被替代文档必须链接其替代文档。
+- Index 必须包含仓库拥有的每份产品 Markdown，除 `LICENSE`、根 `AGENTS.md` 和生成临时文件。
 
-## File Layout
+## 文件布局
 
-Public documentation uses the following layout:
+公开文档使用以下布局：
 
 ```text
 README.md
@@ -500,12 +472,11 @@ docs/
     YYYY-MM-DD-topic.md
 ```
 
-Each repository keeps its own `AGENTS.md` and third-party notices at their
-conventional locations. There is no shared workspace-level `AGENTS.md`.
+每个仓库在常规位置保留自己的 `AGENTS.md` 和第三方声明。不存在 workspace 级共享
+`AGENTS.md`。
 
-The former internal workflow directories move to `docs/specs` and `docs/plans`. Internal links
-are updated in the same change. The previous directory is removed after every
-reference is migrated.
+原内部 workflow directory 移至 `docs/specs` 和 `docs/plans`，内部链接同步更新。所有
+reference 迁移完成后移除旧目录。
 
 ## 语言政策
 
@@ -518,85 +489,71 @@ reference is migrated.
 - `THIRD_PARTY_NOTICES.md`、测试夹具中的 `SOURCE.md` 和 `scripts/fixtures/**/*.md` 保留原文。
 - 自动语言检查在迁移完成后默认启用。
 
-## Writing Rules
+## 写作规则
 
-- Use concrete verbs and short paragraphs.
-- Define a term before using it as a requirement.
-- State unsupported behavior explicitly.
-- Keep current instructions in guides and historical rationale in specifications
-  or plans.
-- Every code block includes a language where Markdown supports it.
-- Every command block states whether it runs from the repository root.
-- Every command block includes expected output or a verification condition.
-- Use stable document identifiers in cross-document prose.
-- Do not include local user paths, credentials, real customer data, or
-  unapproved vendor names.
-- Do not refer to repository-specific implementation as the definition of a
-  shared contract.
+- 使用具体动词和短段落。
+- 将术语作为 requirement 使用前先定义。
+- 明确说明不支持行为。
+- 当前说明放在 guide，历史理由放在 Spec 或 Plan。
+- 每个 code block 在 Markdown 支持时标注 language。
+- 每个 command block 说明是否从 repository root 运行。
+- 每个 command block 包含预期 output 或 verification condition。
+- Cross-document prose 使用稳定 Document Identifier。
+- 不包含 local user path、credential、真实客户数据或未批准 vendor name。
+- 不把 repository-specific implementation 当作 shared contract 定义。
 
-## Automated Validation
+## 自动验证
 
-The documentation gate checks all tracked product Markdown files. A root
-`AGENTS.md` is a repository governance input and is excluded from this scan:
+Documentation gate 检查所有 tracked product Markdown。根 `AGENTS.md` 是 repository
+governance input，不进入扫描：
 
-1. Exactly one level-one heading exists.
-2. The title is non-empty and unique within the repository.
-3. A valid `Document ID` appears immediately after the title.
-4. IDs match the `ICE3-<AREA>-<TYPE>-<NNN>` format.
-5. IDs are unique across the local documentation set.
-6. The status value is supported.
-7. Repository indexes include every owned product Markdown document.
-8. Relative file links resolve to tracked files.
-9. Heading anchors resolve to headings in the target document.
-10. Cross-repository links use `https://github.com/ice-3d/...` and map to a known
-    repository and tracked path when sibling repositories are available.
-11. No `/Users/<name>`, `/home/<name>`, Windows user path, `file://` URL, or
-    temporary output path appears.
-12. Placeholder repositories contain no executable commands or API claims.
+1. 恰好一个 level-one heading。
+2. Title 非空，且在 repository 内唯一。
+3. Title 后紧跟有效 `Document ID`。
+4. ID 匹配 `ICE3-<AREA>-<TYPE>-<NNN>`。
+5. ID 在本地文档集内唯一。
+6. Status 值受支持。
+7. Repository index 包含其拥有的所有产品 Markdown。
+8. 相对 file link 指向 tracked file。
+9. Heading anchor 指向目标文档中的 heading。
+10. Cross-repository link 使用 `https://github.com/ice-3d/...`，并在同级仓库存在时映射到已知 repository 和 tracked path。
+11. 不出现 `/Users/<name>`、`/home/<name>`、Windows user path、`file://` URL 或 temporary output path。
+12. Placeholder repository 不含 executable command 或 API claim。
 
-The validation command must be runnable from every repository and included in
-its verification workflow after the migration.
+Validation command 必须可从每个 repository 运行，并在迁移后纳入其 verification
+workflow。
 
 ## Migration Plan
 
-1. Add this specification and approve its status.
-2. Add the family and repository documentation indexes.
-3. Assign identifiers and metadata to existing documents without changing their
-   technical conclusions.
-4. Move specifications and plans out of the internal workflow directory and
-   rewrite affected links.
-5. Add architecture, decision, guide, API, reference, and policy documents in
-   dependency order: shared documentation, engine, toolchain, industrial core,
-   Agent Console, then placeholders.
-6. Rewrite repository READMEs as navigation and quick-start entry points.
-7. Run documentation validation, content checks, and each repository's existing
-   verification commands.
-8. Review the resulting navigation from every README through an index to each
-   detailed document and back through related-document links.
+1. 添加本 Spec 并批准其 Status。
+2. 添加 family 和 repository documentation index。
+3. 为既有文档分配 Identifier 和 metadata，不改变技术结论。
+4. 将 Spec 和 Plan 移出内部 workflow directory，并修复受影响 link。
+5. 按依赖顺序添加 architecture、decision、guide、API、reference 和 policy：shared documentation、Engine、Toolchain、industrial core、Agent Console，最后是 Placeholder。
+6. 将 repository README 改写为导航和快速开始入口。
+7. 运行 documentation validation、content check 和每个 repository 的既有 verification command。
+8. 从每个 README 经 index 到详细文档，再经关联文档链接返回，审查完整导航。
 
-## Acceptance Criteria
+## 验收标准
 
-The documentation system is complete when:
+满足以下条件时文档系统完成：
 
-- Every Markdown document has a title, unique internal ID, status, and owner.
-- Every implemented repository has a README and a complete documentation index.
-- Every documented command runs from a fresh clone after its stated prerequisites
-  are installed.
-- Every technical decision has an ADR or is explicitly recorded in an existing
-  canonical specification.
-- Every shared-format reference points to the `ice3-doc` canonical contract.
-- Cross-repository links use the `ice-3d` GitHub organization and contain no
-  local sibling paths.
-- All repository indexes contain no missing or extra owned documents.
-- All relative links and anchors pass automated validation.
-- Empty repositories contain only honest placeholder documentation.
-- Existing repository test and build verification remains green.
+- 每份 Markdown 都有 title、唯一 internal ID、Status 和 Owner。
+- 每个已实现 repository 都有 README 和完整 documentation index。
+- 每个 documented command 在安装前置依赖后可从 fresh clone 运行。
+- 每个 technical decision 都有 ADR，或明确记录在现有权威 Spec 中。
+- 所有 shared-format reference 指向 `ice3-doc` 权威 contract。
+- Cross-repository link 使用 `ice-3d` GitHub organization，不包含 local sibling path。
+- 所有 repository index 不缺少也不多余拥有文档。
+- 所有 relative link 和 anchor 通过自动验证。
+- 空 repository 只包含真实 placeholder documentation。
+- 既有 repository test 和 build verification 保持通过。
 
-## Related Documents
+## 关联文档
 
-- `ICE3-DOC-RM-001` — ICE3 documentation README.
-- `ICE3-DOC-IDX-001` — ICE3 documentation index.
-- `ICE3-DOC-ARC-001` — ICE3 family architecture.
+- `ICE3-DOC-RM-001` — ICE3 文档 README。
+- `ICE3-DOC-IDX-001` — ICE3 文档索引。
+- `ICE3-DOC-ARC-001` — ICE3 家族架构。
 - `ICE3-DOC-CTR-001` — Asset Preparation Contract v1.
 
-The related identifiers above become links as those documents are migrated.
+上述关联 Identifier 在相应文档迁移后建立链接。

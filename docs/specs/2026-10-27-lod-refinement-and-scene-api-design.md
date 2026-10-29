@@ -7,7 +7,6 @@
 > Owner: ICE3 architecture maintainers
 
 >
-> English summary: Define refined LOD scheduling and the general scene-query and interaction API.
 
 | 项目 | 内容 |
 | --- | --- |

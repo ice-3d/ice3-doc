@@ -7,7 +7,6 @@
 > Owner: ICE3 architecture maintainers
 
 >
-> English summary: Define deterministic generation of the synthetic wastewater plant source and runtime asset hierarchy.
 
 | 项目 | 内容 |
 | --- | --- |

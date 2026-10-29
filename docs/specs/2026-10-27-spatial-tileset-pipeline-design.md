@@ -6,7 +6,6 @@
 >
 > Owner: ICE3 architecture maintainers
 >
-> English summary: Define deterministic spatial partitioning and OGC 3D Tiles 1.1 output for large industrial assets.
 
 | 项目 | 内容 |
 | --- | --- |
