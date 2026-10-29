@@ -321,6 +321,7 @@ definition.
 |---|---|---|
 | `ICE3-DOC-RM-001` | README | Active |
 | `ICE3-DOC-IDX-001` | Documentation index | Active |
+| `ICE3-DOC-IDX-002` | Decisions index | Active |
 | `ICE3-DOC-ARC-001` | ICE3 family architecture | Active |
 | `ICE3-DOC-ADR-001` | Universal engine and vertical applications | Active |
 | `ICE3-DOC-ADR-002` | Offline preprocessing and open asset formats | Active |
@@ -337,6 +338,7 @@ definition.
 |---|---|---|
 | `ICE3-ENG-RM-001` | README | Active |
 | `ICE3-ENG-IDX-001` | Documentation index | Active |
+| `ICE3-ENG-IDX-002` | Decisions index | Active |
 | `ICE3-ENG-ARC-001` | Runtime and package architecture | Active |
 | `ICE3-ENG-GUIDE-001` | Getting started | Active |
 | `ICE3-ENG-GUIDE-002` | Asset loading and Tileset usage | Active |
@@ -356,6 +358,7 @@ definition.
 |---|---|---|
 | `ICE3-TOOL-RM-001` | README | Active |
 | `ICE3-TOOL-IDX-001` | Documentation index | Active |
+| `ICE3-TOOL-IDX-002` | Decisions index | Active |
 | `ICE3-TOOL-ARC-001` | Preparation and partition architecture | Active |
 | `ICE3-TOOL-GUIDE-001` | Build, validate, partition, and publish | Active |
 | `ICE3-TOOL-GUIDE-002` | Large-model troubleshooting and performance | Active |
@@ -374,6 +377,7 @@ definition.
 |---|---|---|
 | `ICE3-AGENT-RM-001` | README | Active |
 | `ICE3-AGENT-IDX-001` | Documentation index | Active |
+| `ICE3-AGENT-IDX-002` | Decisions index | Active |
 | `ICE3-AGENT-ARC-001` | Console and event-stream architecture | Active |
 | `ICE3-AGENT-GUIDE-001` | Local development | Active |
 | `ICE3-AGENT-GUIDE-002` | Static deployment | Active |
@@ -390,6 +394,7 @@ definition.
 |---|---|---|
 | `ICE3-IND-RM-001` | README | Active |
 | `ICE3-IND-IDX-001` | Documentation index | Active |
+| `ICE3-IND-IDX-002` | Decisions index | Active |
 | `ICE3-IND-ARC-001` | Industrial semantic architecture | Active |
 | `ICE3-IND-GUIDE-001` | Getting started and common workflows | Active |
 | `ICE3-IND-API-001` | Public package reference | Active |

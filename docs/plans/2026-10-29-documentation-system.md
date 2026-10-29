@@ -376,7 +376,7 @@ git commit -m "docs: assign shared document identifiers"
 **Interfaces:**
 - Consumes: all IDs from Task 2.
 - Produces: `ICE3-DOC-RM-001`, `ICE3-DOC-IDX-001`, `ICE3-DOC-ARC-001`, and
-  `ICE3-DOC-ADR-001..004`.
+  `ICE3-DOC-IDX-002`, `ICE3-DOC-ADR-001..004`.
 
 - [ ] **Step 1: Write the family index**
 
@@ -522,7 +522,8 @@ git commit -m "docs: assign engine document identifiers"
 - Consumes: exact export names and behavior documented in `docs/api/m0.md`,
   `docs/api/m1.md`, and `docs/diagnostics.md`.
 - Produces: `ICE3-ENG-RM-001`, `ICE3-ENG-IDX-001`, `ICE3-ENG-ARC-001`,
-  `ICE3-ENG-GUIDE-001..003`, and `ICE3-ENG-ADR-001..003`.
+  `ICE3-ENG-IDX-002`, `ICE3-ENG-GUIDE-001..003`, and
+  `ICE3-ENG-ADR-001..003`.
 
 - [ ] **Step 1: Rewrite the README**
 
@@ -660,7 +661,7 @@ git commit -m "docs: assign toolchain document identifiers"
 **Interfaces:**
 - Consumes: current README examples and `packages/cli/src/commands.ts`.
 - Produces: `ICE3-TOOL-RM-001`, `ICE3-TOOL-IDX-001`,
-  `ICE3-TOOL-ARC-001`, `ICE3-TOOL-GUIDE-001..002`,
+  `ICE3-TOOL-IDX-002`, `ICE3-TOOL-ARC-001`, `ICE3-TOOL-GUIDE-001..002`,
   `ICE3-TOOL-REF-001`, and `ICE3-TOOL-ADR-001..003`.
 
 - [ ] **Step 1: Rewrite the README**
@@ -733,7 +734,7 @@ git commit -m "docs: complete toolchain developer documentation"
 - Consumes: exported symbols from
   `packages/industrial-core/src/index.ts` and the existing README example.
 - Produces: `ICE3-IND-RM-001`, `ICE3-IND-IDX-001`, `ICE3-IND-ARC-001`,
-  `ICE3-IND-GUIDE-001`, `ICE3-IND-API-001`, and
+  `ICE3-IND-IDX-002`, `ICE3-IND-GUIDE-001`, `ICE3-IND-API-001`, and
   `ICE3-IND-ADR-001..003`.
 
 - [ ] **Step 1: Inspect the public exports**
@@ -862,7 +863,7 @@ git commit -m "docs: assign agent console document identifiers"
 **Interfaces:**
 - Consumes: `shared/`, `server/`, `src/protocol/`, and current README behavior.
 - Produces: `ICE3-AGENT-RM-001`, `ICE3-AGENT-IDX-001`,
-  `ICE3-AGENT-ARC-001`, `ICE3-AGENT-GUIDE-001..003`,
+  `ICE3-AGENT-IDX-002`, `ICE3-AGENT-ARC-001`, `ICE3-AGENT-GUIDE-001..003`,
   `ICE3-AGENT-REF-001`, and `ICE3-AGENT-ADR-001..002`.
 
 - [ ] **Step 1: Rewrite the README**
