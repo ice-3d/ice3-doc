@@ -20,7 +20,10 @@ const validFixtureRoot = join(fixtures, 'docs-valid');
 const invalidFixtureRoot = join(fixtures, 'docs-invalid');
 
 test('accepts one titled document with valid metadata', async () => {
-  const report = await checkRepository(validFixtureRoot, { expectedArea: 'DOC' });
+  const report = await checkRepository(validFixtureRoot, {
+    expectedArea: 'DOC',
+    language: false,
+  });
   assert.deepEqual(report.errors, []);
 });
 
@@ -52,7 +55,10 @@ test('excludes root repository agent instructions from product documentation', a
       '',
     ].join('\n'));
 
-    const report = await checkRepository(root, { expectedArea: 'DOC' });
+    const report = await checkRepository(root, {
+      expectedArea: 'DOC',
+      language: false,
+    });
     assert.equal(report.documentCount, 1);
     assert.deepEqual(report.errors, []);
   } finally {
@@ -61,7 +67,10 @@ test('excludes root repository agent instructions from product documentation', a
 });
 
 test('rejects duplicate IDs and missing metadata', async () => {
-  const report = await checkRepository(invalidFixtureRoot, { expectedArea: 'DOC' });
+  const report = await checkRepository(invalidFixtureRoot, {
+    expectedArea: 'DOC',
+    language: false,
+  });
   const errors = report.errors.join('\n');
   assert.match(errors, /missing Document ID/);
   assert.match(errors, /duplicate Document ID/);
@@ -69,7 +78,10 @@ test('rejects duplicate IDs and missing metadata', async () => {
 });
 
 test('rejects incomplete indexes', async () => {
-  const report = await checkRepository(invalidFixtureRoot, { expectedArea: 'DOC' });
+  const report = await checkRepository(invalidFixtureRoot, {
+    expectedArea: 'DOC',
+    language: false,
+  });
   assert.match(report.errors.join('\n'), /index does not link/);
   assert.match(
     report.errors.join('\n'),
@@ -78,7 +90,10 @@ test('rejects incomplete indexes', async () => {
 });
 
 test('rejects broken files, anchors, and cross-repository URLs', async () => {
-  const report = await checkRepository(invalidFixtureRoot, { expectedArea: 'DOC' });
+  const report = await checkRepository(invalidFixtureRoot, {
+    expectedArea: 'DOC',
+    language: false,
+  });
   const errors = report.errors.join('\n');
   assert.match(errors, /broken relative link/);
   assert.match(errors, /missing anchor/);
@@ -86,7 +101,10 @@ test('rejects broken files, anchors, and cross-repository URLs', async () => {
 });
 
 test('rejects placeholder claims', async () => {
-  const report = await checkRepository(invalidFixtureRoot, { expectedArea: 'DOC' });
+  const report = await checkRepository(invalidFixtureRoot, {
+    expectedArea: 'DOC',
+    language: false,
+  });
   const errors = report.errors.join('\n');
   assert.match(errors, /Placeholder document contains executable content/);
 });
@@ -108,7 +126,10 @@ test('rejects local absolute paths', async () => {
       '',
     ].join('\n'));
 
-    const report = await checkRepository(root, { expectedArea: 'DOC' });
+    const report = await checkRepository(root, {
+      expectedArea: 'DOC',
+      language: false,
+    });
     assert.match(report.errors.join('\n'), /local absolute path/);
   } finally {
     await rm(root, { recursive: true, force: true });
@@ -157,7 +178,10 @@ test('accepts a Chinese specification without an English summary', async () => {
       '',
     ].join('\n'));
 
-    const report = await checkRepository(root, { expectedArea: 'DOC' });
+    const report = await checkRepository(root, {
+      expectedArea: 'DOC',
+      language: false,
+    });
     assert.deepEqual(report.errors, []);
   } finally {
     await rm(root, { recursive: true, force: true });
@@ -400,11 +424,24 @@ test('excludes invalid validator fixtures from product documentation', async () 
       '# Invalid fixture\n\nThis file intentionally has no metadata.\n',
     );
 
-    const report = await checkRepository(root, { expectedArea: 'DOC' });
+    const report = await checkRepository(root, {
+      expectedArea: 'DOC',
+      language: false,
+    });
     assert.deepEqual(report.errors, []);
   } finally {
     await rm(root, { recursive: true, force: true });
   }
+});
+
+test('runs the language gate by default', async () => {
+  const report = await checkRepository(invalidFixtureRoot, {
+    expectedArea: 'DOC',
+  });
+  assert.match(
+    report.errors.join('\n'),
+    /ICE3_DOC_ENGLISH_HEADING/,
+  );
 });
 
 test('discovers repository worktrees in workspace mode', async () => {

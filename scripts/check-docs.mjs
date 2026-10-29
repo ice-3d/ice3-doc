@@ -75,12 +75,13 @@ export async function checkRepository(root, options = {}) {
     : undefined;
   const errors = [];
   const documents = [];
+  const language = options.language ?? true;
   for (const path of await markdownFiles(repositoryRoot)) {
     const source = await readFile(path, 'utf8');
     documents.push(parseDocument(path, source));
   }
 
-  if (options.language) {
+  if (language) {
     for (const document of documents) {
       const displayPath = relative(repositoryRoot, document.path);
       for (const violation of findLanguageViolations(
@@ -428,7 +429,7 @@ function parseArgs(argv) {
     workspaceRoot: undefined,
     expectedArea: undefined,
     json: false,
-    language: false,
+    language: true,
   };
   for (let index = 0; index < argv.length; index += 1) {
     const argument = argv[index];
