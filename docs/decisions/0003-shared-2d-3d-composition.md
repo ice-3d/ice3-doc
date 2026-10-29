@@ -1,4 +1,4 @@
-# Shared 2D And 3D Composition
+# 共享 2D 与 3D composition
 
 > Document ID: ICE3-DOC-ADR-003
 >
@@ -6,52 +6,45 @@
 >
 > Owner: ICE3 architecture maintainers
 
-## Context
+## 背景
 
-Industrial interfaces need labels, panels, overlays, diagrams, and controls
-alongside spatial geometry. Treating 2D and 3D as unrelated rendering products
-creates duplicate input routing, lifecycle management, coordinate handling, and
-selection behavior.
+工业界面需要 label、panel、overlay、diagram 和 control 与空间 Geometry 共同显示。
+把 2D 和 3D 视为无关渲染产品，会造成重复的 input routing、lifecycle management、
+coordinate handling 和 Selection 行为。
 
-## Decision
+## 决策
 
-The engine owns a shared composition model for 2D layers and 3D content.
-Applications register visual layers in explicit order. Pointer, wheel, focus,
-resize, and disposal flow through the same engine lifecycle.
+Engine 为 2D layer 和 3D content 提供共享 composition model。应用按明确顺序注册视觉
+layer。Pointer、wheel、focus、resize 和 disposal 使用同一 Engine lifecycle。
 
-2D content may cover, annotate, or interact with 3D content. A 2D layer can
-consume hit-test regions and block or pass events according to an explicit
-policy.
+2D content 可以覆盖、标注或交互 3D content。2D layer 可以消费 hit-test region，并按
+明确策略阻止或透传 event。
 
-## Considered Alternatives
+## 备选方案
 
-- Embed a separate 2D canvas with independent DOM event handling.
-- Require every application to coordinate multiple rendering lifecycles.
-- Project all 2D interfaces into textured 3D geometry.
+- 内嵌独立 2D canvas，并使用独立 DOM event handling。
+- 要求每个应用协调多个 rendering lifecycle。
+- 将所有 2D interface 投影为带 texture 的 3D Geometry。
 
-These alternatives increase synchronization bugs and make consistent selection
-and accessibility difficult.
+这些方案会增加同步问题，并让一致的 Selection 和 accessibility 更难实现。
 
-## Consequences
+## 影响
 
-- Applications learn one layer and input model.
-- 2D and 3D can be tested together.
-- Renderer backends must preserve the shared event and lifecycle semantics.
-- Large application-specific 2D UI may still remain outside the engine when it
-  does not belong to the spatial composition.
+- 应用只需理解一套 layer 和 input model。
+- 2D 与 3D 可以联合测试。
+- Renderer backend 必须保持共享 event 和 lifecycle semantic。
+- 不属于空间 composition 的大型应用专用 2D UI 可以继续留在 Engine 之外。
 
-## Compatibility
+## 兼容性
 
-The shared composition API is a public engine boundary. Backend-specific canvas
-objects and GPU state remain private.
+共享 composition API 是公开 Engine 边界。后端专用 canvas object 和 GPU state 保持私有。
 
-## Verification
+## 验证
 
-- Tests cover ordered hit testing, event blocking and passthrough, pointer
-  capture, resize, and disposal.
-- Headless interfaces can verify 2D/3D routing without a specific GPU.
+- 测试覆盖有序 hit testing、event blocking/passthrough、pointer capture、resize 和 disposal。
+- Headless interface 可以在不依赖特定 GPU 的情况下验证 2D/3D routing。
 
-## Related Documents
+## 关联文档
 
-- `ICE3-DOC-ARC-001` — [ICE3 family architecture](../architecture.md)
-- `ICE3-ENG-ARC-001` — ICE3 Engine architecture, published in `ice3-engine`.
+- `ICE3-DOC-ARC-001` — [ICE3 家族架构](../architecture.md)
+- `ICE3-ENG-ARC-001` — ICE3 Engine 架构，发布在 `ice3-engine`。

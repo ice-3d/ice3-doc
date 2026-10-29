@@ -1,4 +1,4 @@
-# Offline Open Asset Pipeline
+# 离线开放 Asset pipeline
 
 > Document ID: ICE3-DOC-ADR-002
 >
@@ -6,54 +6,50 @@
 >
 > Owner: ICE3 architecture maintainers
 
-## Context
+## 背景
 
-Industrial source models can be large and use complex authoring formats. Parsing,
-normalizing, simplifying, and repartitioning them in the browser causes long
-startup delays and makes runtime behavior depend on conversion code.
+工业 source model 可能很大，并使用复杂的 authoring format。在浏览器中 parsing、
+normalizing、simplifying 和 repartitioning 会导致长启动延迟，并让 Runtime 行为依赖
+conversion code。
 
-The published runtime also needs to interoperate with existing asset tooling and
-web infrastructure.
+发布的 Runtime 还需要与现有 Asset tooling 和 Web infrastructure 互操作。
 
-## Decision
+## 决策
 
-All source-format parsing, geometry preparation, simplification, partitioning,
-and LOD generation occur in `ice3-toolchain`. Runtime content is standard GLB
-with the documented ICE3 Prepared GLB Profile, distributed through OGC 3D Tiles
-1.1 where spatial streaming is required.
+所有 source format parsing、Geometry preparation、simplification、partitioning 和
+LOD generation 都在 `ice3-toolchain` 中完成。Runtime content 是带文档化 ICE3
+Prepared GLB Profile 的标准 GLB；需要空间流式加载时，通过 OGC 3D Tiles 1.1 分发。
 
-ICE3 does not introduce a private monolithic container when the public GLB and
-Tileset formats can represent the runtime artifact.
+公开 GLB 和 Tileset format 足以表达 Runtime artifact 时，ICE3 不引入私有单体容器。
 
-## Considered Alternatives
+## 备选方案
 
-- Convert arbitrary source assets in the browser.
-- Define a proprietary binary format that duplicates GLB structure.
-- Require one complete monolithic prepared file for every scene.
+- 在浏览器中转换任意 source Asset。
+- 定义重复 GLB 结构的私有 binary format。
+- 每个 Scene 都要求一个完整单体 prepared file。
 
-These alternatives increase runtime cost, weaken ecosystem compatibility, or
-prevent incremental loading.
+这些方案会增加 Runtime 成本、削弱生态兼容性，或阻止增量加载。
 
-## Consequences
+## 影响
 
-- Runtime failures are separated from source-conversion failures.
-- Existing GLB and Tileset tooling can inspect or host compatible artifacts.
-- The toolchain owns format evolution and migration.
-- The browser only downloads the data required by the current view.
+- Runtime failure 与 source-conversion failure 分离。
+- 现有 GLB 和 Tileset tooling 可以检查或托管兼容 artifact。
+- Toolchain 负责 format evolution 和 migration。
+- 浏览器只下载当前视图所需数据。
 
-## Compatibility
+## 兼容性
 
-The canonical compatibility rules are defined by `ICE3-DOC-CTR-001`. Runtime
-conversion and undeclared required features are rejected rather than guessed.
+权威 compatibility rule 由 `ICE3-DOC-CTR-001` 定义。Runtime conversion 和未声明
+required feature 会被拒绝，系统不会猜测处理。
 
-## Verification
+## 验证
 
-- Engine tests reject conversion-required profiles.
-- Toolchain tests validate generated GLB and Tileset artifacts.
-- Example builds publish atomically only after all outputs validate.
+- Engine test 拒绝要求 Runtime conversion 的 profile。
+- Toolchain test 验证生成的 GLB 和 Tileset artifact。
+- Example build 只有在全部输出通过 validation 后才原子发布。
 
-## Related Documents
+## 关联文档
 
-- `ICE3-DOC-ARC-001` — [ICE3 family architecture](../architecture.md)
+- `ICE3-DOC-ARC-001` — [ICE3 家族架构](../architecture.md)
 - `ICE3-DOC-CTR-001` — [Asset Preparation Contract v1](../contracts/asset-preparation-contract-v1.md)
-- `ICE3-DOC-SPEC-007` — [Spatial Tileset pipeline](../specs/2026-10-27-spatial-tileset-pipeline-design.md)
+- `ICE3-DOC-SPEC-007` — [空间 Tileset pipeline](../specs/2026-10-27-spatial-tileset-pipeline-design.md)

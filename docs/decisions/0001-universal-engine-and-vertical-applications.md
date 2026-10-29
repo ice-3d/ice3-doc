@@ -1,4 +1,4 @@
-# Universal Engine And Vertical Applications
+# 通用 Engine 与垂直应用
 
 > Document ID: ICE3-DOC-ADR-001
 >
@@ -6,53 +6,46 @@
 >
 > Owner: ICE3 architecture maintainers
 
-## Context
+## 背景
 
-ICE3 must serve multiple industrial domains without building a separate
-rendering and asset foundation for each application. The water demonstration is
-one application of the platform, not the definition of the platform.
+ICE3 必须服务多个工业领域，而不为每个应用重复建设 rendering 和 Asset 基础能力。
+水务演示只是平台的一个应用，不定义平台本身。
 
-## Decision
+## 决策
 
-The reusable engine, toolchain, and industrial semantic core remain
-domain-neutral. Industry-specific entities, workflows, terminology, data
-connections, and presentation live in vertical applications.
+可复用的 Engine、Toolchain 和 industrial semantic core 保持领域中立。行业专用
+Entity、workflow、术语、数据连接和呈现留在垂直应用中。
 
-Vertical applications compose public ICE3 APIs. They must not add
-industry-specific behavior to the engine's core scene, renderer, input,
-selection, or asset contracts.
+垂直应用组合使用公开 ICE3 API，不得把行业专用行为加入 Engine 的 core Scene、
+Renderer、input、Selection 或 Asset contract。
 
-## Considered Alternatives
+## 备选方案
 
-- Build a dedicated rendering stack inside the first industry application.
-- Add water-specific concepts to the generic engine.
-- Use one application repository for all reusable and vertical code.
+- 在第一个行业应用中构建专用 rendering stack。
+- 向通用 Engine 添加水务专用概念。
+- 用同一个应用仓库承载所有可复用代码和垂直代码。
 
-These alternatives shorten an initial demonstration but duplicate foundational
-work and make later industries depend on one application's assumptions.
+这些方案可以缩短初始演示时间，但会重复基础工作，并让后续行业依赖某个应用的假设。
 
-## Consequences
+## 影响
 
-- Shared improvements benefit every vertical application.
-- Integration requires an explicit application boundary.
-- Cross-repository contracts must be versioned and documented.
-- Domain-specific behavior is easier to test without GPU infrastructure.
+- 共享改进可以惠及所有垂直应用。
+- 集成必须经过明确应用边界。
+- 跨仓库 contract 必须带版本并写入文档。
+- 领域专用行为可以在不依赖 GPU 基础设施的情况下测试。
 
-## Compatibility
+## 兼容性
 
-The public engine API remains the stable integration surface. Moving a
-domain-specific concern out of an application and into the generic platform
-requires a separate architecture decision and compatibility review.
+公开 Engine API 是稳定集成边界。将领域专用关注点从应用移入通用平台时，必须单独作出
+架构决策并完成 compatibility review。
 
-## Verification
+## 验证
 
-- Architecture tests reject dependencies from generic packages to application
-  packages.
-- The water demonstration consumes only public APIs.
-- Shared contracts contain no industry-only fields required by unrelated
-  domains.
+- 架构测试拒绝通用 package 依赖应用 package。
+- 水务演示只消费公开 API。
+- 共享 contract 不包含无关领域必须依赖的行业专用字段。
 
-## Related Documents
+## 关联文档
 
-- `ICE3-DOC-ARC-001` — [ICE3 family architecture](../architecture.md)
-- `ICE3-DOC-ADR-004` — [Generic semantic interfaces](0004-generic-semantic-interfaces.md)
+- `ICE3-DOC-ARC-001` — [ICE3 家族架构](../architecture.md)
+- `ICE3-DOC-ADR-004` — [通用 semantic interface](0004-generic-semantic-interfaces.md)
