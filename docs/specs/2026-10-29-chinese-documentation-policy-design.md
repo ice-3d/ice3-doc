@@ -5,8 +5,6 @@
 > Status: Draft
 >
 > Owner: ICE3 documentation maintainers
->
-> English summary: Define a Chinese narrative policy that preserves technical nouns and abbreviations, migrates all product and repository policy documents, and validates future documentation without creating bilingual duplicates.
 
 ## 1. 目标
 

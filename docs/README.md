@@ -15,6 +15,12 @@
 | `ICE3-DOC-IDX-002` | [Architecture Decisions](decisions/README.md) | Active | Index of shared decisions |
 | `ICE3-DOC-CTR-001` | [Asset Preparation Contract v1](contracts/asset-preparation-contract-v1.md) | Active | Canonical shared asset contract |
 
+## 参考资料
+
+| ID | Title | Status | Purpose |
+|---|---|---|---|
+| `ICE3-DOC-REF-001` | [ICE3 技术词表](reference/terminology.md) | Active | 固定技术词汇写法并提供中文解释 |
+
 ## Shared Decisions
 
 | ID | Title | Status | Purpose |

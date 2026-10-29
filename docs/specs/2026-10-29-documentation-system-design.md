@@ -507,18 +507,16 @@ The former internal workflow directories move to `docs/specs` and `docs/plans`. 
 are updated in the same change. The previous directory is removed after every
 reference is migrated.
 
-## Language Policy
+## 语言政策
 
-- Public API names, command names, identifiers, and code remain in their
-  implementation language and casing.
-- New shared architecture, decision, guide, and reference documents use English
-  as the canonical technical language.
-- Existing Chinese specifications and plans remain Chinese; their titles may
-  include English technical terms where those terms are normative.
-- Each Chinese technical specification receives an English short summary in its
-  metadata section so readers can identify its scope.
-- Bilingual duplication is not allowed because it creates competing sources of
-  truth.
+- 标题、正文、步骤、表格说明和验收条件使用简体中文。
+- 产品名、标准名、缩写、API、类型、字段、命令、路径和 Diagnostic ID 保留英文原样。
+- `Scene`、`Asset`、`Selection`、`Node`、`Mesh`、`Material` 和 `LOD` 等技术词汇直接使用英文。
+- 技术词不强制添加中文括注，技术词写法以 [ICE3 技术词表](../reference/terminology.md) 为准。
+- 代码块、inline code、URL、schema key 和协议字符串不因语言政策改变。
+- 不维护中英双语正文，也不要求中文 Spec 提供 English summary。
+- `THIRD_PARTY_NOTICES.md`、测试夹具中的 `SOURCE.md` 和 `scripts/fixtures/**/*.md` 保留原文。
+- 自动语言检查在迁移完成后默认启用。
 
 ## Writing Rules
 

@@ -66,7 +66,6 @@ test('rejects duplicate IDs and missing metadata', async () => {
   assert.match(errors, /missing Document ID/);
   assert.match(errors, /duplicate Document ID/);
   assert.match(errors, /unsupported Status/);
-  assert.match(errors, /Chinese specification lacks English summary/);
 });
 
 test('rejects incomplete indexes', async () => {
@@ -111,6 +110,55 @@ test('rejects local absolute paths', async () => {
 
     const report = await checkRepository(root, { expectedArea: 'DOC' });
     assert.match(report.errors.join('\n'), /local absolute path/);
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
+test('accepts a Chinese specification without an English summary', async () => {
+  const root = await mkdtemp(join(tmpdir(), 'ice3-docs-'));
+  try {
+    await mkdir(join(root, 'docs'));
+    await writeFile(join(root, 'README.md'), [
+      '# 仓库',
+      '',
+      '> Document ID: ICE3-DOC-RM-001',
+      '>',
+      '> Status: Active',
+      '>',
+      '> Owner: Documentation tests',
+      '',
+      '[索引](docs/README.md)',
+      '',
+    ].join('\n'));
+    await writeFile(join(root, 'docs', 'README.md'), [
+      '# 文档索引',
+      '',
+      '> Document ID: ICE3-DOC-IDX-001',
+      '>',
+      '> Status: Active',
+      '>',
+      '> Owner: Documentation tests',
+      '',
+      '- [README](../README.md)',
+      '- [规格](spec.md)',
+      '',
+    ].join('\n'));
+    await writeFile(join(root, 'docs', 'spec.md'), [
+      '# 中文规格',
+      '',
+      '> Document ID: ICE3-DOC-SPEC-001',
+      '>',
+      '> Status: Draft',
+      '>',
+      '> Owner: Documentation tests',
+      '',
+      '本文定义中文文档规则。',
+      '',
+    ].join('\n'));
+
+    const report = await checkRepository(root, { expectedArea: 'DOC' });
+    assert.deepEqual(report.errors, []);
   } finally {
     await rm(root, { recursive: true, force: true });
   }
