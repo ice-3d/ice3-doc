@@ -4,52 +4,52 @@
 >
 > Status: Implemented
 >
-> Owner: ICE3 architecture maintainers
+> Owner: ICE3 架构维护者
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **面向智能体执行者：** 必需子技能：使用 superpowers:subagent-driven-development（推荐）或 superpowers:executing-plans 按任务逐步实施本计划。步骤使用复选框（`- [ ]`）语法跟踪。
 
-**Goal:** 让 Tileset 运行时根据屏幕空间误差选择覆盖完整的 LOD 切面，在细模未就绪或失败时保留父粗模，并跨 LOD 保持设备选择。
+**目标：** 让 Tileset 运行时根据屏幕空间误差选择覆盖完整的 LOD 切面，在细模未就绪或失败时保留父粗模，并在 LOD 切换期间保持设备 Selection。
 
-**Architecture:** 纯选择器从完整 Tileset 树计算目标切面和最近粗模回退。句柄保留当前覆盖切面，分帧准备候选内容，必要替代内容齐备后再移除父粗模。现有视锥、预算、缓存和场景容器继续复用。
+**架构：** 纯选择器从完整 Tileset 树计算目标切面和最近粗模回退。句柄保留当前覆盖切面，分帧准备候选内容，并在必要替代内容齐备后移除父粗模。现有视锥、预算、缓存和场景容器继续复用。
 
-**Tech Stack:** TypeScript 7, Node.js 24.22.1 LTS, WebGL2, Node.js test runner, Playwright, OGC 3D Tiles 1.1, ICE3 core/assets/runtime
+**技术栈：** TypeScript 7、Node.js 24.22.1 LTS、WebGL2、Node.js 测试运行器、Playwright、OGC 3D Tiles 1.1、ICE3 core/assets/runtime
 
-**Spec:** `../specs/2026-10-27-hierarchical-lod-design.md`
+**规范：** `../specs/2026-10-27-hierarchical-lod-design.md`
 
-## Global Constraints
+## 全局约束
 
-- Use Node.js 24.22.1 LTS from `.nvmrc`.
-- Develop on `feature/hierarchical-lod`; merge to `main` only after the complete gate passes.
-- Follow RED-GREEN-REFACTOR for every behavior change.
-- Add no runtime dependency.
-- Camera and viewport are required for LOD selection.
-- Default `maxScreenSpaceErrorPixels` is `16`.
-- Visible coverage wins over the soft resident budget.
-- Parent coarse content remains until required finer content is resident.
-- Coarse and fine scene nodes have unique IDs while sharing stable selection IDs.
-- Clear a selection only when no resident content contains that selection ID.
-- Do not expose AI-specific behavior; APIs remain general engine capabilities.
-- Do not put real customer assets or derived files in Git, fixtures, screenshots, logs, or packages.
+- 使用 `.nvmrc` 指定的 Node.js 24.22.1 LTS。
+- 在 `feature/hierarchical-lod` 分支上开发；仅在完整门禁通过后合入 `main`。
+- 每项行为变更都遵循 RED-GREEN-REFACTOR。
+- 不添加运行时依赖。
+- LOD 选择需要相机和视口。
+- `maxScreenSpaceErrorPixels` 默认为 `16`。
+- 可见覆盖优先于软驻留预算。
+- 在所需细模内容驻留前保留父粗模内容。
+- 粗模和细模场景 Node 具有唯一 ID，同时共享稳定的 Selection ID。
+- 仅当没有任何驻留内容包含该 Selection ID 时清除 Selection。
+- 不要暴露 AI 专用行为；API 仍是通用引擎能力。
+- 不要将真实客户 Asset 或派生文件放入 Git、fixture、截图、日志或包中。
 
-## Review Focus
+## 审查重点
 
-- A parent may be partially visible; replacing it must not create a hole in the visible area.
-- A camera change during an in-progress refinement must preserve old coverage and discard stale children.
-- A failed child must trigger parent fallback without turning the whole Tileset fatal.
-- A selected coarse device must stay selected when the same selection ID moves to fine content.
-- Resizing the viewport without moving the camera must recompute SSE and the target cut.
+- 父节点可能部分可见；替换它时不得在可见区域产生空洞。
+- 细化过程中发生相机变化时，必须保留旧覆盖并丢弃过期子节点。
+- 子节点失败必须触发父级回退，同时不得使整个 Tileset 致命失败。
+- 当同一 Selection ID 移到细模内容时，已选中的粗模设备必须保持选中。
+- 不移动相机而调整视口大小时，必须重新计算 SSE 和目标切面。
 
 ---
 
-### Task 1: Read Complete Hierarchical Tilesets
+### 任务 1：读取完整的层级 Tileset
 
-**Files:**
-- Modify: `ice3-engine/packages/assets/src/ICETileset.ts`
-- Modify: `ice3-engine/packages/assets/src/ICETilesetReader.ts`
-- Modify: `ice3-engine/packages/assets/tests/TilesetReader.test.ts`
-- Modify: `ice3-engine/packages/assets/src/index.ts`
+**文件：**
+- 修改：`ice3-engine/packages/assets/src/ICETileset.ts`
+- 修改：`ice3-engine/packages/assets/src/ICETilesetReader.ts`
+- 修改：`ice3-engine/packages/assets/tests/TilesetReader.test.ts`
+- 修改：`ice3-engine/packages/assets/src/index.ts`
 
-**Interfaces:**
+**接口：**
 
 ```ts
 interface ICETilesetSnapshot {
@@ -60,16 +60,14 @@ interface ICETilesetSnapshot {
 }
 ```
 
-- `tiles` contains every content-bearing tile, coarse and fine.
-- `root` retains the full explicit tree.
-- Internal content is accepted.
-- Multiple contents, `region`, implicit tiling, external Tilesets, and nonfinite
-  errors remain rejected.
+- `tiles` 包含每个带内容的 Tile，包括粗模和细模。
+- `root` 保留完整显式树。
+- 接受内部内容。
+- 多个内容、`region`、隐式 tiling、外部 Tileset 和非有限误差仍会被拒绝。
 
-- [ ] **Step 1: Replace the rejection test with hierarchy tests**
+- [ ] **步骤 1：用层级测试替换拒绝测试**
 
-In `packages/assets/tests/TilesetReader.test.ts`, replace the current
-"rejects content on a non-leaf" test with:
+在 `packages/assets/tests/TilesetReader.test.ts` 中，将当前的“拒绝非叶节点内容”测试替换为：
 
 ```ts
 test('parses parent content and retains the complete hierarchy', () => {
@@ -112,7 +110,7 @@ test('rejects a tile whose error is above its parent', () => {
 });
 ```
 
-- [ ] **Step 2: Run RED**
+- [ ] **步骤 2：运行 RED**
 
 ```bash
 source "$HOME/.nvm/nvm.sh"
@@ -120,26 +118,26 @@ nvm use 24
 npm test -- packages/assets/tests/TilesetReader.test.ts
 ```
 
-Expected: FAIL because internal content is rejected and `root` is absent.
+预期：失败，因为内部内容会被拒绝且缺少 `root`。
 
-- [ ] **Step 3: Implement hierarchy parsing**
+- [ ] **步骤 3：实现层级解析**
 
-- Return `root: rootTile` from `readTileset`.
-- Keep outputting content-bearing nodes in traversal order.
-- Remove the non-leaf content rejection.
-- Validate `child.geometricError <= parent.geometricError`.
-- Preserve transform composition and relative URI checks.
+- 从 `readTileset` 返回 `root: rootTile`。
+- 继续按遍历顺序输出带内容的 Node。
+- 移除非叶节点内容拒绝逻辑。
+- 验证 `child.geometricError <= parent.geometricError`。
+- 保留变换组合和相对 URI 检查。
 
-- [ ] **Step 4: Verify GREEN**
+- [ ] **步骤 4：验证 GREEN**
 
 ```bash
 npm test -- packages/assets/tests/TilesetReader.test.ts
 npm test
 ```
 
-Expected: all pass.
+预期：全部通过。
 
-- [ ] **Step 5: Commit**
+- [ ] **步骤 5：提交**
 
 ```bash
 git add packages/assets/src/ICETileset.ts \
@@ -151,14 +149,14 @@ git commit -m "feat(assets): read hierarchical tilesets"
 
 ---
 
-### Task 2: Pure Screen-Space LOD Selector
+### 任务 2：纯屏幕空间 LOD 选择器
 
-**Files:**
-- Create: `ice3-engine/packages/runtime/src/asset/ICELodSelector.ts`
-- Create: `ice3-engine/packages/runtime/tests/LodSelector.test.ts`
-- Modify: `ice3-engine/packages/runtime/src/index.ts`
+**文件：**
+- 新建：`ice3-engine/packages/runtime/src/asset/ICELodSelector.ts`
+- 新建：`ice3-engine/packages/runtime/tests/LodSelector.test.ts`
+- 修改：`ice3-engine/packages/runtime/src/index.ts`
 
-**Interfaces:**
+**接口：**
 
 ```ts
 export interface ICELodSelectionInput {
@@ -180,11 +178,10 @@ export class ICELodSelector {
 }
 ```
 
-- `fallbackByTargetId` maps a target content tile to its nearest ancestor with
-  content.
-- The selector is pure and does not know URLs, fetch, scene, or GPU state.
+- `fallbackByTargetId` 将目标内容 Tile 映射到其最近的带内容祖先。
+- 选择器是纯函数，不了解 URL、fetch、场景或 GPU 状态。
 
-- [ ] **Step 1: Write failing selector tests**
+- [ ] **步骤 1：编写失败的选择器测试**
 
 ```ts
 import { test } from 'node:test';
@@ -257,22 +254,22 @@ test('provides ancestor fallback while target content is not resident', () => {
 });
 ```
 
-Add tests for:
+添加以下测试：
 
-- changing only viewport width changes the target;
-- a zero-error leaf stops refinement;
-- a culled subtree is absent;
-- an internal tile without content continues to children.
+- 仅更改视口宽度会改变目标；
+- 零误差叶节点停止细化；
+- 被剔除的子树不存在；
+- 不带内容的内部 Tile 会继续进入子节点。
 
-- [ ] **Step 2: Run RED**
+- [ ] **步骤 2：运行 RED**
 
 ```bash
 npm test -- packages/runtime/tests/LodSelector.test.ts
 ```
 
-Expected: FAIL because `ICELodSelector` does not exist.
+预期：失败，因为 `ICELodSelector` 尚不存在。
 
-- [ ] **Step 3: Implement selection**
+- [ ] **步骤 3：实现选择**
 
 ```ts
 const distance = Math.max(
@@ -284,16 +281,15 @@ const sse = tile.geometricError * input.viewport.height / (
 );
 ```
 
-Traversal:
+遍历：
 
-1. Reject tiles outside `ICEFrustum`.
-2. Stop at a content leaf or when `sse <= threshold`.
-3. For an internal node above threshold, recurse into visible children.
-4. If an internal node has no content and cannot refine, keep its visible
-   content-bearing descendants.
-5. Resolve fallback from the nearest content ancestor for each target.
+1. 拒绝 `ICEFrustum` 之外的 Tile。
+2. 在内容叶节点或 `sse <= threshold` 时停止。
+3. 对于高于阈值的内部 Node，递归进入可见子节点。
+4. 如果内部 Node 没有内容且无法细化，则保留其可见的带内容后代。
+5. 为每个目标从最近的内容祖先解析回退。
 
-- [ ] **Step 4: Verify GREEN**
+- [ ] **步骤 4：验证 GREEN**
 
 ```bash
 npm test -- packages/runtime/tests/LodSelector.test.ts
@@ -301,9 +297,9 @@ npm run typecheck
 npm test
 ```
 
-Expected: all pass.
+预期：全部通过。
 
-- [ ] **Step 5: Commit**
+- [ ] **步骤 5：提交**
 
 ```bash
 git add packages/runtime/src/asset/ICELodSelector.ts \
@@ -314,14 +310,14 @@ git commit -m "feat(runtime): select hierarchical lod cuts"
 
 ---
 
-### Task 3: Add LOD Options, Stats, and Events
+### 任务 3：添加 LOD 选项、统计和事件
 
-**Files:**
-- Modify: `ice3-engine/packages/runtime/src/asset/ICETilesetLoader.ts`
-- Modify: `ice3-engine/packages/runtime/tests/TilesetLoader.test.ts`
-- Modify: `ice3-engine/examples/m1/global.d.ts`
+**文件：**
+- 修改：`ice3-engine/packages/runtime/src/asset/ICETilesetLoader.ts`
+- 修改：`ice3-engine/packages/runtime/tests/TilesetLoader.test.ts`
+- 修改：`ice3-engine/examples/m1/global.d.ts`
 
-**Interfaces:**
+**接口：**
 
 ```ts
 interface ICETilesetLoaderOptions {
@@ -343,12 +339,12 @@ interface ICETilesetStats {
 }
 ```
 
-Events:
+事件：
 
 - `TILESET_LOD_CHANGED`
 - `TILESET_LOD_FALLBACK`
 
-- [ ] **Step 1: Write failing stats tests**
+- [ ] **步骤 1：编写失败的统计测试**
 
 ```ts
 it('reports the selected LOD cut and SSE threshold', async () => {
@@ -369,32 +365,32 @@ it('rejects an invalid SSE threshold', () => {
 });
 ```
 
-- [ ] **Step 2: Run RED**
+- [ ] **步骤 2：运行 RED**
 
 ```bash
 npm test -- packages/runtime/tests/TilesetLoader.test.ts
 ```
 
-Expected: FAIL because the option and stats do not exist.
+预期：失败，因为选项和统计尚不存在。
 
-- [ ] **Step 3: Implement stable initial values**
+- [ ] **步骤 3：实现稳定的初始值**
 
-- Default threshold is `16`.
-- Initialize LOD stats to zero before the first selection.
-- Emit `TILESET_LOD_CHANGED` only when target IDs differ from the previous cut.
-- Emit `TILESET_LOD_FALLBACK` once per target tile transition into fallback.
-- Include frozen stats in every LOD event.
+- 默认阈值为 `16`。
+- 在首次选择前将 LOD 统计初始化为零。
+- 仅在目标 ID 与先前切面不同时发出 `TILESET_LOD_CHANGED`。
+- 每个目标 Tile 转入回退时发出一次 `TILESET_LOD_FALLBACK`。
+- 在每个 LOD 事件中包含冻结统计。
 
-- [ ] **Step 4: Verify GREEN**
+- [ ] **步骤 4：验证 GREEN**
 
 ```bash
 npm test -- packages/runtime/tests/TilesetLoader.test.ts
 npm run typecheck
 ```
 
-Expected: all pass.
+预期：全部通过。
 
-- [ ] **Step 5: Commit**
+- [ ] **步骤 5：提交**
 
 ```bash
 git add packages/runtime/src/asset/ICETilesetLoader.ts \
@@ -405,23 +401,22 @@ git commit -m "feat(runtime): expose lod selection state"
 
 ---
 
-### Task 4: Maintain Coverage During LOD Transitions
+### 任务 4：在 LOD 过渡期间维持覆盖
 
-**Files:**
-- Modify: `ice3-engine/packages/runtime/src/asset/ICETilesetLoader.ts`
-- Create: `ice3-engine/packages/runtime/tests/LodLoader.test.ts`
-- Modify: `ice3-engine/packages/runtime/tests/TilesetLoader.test.ts`
+**文件：**
+- 修改：`ice3-engine/packages/runtime/src/asset/ICETilesetLoader.ts`
+- 新建：`ice3-engine/packages/runtime/tests/LodLoader.test.ts`
+- 修改：`ice3-engine/packages/runtime/tests/TilesetLoader.test.ts`
 
-**Interfaces:**
+**接口：**
 
-- `ICETilesetHandle` keeps internal `currentCut` and `targetCut` ID sets.
-- A target tile with an ancestor fallback does not remove that ancestor until
-  all required visible target children are committed.
-- Failed target children keep the fallback branch active.
+- `ICETilesetHandle` 保留内部 `currentCut` 和 `targetCut` ID 集合。
+- 具有祖先回退的目标 Tile 在全部所需可见目标子节点提交前，不会移除该祖先。
+- 目标子节点失败时保持回退分支活动。
 
-- [ ] **Step 1: Write failing fallback tests**
+- [ ] **步骤 1：编写失败的回退测试**
 
-Use a synthetic hierarchy whose root has coarse content and two child leaves.
+使用一个合成层级，其根具有粗模内容和两个子叶节点。
 
 ```ts
 it('keeps coarse parent coverage until both target children commit', async () => {
@@ -468,29 +463,27 @@ it('discards stale refinement when the camera leaves', async () => {
 });
 ```
 
-- [ ] **Step 2: Run RED**
+- [ ] **步骤 2：运行 RED**
 
 ```bash
 npm test -- packages/runtime/tests/LodLoader.test.ts
 ```
 
-Expected: FAIL because the current loader removes/commits content without a
-coverage cut.
+预期：失败，因为当前加载器在没有覆盖切面的情况下移除/提交内容。
 
-- [ ] **Step 3: Implement cut-aware lifecycle**
+- [ ] **步骤 3：实现切面感知生命周期**
 
-- Run `ICELodSelector.select()` before building the scheduler work set.
-- Give target nodes priority; include required fallback ancestors.
-- Mark a subtree as transitioning when any target child is pending.
-- Stage candidates without adding duplicate scene IDs.
-- Keep current fallback content until all visible target replacement content is
-  committed.
-- On failure, keep fallback and remove only the failed target from readiness.
-- On camera change, discard candidates not retained by the new cut.
-- Keep one scene commit per configured frame.
-- After the replacement set commits, remove superseded parent content.
+- 在构建调度器工作集之前运行 `ICELodSelector.select()`。
+- 优先处理目标 Node；包含所需回退祖先。
+- 当任一目标子节点处于 pending 时，将子树标记为 transitioning。
+- 暂存候选，同时不添加重复场景 ID。
+- 在所有可见目标替代内容提交前，保留当前回退内容。
+- 失败时保留回退，仅将失败目标从就绪状态移除。
+- 相机变化时，丢弃未被新切面保留的候选。
+- 按配置保持每帧一次场景提交。
+- 替代集提交后，移除已被取代的父内容。
 
-- [ ] **Step 4: Verify GREEN**
+- [ ] **步骤 4：验证 GREEN**
 
 ```bash
 npm test -- packages/runtime/tests/LodLoader.test.ts \
@@ -499,9 +492,9 @@ npm run typecheck
 npm test
 ```
 
-Expected: all pass including stale-request and idle tests.
+预期：全部通过，包括过期请求和空闲测试。
 
-- [ ] **Step 5: Commit**
+- [ ] **步骤 5：提交**
 
 ```bash
 git add packages/runtime/src/asset/ICETilesetLoader.ts \
@@ -512,21 +505,20 @@ git commit -m "feat(runtime): preserve coverage across lod transitions"
 
 ---
 
-### Task 5: Preserve Selection and Enforce Budgets
+### 任务 5：保留 Selection 并执行预算
 
-**Files:**
-- Modify: `ice3-engine/packages/runtime/src/asset/ICETilesetLoader.ts`
-- Modify: `ice3-engine/packages/runtime/tests/LodLoader.test.ts`
-- Modify: `ice3-engine/packages/runtime/tests/TilesetLoader.test.ts`
+**文件：**
+- 修改：`ice3-engine/packages/runtime/src/asset/ICETilesetLoader.ts`
+- 修改：`ice3-engine/packages/runtime/tests/LodLoader.test.ts`
+- 修改：`ice3-engine/packages/runtime/tests/TilesetLoader.test.ts`
 
-**Interfaces:**
+**接口：**
 
-- Selection lookup uses `ICEMesh.selectionId`, not scene node IDs.
-- Unload clears selection only if no remaining resident content contains the
-  selected semantic ID.
-- Visible coverage is never removed for budget.
+- Selection 查找使用 `ICEMesh.selectionId`，而不是场景 Node ID。
+- 仅当没有剩余驻留内容包含所选语义 ID 时，卸载才清除 Selection。
+- 绝不因预算移除可见覆盖。
 
-- [ ] **Step 1: Write failing selection and budget tests**
+- [ ] **步骤 1：编写失败的 Selection 和预算测试**
 
 ```ts
 it('preserves selection when a coarse device is replaced by fine content', async () => {
@@ -561,25 +553,24 @@ it('stops optional refinement when the budget is reached', async () => {
 });
 ```
 
-- [ ] **Step 2: Run RED**
+- [ ] **步骤 2：运行 RED**
 
 ```bash
 npm test -- packages/runtime/tests/LodLoader.test.ts
 ```
 
-Expected: FAIL because selection is currently cleared by container unload and
-budget handling is not cut-aware.
+预期：失败，因为当前容器卸载会清除 Selection，且预算处理不支持感知切面。
 
-- [ ] **Step 3: Implement identity-aware unload and budget**
+- [ ] **步骤 3：实现身份感知卸载和预算**
 
-- Collect remaining resident semantic IDs before removing a container.
-- Clear selection only when an active ID has no remaining resident match.
-- Preserve selected IDs as intent during a staged replacement.
-- Prioritize visible coverage before optional detail and prefetch.
-- Suppress optional refinement while resident limits are reached.
-- Continue to allow visible completeness above the soft budget.
+- 移除容器前收集剩余驻留语义 ID。
+- 仅当活动 ID 没有剩余驻留匹配时清除 Selection。
+- 在分阶段替换期间将已选 ID 保留为意图。
+- 在可选细节和预取之前优先保证可见覆盖。
+- 达到驻留限制时暂停可选细化。
+- 继续允许可见完整性超过软预算。
 
-- [ ] **Step 4: Verify GREEN**
+- [ ] **步骤 4：验证 GREEN**
 
 ```bash
 npm test -- packages/runtime/tests/LodLoader.test.ts \
@@ -588,9 +579,9 @@ npm run typecheck
 npm test
 ```
 
-Expected: all pass.
+预期：全部通过。
 
-- [ ] **Step 5: Commit**
+- [ ] **步骤 5：提交**
 
 ```bash
 git add packages/runtime/src/asset/ICETilesetLoader.ts \
@@ -601,28 +592,26 @@ git commit -m "feat(runtime): preserve lod selection and budgets"
 
 ---
 
-### Task 6: Hierarchical Browser Example
+### 任务 6：层级浏览器示例
 
-**Files:**
-- Create: `ice3-engine/tests/fixtures/hierarchical-demo/tileset.json`
-- Create: `ice3-engine/tests/fixtures/hierarchical-demo/coarse/*.glb`
-- Create: `ice3-engine/tests/fixtures/hierarchical-demo/parts/*.glb`
-- Modify: `ice3-engine/examples/m1/assets/hierarchical-demo/**`
-- Modify: `ice3-engine/examples/m1/main.ts`
-- Modify: `ice3-engine/examples/m1/index.html`
-- Modify: `ice3-engine/examples/m1/styles.css`
-- Modify: `ice3-engine/examples/m1/global.d.ts`
-- Modify: `ice3-engine/tests/e2e/m1.spec.ts`
+**文件：**
+- 新建：`ice3-engine/tests/fixtures/hierarchical-demo/tileset.json`
+- 新建：`ice3-engine/tests/fixtures/hierarchical-demo/coarse/*.glb`
+- 新建：`ice3-engine/tests/fixtures/hierarchical-demo/parts/*.glb`
+- 修改：`ice3-engine/examples/m1/assets/hierarchical-demo/**`
+- 修改：`ice3-engine/examples/m1/main.ts`
+- 修改：`ice3-engine/examples/m1/index.html`
+- 修改：`ice3-engine/examples/m1/styles.css`
+- 修改：`ice3-engine/examples/m1/global.d.ts`
+- 修改：`ice3-engine/tests/e2e/m1.spec.ts`
 
-**Interfaces:**
+**接口：**
 
-- Example loads a reviewed synthetic hierarchy generated by Task 4 of the asset
-  plan.
-- Browser bridge exposes `tilesetStats()` with LOD fields and deterministic
-  camera poses.
-- UI shows target/resident cut counts without exposing internal paths.
+- 示例加载 Asset 计划任务 4 生成的已审查合成层级。
+- 浏览器桥暴露带 LOD 字段的 `tilesetStats()` 和确定性相机姿态。
+- UI 显示目标/驻留切面数量，且不暴露内部路径。
 
-- [ ] **Step 1: Write failing E2E tests**
+- [ ] **步骤 1：编写失败的 E2E 测试**
 
 ```ts
 test('shows coarse coverage and refines the focused branch', async ({ page }) => {
@@ -666,26 +655,24 @@ test('shows no blank frame during an intentionally delayed refinement', async ({
 });
 ```
 
-- [ ] **Step 2: Run RED**
+- [ ] **步骤 2：运行 RED**
 
 ```bash
 npm run test:e2e -- --project=chromium -g "coarse coverage|coarse-to-fine|blank frame"
 ```
 
-Expected: FAIL because the example has no hierarchy or LOD UI.
+预期：失败，因为示例没有层级或 LOD UI。
 
-- [ ] **Step 3: Generate and wire the synthetic hierarchy**
+- [ ] **步骤 3：生成并接入合成层级**
 
-- Generate the reviewed synthetic fixture with the toolchain using the asset
-  plan's `--lod` flow.
-- Commit only that synthetic fixture.
-- Point M1 at `/assets/hierarchical-demo/tileset.json`.
-- Add LOD progress text: target cut, coarse resident, fine resident, fallback.
-- Add deterministic focus, overview, selection, and idle helpers.
-- Keep black background, flat color, yellow selection, controls, loading, and
-  upper-right business panel.
+- 使用 Asset 计划的 `--lod` 流程和工具链生成已审查的合成 fixture。
+- 仅提交该合成 fixture。
+- 将 M1 指向 `/assets/hierarchical-demo/tileset.json`。
+- 添加 LOD 进度文本：目标切面、粗模驻留、细模驻留、回退。
+- 添加确定性的聚焦、总览、Selection 和空闲辅助函数。
+- 保留黑色背景、平面颜色、黄色 Selection、控件、加载状态和右上业务面板。
 
-- [ ] **Step 4: Verify GREEN**
+- [ ] **步骤 4：验证 GREEN**
 
 ```bash
 npm run typecheck:example
@@ -693,9 +680,9 @@ npm run test:e2e -- --project=chromium tests/e2e/m1.spec.ts
 npm run test:e2e -- --project=webkit tests/e2e/m1.spec.ts
 ```
 
-Expected: all pass.
+预期：全部通过。
 
-- [ ] **Step 5: Commit**
+- [ ] **步骤 5：提交**
 
 ```bash
 git add tests/fixtures/hierarchical-demo examples/m1 tests/e2e/m1.spec.ts
@@ -704,27 +691,27 @@ git commit -m "feat(example): demonstrate hierarchical lod"
 
 ---
 
-### Task 7: Documentation, Real-Asset Validation, and Merge
+### 任务 7：文档、真实 Asset 验证和合并
 
-**Files:**
-- Modify: `ice3-engine/README.md`
-- Modify: `ice3-engine/docs/api/m1.md`
-- Modify: `ice3-engine/docs/diagnostics.md`
-- Modify: `ice3-doc/docs/contracts/asset-preparation-contract-v1.md`
+**文件：**
+- 修改：`ice3-engine/README.md`
+- 修改：`ice3-engine/docs/api/m1.md`
+- 修改：`ice3-engine/docs/diagnostics.md`
+- 修改：`ice3-doc/docs/contracts/asset-preparation-contract-v1.md`
 
-- [ ] **Step 1: Document runtime behavior**
+- [ ] **步骤 1：记录运行时行为**
 
-Document:
+记录：
 
-- `maxScreenSpaceErrorPixels`.
-- Current/target/fallback cut semantics.
-- LOD stats and events.
-- Selection identity.
-- Parent fallback and failures.
-- No runtime simplification.
-- No implicit tiling or external Tilesets.
+- `maxScreenSpaceErrorPixels`。
+- 当前/目标/回退切面语义。
+- LOD 统计和事件。
+- Selection 身份。
+- 父级回退和失败。
+- 无运行时简化。
+- 无隐式 tiling 或外部 Tileset。
 
-- [ ] **Step 2: Run full gates**
+- [ ] **步骤 2：运行完整门禁**
 
 ```bash
 cd ../ice3-toolchain
@@ -737,17 +724,16 @@ npm run verify
 npm pack --workspaces --dry-run
 ```
 
-Expected:
+预期：
 
-- architecture and type checks pass;
-- all unit tests pass;
-- Chromium and WebKit browser tests pass;
-- packages contain no customer or synthetic model fixtures.
+- 架构和类型检查通过；
+- 所有单元测试通过；
+- Chromium 和 WebKit 浏览器测试通过；
+- 包不包含客户或合成模型 fixture。
 
-- [ ] **Step 3: Measure a controlled real asset**
+- [ ] **步骤 3：测量受控真实 Asset**
 
-Generate temporary hierarchical output outside Git with the toolchain LOD flags.
-Use a temporary browser page and public API. Record only:
+使用工具链 LOD 标志在 Git 之外生成临时层级输出。使用临时浏览器页面和公共 API。仅记录：
 
 ```text
 totalTiles
@@ -767,20 +753,18 @@ selectionRetentionCount
 pageErrors
 ```
 
-Do not print or persist model names, node names, paths, screenshots, or geometry.
+不要打印或持久化模型名称、Node 名称、路径、截图或几何。
 
-- [ ] **Step 4: Audit and clean**
+- [ ] **步骤 4：审查并清理**
 
 ```bash
 git status --short --ignored
 git ls-files | rg -i '\.(glb|gltf|bin)$'
 ```
 
-Expected: only reviewed synthetic fixtures are tracked; temporary real-asset
-output is removed. Run the project-approved naming audit and record no
-findings.
+预期：仅跟踪已审查的合成 fixture；临时真实 Asset 输出已移除。运行项目批准的命名审查，并记录无发现。
 
-- [ ] **Step 5: Commit docs and merge**
+- [ ] **步骤 5：提交文档并合并**
 
 ```bash
 cd ../ice3-engine
@@ -792,7 +776,7 @@ git add docs/contracts/asset-preparation-contract-v1.md
 git commit -m "docs: finalize hierarchical lod contract"
 ```
 
-After all repositories are clean and fully verified:
+所有仓库均干净且完整验证后：
 
 ```bash
 cd ../ice3-toolchain
@@ -814,17 +798,13 @@ git merge --no-ff feature/hierarchical-lod \
 git branch -d feature/hierarchical-lod
 ```
 
-Run the full engine and toolchain gates once more on `main`. Confirm the naming
-audit with the project-approved term list in addition to the product list above.
+在 `main` 上再次运行引擎和工具链完整门禁。除上述产品列表外，还使用项目批准的术语列表确认命名审查。
 
-## Execution Recommendation
+## 执行建议
 
-Use Native execution after the asset plan is complete. LOD cut calculation,
-coverage-preserving transitions, selection identity, and the scheduler share
-tight lifecycle invariants; one continuous implementation session reduces
-interface mismatch.
+Asset 计划完成后使用原生执行。LOD 切面计算、保覆盖过渡、Selection 身份和调度器共享紧密的生命周期不变量；连续实施会话可减少接口不匹配。
 
-## Related Documents
+## 相关文档
 
-- `ICE3-DOC-IDX-001` — [Documentation index](../README.md)
-- `ICE3-DOC-SPEC-003` — [Hierarchical LOD specification](../specs/2026-10-27-hierarchical-lod-design.md)
+- `ICE3-DOC-IDX-001` — [文档索引](../README.md)
+- `ICE3-DOC-SPEC-003` — [层级 LOD 规范](../specs/2026-10-27-hierarchical-lod-design.md)
