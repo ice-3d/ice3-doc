@@ -1,5 +1,11 @@
 # Static Industrial Render Batching Implementation Plan
 
+> Document ID: ICE3-DOC-PLAN-011
+>
+> Status: Implemented
+>
+> Owner: ICE3 architecture maintainers
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Generate deterministic static render batches in the toolchain and consume them through WebGL2 with unchanged device selection, LOD, and Tileset behavior.
@@ -690,7 +696,7 @@ git commit -m "feat(renderer): instance repeated industrial geometry"
 
 **Files:**
 - Modify: `ice3-doc/docs/contracts/asset-preparation-contract-v1.md`
-- Modify: `ice3-doc/docs/superpowers/specs/2026-10-27-industrial-render-batching-design.md`
+- Modify: `ice3-doc/docs/specs/2026-10-27-industrial-render-batching-design.md`
 - Modify: `ice3-engine/README.md`
 - Modify: `ice3-toolchain/README.md`
 
@@ -767,3 +773,8 @@ npm pack --workspaces --dry-run --json
 git add docs
 git commit -m "docs: record static render batching"
 ```
+
+## Related Documents
+
+- `ICE3-DOC-IDX-001` — [Documentation index](../README.md)
+- `ICE3-DOC-SPEC-004` — [Industrial render batching specification](../specs/2026-10-27-industrial-render-batching-design.md)

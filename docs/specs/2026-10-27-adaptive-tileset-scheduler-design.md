@@ -1,8 +1,16 @@
 # ICE3 自适应 Tileset 调度设计规格
 
+> Document ID: ICE3-DOC-SPEC-002
+>
+> Status: Implemented
+>
+> Owner: ICE3 architecture maintainers
+>
+> English summary: Define camera-driven Tileset request scheduling, residency, prefetching, and bounded scene commits.
+
 | 项目 | 内容 |
 | --- | --- |
-| 状态 | 待用户评审 |
+| 状态 | 已实现 |
 | 版本 | 1.0 |
 | 日期 | 2026-10-27 |
 | 适用范围 | `ice3-engine` 的 Tileset 运行时、现有浏览器示例和后续 LOD |
@@ -424,3 +432,8 @@ export class ICETilesetHandle extends ICEEventDispatcher {
 7. 真实模型局部视角下的 resident 分区数显著低于 54。
 8. 所有仓库验证门禁与打包检查通过。
 9. 客户资产或派生内容未进入 Git、测试夹具、截图或发布包。
+
+## Related Documents
+
+- `ICE3-DOC-IDX-001` — [Documentation index](../README.md)
+- `ICE3-DOC-PLAN-003` — [Adaptive Tileset Scheduler implementation](../plans/2026-10-27-adaptive-tileset-scheduler.md)

@@ -1,5 +1,11 @@
 # ICE3 Documentation
 
+> Document ID: ICE3-DOC-RM-001
+>
+> Status: Active
+>
+> Owner: ICE3 documentation maintainers
+
 This repository is the single source of truth for contracts shared by the ICE3
 engine and its surrounding tools.
 
@@ -9,7 +15,7 @@ engine and its surrounding tools.
 
 ## Implementation plans
 
-- [Asset Preparation Contract v1 implementation](docs/superpowers/plans/2026-10-27-asset-preparation-contract.md)
+- [Asset Preparation Contract v1 implementation](docs/plans/2026-10-27-asset-preparation-contract.md)
 
 Repository-specific implementation guides remain in their owning repositories.
 Cross-repository formats, compatibility rules, shared metrics, and diagnostic

@@ -1,5 +1,11 @@
 # ICE3 通用场景查询与交互 API 实施计划
 
+> Document ID: ICE3-DOC-PLAN-008
+>
+> Status: Implemented
+>
+> Owner: ICE3 architecture maintainers
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** 提供稳定、去重、可序列化的场景查询、屏幕拾取、世界射线和设备聚焦能力，供任意工具或业务调用。
@@ -534,3 +540,8 @@ Merge both feature branches to `main` after full verification.
 Use Native execution after the LOD refinement plan. Query, pick, raycast, and
 focus share one semantic representative rule; implementing them in one focused
 session avoids inconsistent device identity.
+
+## Related Documents
+
+- `ICE3-DOC-IDX-001` — [Documentation index](../README.md)
+- `ICE3-DOC-SPEC-005` — [LOD refinement and scene API specification](../specs/2026-10-27-lod-refinement-and-scene-api-design.md)

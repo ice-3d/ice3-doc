@@ -1,5 +1,11 @@
 # Semantic Industrial Proxies Implementation Plan
 
+> Document ID: ICE3-DOC-PLAN-009
+>
+> Status: Implemented
+>
+> Owner: ICE3 architecture maintainers
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Add conservative offline OBB and cylinder proxies as optional adaptive-LOD samples while preserving the standard Tileset, Prepared GLB, selection identity, and runtime API.
@@ -1359,7 +1365,7 @@ git commit -m "feat(cli): expose semantic proxy generation"
 
 **Files:**
 - Modify: `ice3-doc/docs/contracts/asset-preparation-contract-v1.md`
-- Modify: `ice3-doc/docs/superpowers/specs/2026-10-27-semantic-industrial-proxy-design.md`
+- Modify: `ice3-doc/docs/specs/2026-10-27-semantic-industrial-proxy-design.md`
 - Modify: `ice3-toolchain/README.md`
 
 - [ ] **Step 1: Run both full suites before the controlled comparison**
@@ -1479,10 +1485,15 @@ Expected: all green, zero model-like files in packages.
 ```bash
 cd ../ice3-doc
 git add docs/contracts/asset-preparation-contract-v1.md \
-  docs/superpowers/specs/2026-10-27-semantic-industrial-proxy-design.md
+  docs/specs/2026-10-27-semantic-industrial-proxy-design.md
 git commit -m "docs: record semantic proxy contract"
 
 cd ../ice3-toolchain
 git add README.md
 git commit -m "docs: finalize semantic proxy guidance"
 ```
+
+## Related Documents
+
+- `ICE3-DOC-IDX-001` — [Documentation index](../README.md)
+- `ICE3-DOC-SPEC-006` — [Semantic industrial proxy specification](../specs/2026-10-27-semantic-industrial-proxy-design.md)

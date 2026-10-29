@@ -1,8 +1,17 @@
 # 高可信度污水处理厂三维资产生成规格
 
+> Document ID: ICE3-DOC-SPEC-008
+>
+> Status: Implemented
+>
+> Owner: ICE3 architecture maintainers
+
+>
+> English summary: Define the authored Blender pipeline for a credible, fully synthetic wastewater treatment plant.
+
 | 项目 | 内容 |
 | --- | --- |
-| 状态 | 已评审 |
+| 状态 | 已实现 |
 | 版本 | 1.1 |
 | 日期 | 2026-10-28 |
 | 适用范围 | 虚构污水厂构建期资产生成、GLB 导出和现有预处理流水线接入 |
@@ -194,3 +203,8 @@ TypeScript 场景规格
 - 不追求施工级尺寸、工程量或水力计算。
 - 不引入真实工程模型、厂商受保护图纸或第三方模型资产。
 - 不实现 Agent、Prompt 或 AI 专用接口。
+
+## Related Documents
+
+- `ICE3-DOC-IDX-001` — [Documentation index](../README.md)
+- `ICE3-DOC-PLAN-012` — [Wastewater Blender pipeline implementation](../plans/2026-10-28-credible-wastewater-blender-pipeline.md)

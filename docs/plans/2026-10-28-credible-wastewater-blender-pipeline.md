@@ -1,5 +1,11 @@
 # 高可信度污水处理厂三维资产生成 Implementation Plan
 
+> Document ID: ICE3-DOC-PLAN-012
+>
+> Status: Implemented
+>
+> Owner: ICE3 architecture maintainers
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** 用固定版本的成熟三维建模工具替换手写三角面生成器，生成可用于客户演示的虚构污水厂 GLB，同时保留现有 ICE3 预处理、拆分、LOD、合批和选择链路。
@@ -38,9 +44,9 @@
 
 ### 文档仓库
 
-- `docs/superpowers/specs/2026-10-28-credible-wastewater-blender-pipeline-design.md`
+- `docs/specs/2026-10-28-credible-wastewater-blender-pipeline-design.md`
   - 已批准的设计规格。
-- `docs/superpowers/plans/2026-10-28-credible-wastewater-blender-pipeline.md`
+- `docs/plans/2026-10-28-credible-wastewater-blender-pipeline.md`
   - 本实施计划。
 
 ### 工具链仓库
@@ -1182,3 +1188,8 @@ git switch main
 git merge --no-ff feat/blender-wastewater-model
 git merge --no-ff feat/blender-wastewater-demo
 ```
+
+## Related Documents
+
+- `ICE3-DOC-IDX-001` — [Documentation index](../README.md)
+- `ICE3-DOC-SPEC-008` — [Wastewater Blender pipeline specification](../specs/2026-10-28-credible-wastewater-blender-pipeline-design.md)

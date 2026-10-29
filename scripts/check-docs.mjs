@@ -120,7 +120,7 @@ export async function checkRepository(root, options = {}) {
         if (
           match[2] === 'SPEC'
           && /\p{Script=Han}/u.test(document.source)
-          && !/^English summary:\s*\S+/mu.test(document.source)
+          && !/^>\s*English summary:\s*\S+/mu.test(document.source)
         ) {
           errors.push(`${displayPath}: Chinese specification lacks English summary`);
         }
@@ -247,7 +247,10 @@ async function markdownFiles(root) {
       ['ls-files', '-z', '--', '*.md'],
       { cwd: root, encoding: 'utf8' },
     );
-    return output.split('\0').filter(Boolean).map((file) => join(root, file));
+    return output
+      .split('\0')
+      .filter((file) => file && !file.startsWith('scripts/fixtures/'))
+      .map((file) => join(root, file));
   }
   const files = [];
   async function visit(directory) {
@@ -262,7 +265,9 @@ async function markdownFiles(root) {
     }
   }
   await visit(root);
-  return files.sort();
+  return files
+    .filter((file) => !relative(root, file).startsWith('scripts/fixtures/'))
+    .sort();
 }
 
 function parseDocument(path, source) {

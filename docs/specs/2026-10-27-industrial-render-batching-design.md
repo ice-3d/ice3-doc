@@ -1,8 +1,16 @@
 # ICE3 工业渲染合批与实例化设计规格
 
+> Document ID: ICE3-DOC-SPEC-004
+>
+> Status: Implemented
+>
+> Owner: ICE3 architecture maintainers
+>
+> English summary: Define static and runtime render batching with stable semantic identity and bounded GPU residency.
+
 | 项目 | 内容 |
 | --- | --- |
-| 状态 | 静态、自适应批次与 GPU 驻留稳定性均已通过受控资产验收 |
+| 状态 | 已实现 |
 | 版本 | 1.2 |
 | 日期 | 2026-10-27 |
 | 适用范围 | Prepared GLB 生成、运行时批次规划、Web Worker 数据处理、WebGL2 绘制和后续 WebGPU 后端 |
@@ -495,3 +503,8 @@ CPU 驻留、视锥可见性和 GPU 驻留是独立状态。Tile 一旦成功驻
 
 渲染诊断增加累计 `gpuUploads` 与 `gpuEvictions`。稳定旋转测试要求已驻留
 内容重新进入视野时不增加上传或淘汰计数，并保持完整可见覆盖。
+
+## Related Documents
+
+- `ICE3-DOC-IDX-001` — [Documentation index](../README.md)
+- `ICE3-DOC-PLAN-011` — [Static render batching implementation](../plans/2026-10-27-static-render-batching.md)

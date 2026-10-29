@@ -1,8 +1,16 @@
 # ICE3 自适应工业 LOD 设计规格
 
+> Document ID: ICE3-DOC-SPEC-001
+>
+> Status: Implemented
+>
+> Owner: ICE3 architecture maintainers
+>
+> English summary: Define deterministic per-unit triangle budget allocation and error curves for adaptive coarse LOD generation.
+
 | 项目 | 内容 |
 | --- | --- |
-| 状态 | 待用户评审 |
+| 状态 | 已实现 |
 | 版本 | 1.0 |
 | 日期 | 2026-10-27 |
 | 适用范围 | `ice3-toolchain` 的粗模预算分配、离线简化、报告和 CLI |
@@ -322,3 +330,8 @@ wallClockMs
 - 现有 `proportional` 资产保持兼容。
 - 后续语义代理可作为新的采样来源接入同一预算分配器。
 - 后续簇代理可以复用误差汇总和预算报告，但不在本阶段实现。
+
+## Related Documents
+
+- `ICE3-DOC-IDX-001` — [Documentation index](../README.md)
+- `ICE3-DOC-PLAN-001` — [Adaptive Industrial LOD implementation](../plans/2026-10-27-adaptive-industrial-lod.md)

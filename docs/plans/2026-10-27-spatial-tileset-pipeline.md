@@ -1,5 +1,11 @@
 # ICE3 Spatial Tileset Pipeline Implementation Plan
 
+> Document ID: ICE3-DOC-PLAN-010
+>
+> Status: Implemented
+>
+> Owner: ICE3 architecture maintainers
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Build a standards-based toolchain pipeline that partitions a large industrial model into independently loadable GLBs and a 3D Tiles 1.1 tileset, then load those partitions incrementally in the public ICE3 runtime and verify the result in the existing browser example.
@@ -1779,3 +1785,8 @@ schema, engine parser, runtime fixture, and browser demonstration share exact
 field names and dependency ordering; keeping those interface decisions in one
 continuous session reduces cross-repository mismatch. The full verification
 gate still provides an independent final check.
+
+## Related Documents
+
+- `ICE3-DOC-IDX-001` — [Documentation index](../README.md)
+- `ICE3-DOC-SPEC-007` — [Spatial Tileset pipeline specification](../specs/2026-10-27-spatial-tileset-pipeline-design.md)

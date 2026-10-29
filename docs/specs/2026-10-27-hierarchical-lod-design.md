@@ -1,8 +1,17 @@
 # ICE3 层级 LOD 设计规格
 
+> Document ID: ICE3-DOC-SPEC-003
+>
+> Status: Implemented
+>
+> Owner: ICE3 architecture maintainers
+
+>
+> English summary: Define hierarchical LOD asset generation, coarse-content selection, and stable semantic identity across refinement levels.
+
 | 项目 | 内容 |
 | --- | --- |
-| 状态 | 已确认 |
+| 状态 | 已实现 |
 | 版本 | 1.0 |
 | 日期 | 2026-10-27 |
 | 适用范围 | `ice3-toolchain`、`ice3-engine`、空间 Tileset 契约和浏览器示例 |
@@ -541,3 +550,8 @@ export interface ICELodStats {
 - 文档和实现不写客户文件名或绝对路径。
 - 不使用竞品名称描述设计。
 - API 和代码沿用 ICE 家族命名。
+
+## Related Documents
+
+- `ICE3-DOC-IDX-001` — [Documentation index](../README.md)
+- `ICE3-DOC-PLAN-005` — [Hierarchical LOD asset implementation](../plans/2026-10-27-hierarchical-lod-assets.md)

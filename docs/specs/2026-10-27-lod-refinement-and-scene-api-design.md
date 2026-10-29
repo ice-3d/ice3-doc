@@ -1,8 +1,17 @@
 # ICE3 LOD 精炼与通用场景 API 设计规格
 
+> Document ID: ICE3-DOC-SPEC-005
+>
+> Status: Implemented
+>
+> Owner: ICE3 architecture maintainers
+
+>
+> English summary: Define refined LOD scheduling and the general scene-query and interaction API.
+
 | 项目 | 内容 |
 | --- | --- |
-| 状态 | 待用户评审 |
+| 状态 | 已实现 |
 | 版本 | 1.0 |
 | 日期 | 2026-10-27 |
 | 适用范围 | 层级粗模分片、Tileset 多内容生命周期、预取、SSE 校准和公共场景查询 |
@@ -455,3 +464,8 @@ focus(
 7. 通用查询、屏幕拾取、世界射线和设备聚焦通过测试。
 8. 查询与交互 API 不包含 Agent 专用语义。
 9. 客户模型及派生文件不进入仓库或发布包。
+
+## Related Documents
+
+- `ICE3-DOC-IDX-001` — [Documentation index](../README.md)
+- `ICE3-DOC-PLAN-007` — [LOD refinement implementation](../plans/2026-10-27-lod-refinement.md)

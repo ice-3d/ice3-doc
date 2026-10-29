@@ -1,5 +1,11 @@
 # Adaptive Tileset Scheduler Implementation Plan
 
+> Document ID: ICE3-DOC-PLAN-003
+>
+> Status: Implemented
+>
+> Owner: ICE3 architecture maintainers
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Replace eager all-tile loading with a camera-driven resident work set that culls, prefetches, commits, and unloads Tileset partitions under explicit limits.
@@ -1003,3 +1009,8 @@ Native execution is recommended. The frustum, scheduler decision object, and
 loader state machine share exact IDs and lifecycle conditions across many tests;
 one continuous implementation session reduces interface mismatch. The final full
 gate still provides independent regression coverage.
+
+## Related Documents
+
+- `ICE3-DOC-IDX-001` — [Documentation index](../README.md)
+- `ICE3-DOC-SPEC-002` — [Adaptive Tileset scheduler specification](../specs/2026-10-27-adaptive-tileset-scheduler-design.md)

@@ -1,8 +1,14 @@
 # ICE3 资产预处理协同契约 v1
 
+> Document ID: ICE3-DOC-CTR-001
+>
+> Status: Active
+>
+> Owner: ICE3 architecture maintainers
+
 | 项目 | 内容 |
 | --- | --- |
-| 状态 | 已确认 |
+| 状态 | 生效 |
 | 版本 | 1.0 |
 | 日期 | 2026-10-27 |
 | 适用范围 | ICE3 引擎、工具链、CLI、未来的资产工具 UI 和 CI |

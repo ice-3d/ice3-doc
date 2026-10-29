@@ -1,5 +1,11 @@
 # Industrial Semantic Core Implementation Plan
 
+> Document ID: ICE3-DOC-PLAN-013
+>
+> Status: Implemented
+>
+> Owner: ICE3 architecture maintainers
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Build the browser-independent `@ice3/industrial-core` package with a validated industrial manifest, entity/type registries, relation graph, query engine, batched state updates, events, operations, workspace context, serialization, and native ICE JSON adapters.
@@ -1059,3 +1065,8 @@ Expected: no generated assets and no prohibited names.
 git add README.md packages/industrial-core/src/adapter packages/industrial-core/src/index.ts tests/core/Adapters.test.ts tests/core/Performance.test.ts
 git commit -m "feat(core): add native industrial json adapters"
 ```
+
+## Related Documents
+
+- `ICE3-DOC-IDX-001` — [Documentation index](../README.md)
+- `ICE3-DOC-SPEC-009` — [Industrial semantic layer specification](../specs/2026-10-28-industrial-semantic-layer-design.md)

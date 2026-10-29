@@ -1,8 +1,16 @@
 # ICE3 工业语义代理设计规格
 
+> Document ID: ICE3-DOC-SPEC-006
+>
+> Status: Implemented
+>
+> Owner: ICE3 architecture maintainers
+>
+> English summary: Define conservative OBB and cylinder semantic proxies with quality gates and QEM fallback.
+
 | 项目 | 内容 |
 | --- | --- |
-| 状态 | 已确认 |
+| 状态 | 已实现 |
 | 版本 | 1.0 |
 | 日期 | 2026-10-27 |
 | 适用范围 | 离线工具链的语义代理候选、自适应 LOD 采样、Prepared GLB mesh 重建和 CLI |
@@ -405,3 +413,8 @@ failedRequests
 - 运行时无需改动。
 - 凸包、人工覆盖和部件拆分留给后续规格。
 - 远景簇代理仍作为第三阶段，不混入本阶段。
+
+## Related Documents
+
+- `ICE3-DOC-IDX-001` — [Documentation index](../README.md)
+- `ICE3-DOC-PLAN-009` — [Semantic proxy implementation](../plans/2026-10-27-semantic-industrial-proxies.md)

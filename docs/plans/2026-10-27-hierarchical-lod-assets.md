@@ -1,5 +1,11 @@
 # ICE3 层级 LOD 资产生成实施计划
 
+> Document ID: ICE3-DOC-PLAN-005
+>
+> Status: Implemented
+>
+> Owner: ICE3 architecture maintainers
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** 在工具链中从一次源模型构建同时生成细模、层级粗模、真实 `geometricError`、稳定设备选择身份和可审计报告。
@@ -940,3 +946,8 @@ Use Native execution. The identity extension, simplification adapter, workspace,
 partition pipeline, and Tileset errors share exact IDs and geometry contracts;
 one continuous implementation session reduces interface drift. Complete this
 plan before starting the runtime plan.
+
+## Related Documents
+
+- `ICE3-DOC-IDX-001` — [Documentation index](../README.md)
+- `ICE3-DOC-SPEC-003` — [Hierarchical LOD specification](../specs/2026-10-27-hierarchical-lod-design.md)

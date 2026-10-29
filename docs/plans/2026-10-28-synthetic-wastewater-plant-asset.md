@@ -1,5 +1,11 @@
 # 虚构污水处理厂三维资产 Implementation Plan
 
+> Document ID: ICE3-DOC-PLAN-014
+>
+> Status: Implemented
+>
+> Owner: ICE3 architecture maintainers
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** 程序化生成一个完全虚构、可确定性重建的市政污水处理厂 GLB，并完成 prepared、空间拆分、LOD 粗模、粗模分块和示例集成。
@@ -927,3 +933,8 @@ The implementation is complete only when:
 6. Local customer previews still override the synthetic asset only on the local machine.
 7. Chromium and WebKit browser tests report no page errors or failed requests.
 8. No customer asset or prohibited name enters source, generated assets, documentation, tests or commit history.
+
+## Related Documents
+
+- `ICE3-DOC-IDX-001` — [Documentation index](../README.md)
+- `ICE3-DOC-SPEC-010` — [Synthetic wastewater plant specification](../specs/2026-10-28-synthetic-wastewater-plant-asset-design.md)

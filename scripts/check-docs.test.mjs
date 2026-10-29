@@ -1,5 +1,12 @@
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
+import {
+  mkdtemp,
+  mkdir,
+  rm,
+  writeFile,
+} from 'node:fs/promises';
+import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import test from 'node:test';
@@ -21,6 +28,7 @@ test('rejects duplicate IDs and missing metadata', async () => {
   assert.match(errors, /missing Document ID/);
   assert.match(errors, /duplicate Document ID/);
   assert.match(errors, /unsupported Status/);
+  assert.match(errors, /Chinese specification lacks English summary/);
 });
 
 test('rejects incomplete indexes', async () => {
@@ -61,4 +69,47 @@ test('CLI reports JSON and a non-zero status for invalid documentation', () => {
   const report = JSON.parse(result.stdout);
   assert.equal(report.valid, false);
   assert.ok(report.errors.length > 0);
+});
+
+test('excludes invalid validator fixtures from product documentation', async () => {
+  const root = await mkdtemp(join(tmpdir(), 'ice3-docs-'));
+  try {
+    await mkdir(join(root, 'docs'));
+    await mkdir(join(root, 'scripts', 'fixtures'), { recursive: true });
+    await writeFile(join(root, 'README.md'), [
+      '# Repository',
+      '',
+      '> Document ID: ICE3-DOC-RM-001',
+      '>',
+      '> Status: Active',
+      '>',
+      '> Owner: Documentation tests',
+      '',
+      '[Index](docs/README.md#documents)',
+      '',
+    ].join('\n'));
+    await writeFile(join(root, 'docs', 'README.md'), [
+      '# Documents',
+      '',
+      '> Document ID: ICE3-DOC-IDX-001',
+      '>',
+      '> Status: Active',
+      '>',
+      '> Owner: Documentation tests',
+      '',
+      '## Documents',
+      '',
+      '- [README](../README.md)',
+      '',
+    ].join('\n'));
+    await writeFile(
+      join(root, 'scripts', 'fixtures', 'README.md'),
+      '# Invalid fixture\n\nThis file intentionally has no metadata.\n',
+    );
+
+    const report = await checkRepository(root, { expectedArea: 'DOC' });
+    assert.deepEqual(report.errors, []);
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
 });

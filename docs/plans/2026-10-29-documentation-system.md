@@ -199,6 +199,7 @@ entry point. Validate:
   (RM|IDX|ARC|ADR|GUIDE|API|SPEC|PLAN|POL|CTR|REF|NOTICE)-[0-9]{3}$
 ^> Status: (Draft|Approved|Active|Implemented|Historical|Deprecated|Placeholder)$
 ^> Owner: .+$
+
 ```
 
 Resolve relative links against the containing document. Compute GitHub heading
@@ -1077,3 +1078,8 @@ cd ../ice3-water-demo
 git switch main
 git merge --no-ff --no-edit docs/placeholder
 ```
+
+## Related Documents
+
+- `ICE3-DOC-IDX-001` — [Documentation index](../README.md)
+- `ICE3-DOC-SPEC-011` — [Documentation system specification](../specs/2026-10-29-documentation-system-design.md)

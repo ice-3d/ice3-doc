@@ -1,8 +1,16 @@
 # ICE3 空间分区与开放 Tileset 管线设计规格
 
+> Document ID: ICE3-DOC-SPEC-007
+>
+> Status: Implemented
+>
+> Owner: ICE3 architecture maintainers
+>
+> English summary: Define deterministic spatial partitioning and OGC 3D Tiles 1.1 output for large industrial assets.
+
 | 项目 | 内容 |
 | --- | --- |
-| 状态 | 待用户评审 |
+| 状态 | 已实现 |
 | 版本 | 1.0 |
 | 日期 | 2026-10-27 |
 | 适用范围 | `ice3-toolchain`、`ice3-engine`、`ice3-doc` 和现有浏览器示例 |
@@ -428,3 +436,8 @@ ice3-tool partition <source> \
 - 纹理和压缩通过 glTF 2.0 开放扩展表达。
 
 只有开放标准确实无法表达经确认的工业需求时，才讨论 ICE3 专有扩展。
+
+## Related Documents
+
+- `ICE3-DOC-IDX-001` — [Documentation index](../README.md)
+- `ICE3-DOC-PLAN-010` — [Spatial Tileset pipeline implementation](../plans/2026-10-27-spatial-tileset-pipeline.md)

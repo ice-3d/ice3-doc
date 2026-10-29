@@ -1,5 +1,11 @@
 # ICE3 层级 LOD 运行时实施计划
 
+> Document ID: ICE3-DOC-PLAN-006
+>
+> Status: Implemented
+>
+> Owner: ICE3 architecture maintainers
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** 让 Tileset 运行时根据屏幕空间误差选择覆盖完整的 LOD 切面，在细模未就绪或失败时保留父粗模，并跨 LOD 保持设备选择。
@@ -817,3 +823,8 @@ Use Native execution after the asset plan is complete. LOD cut calculation,
 coverage-preserving transitions, selection identity, and the scheduler share
 tight lifecycle invariants; one continuous implementation session reduces
 interface mismatch.
+
+## Related Documents
+
+- `ICE3-DOC-IDX-001` — [Documentation index](../README.md)
+- `ICE3-DOC-SPEC-003` — [Hierarchical LOD specification](../specs/2026-10-27-hierarchical-lod-design.md)

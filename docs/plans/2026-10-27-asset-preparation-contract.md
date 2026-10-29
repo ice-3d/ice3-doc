@@ -1,5 +1,11 @@
 # Asset Preparation Contract v1 Implementation Plan
 
+> Document ID: ICE3-DOC-PLAN-004
+>
+> Status: Implemented
+>
+> Owner: ICE3 architecture maintainers
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Implement the shared GLB contract, budget evaluation, optional report, engine consumption, and cross-repository verification defined by Asset Preparation Contract v1.
@@ -1496,3 +1502,8 @@ git merge --ff-only docs/asset-contract-implementation-plan
 After all repositories are green on `main`, restart the M1 preview and
 verify the local synthetic fixture and the locally supplied model without
 committing or screenshotting customer content.
+
+## Related Documents
+
+- `ICE3-DOC-IDX-001` — [Documentation index](../README.md)
+- `ICE3-DOC-CTR-001` — [Asset Preparation Contract v1](../contracts/asset-preparation-contract-v1.md)

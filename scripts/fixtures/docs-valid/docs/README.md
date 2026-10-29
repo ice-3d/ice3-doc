@@ -9,3 +9,4 @@
 ## Documents
 
 - `ICE3-DOC-RM-001` — [Valid Documentation Fixture](../README.md)
+- `ICE3-DOC-SPEC-001` — [Chinese Specification](chinese-spec.md)

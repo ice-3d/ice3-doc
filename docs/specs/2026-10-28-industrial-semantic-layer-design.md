@@ -1,8 +1,17 @@
 # ICE3 工业语义层设计规格
 
+> Document ID: ICE3-DOC-SPEC-009
+>
+> Status: Implemented
+>
+> Owner: ICE3 architecture maintainers
+
+>
+> English summary: Define the browser-independent industrial semantic core, workspace model, and native JSON contract.
+
 | 项目 | 内容 |
 | --- | --- |
-| 状态 | 核心阶段已实现，浏览器集成待后续计划 |
+| 状态 | 已实现 |
 | 版本 | 1.0 |
 | 日期 | 2026-10-28 |
 | 适用范围 | `ice3-industrial` 领域核心、浏览器场景集成、工作区状态、2D/3D 协同和后续标准适配器 |
@@ -666,3 +675,8 @@ Studio、标准连接器和行业规则属于后续独立计划。
 8. 标准能力通过适配器边界接入，专属类型不泄漏进核心。
 9. Chromium 和 WebKit 交互测试通过。
 10. 所有核心代码、文档和包产物不含客户资产或敏感业务数据。
+
+## Related Documents
+
+- `ICE3-DOC-IDX-001` — [Documentation index](../README.md)
+- `ICE3-DOC-PLAN-013` — [Industrial semantic core implementation](../plans/2026-10-28-industrial-semantic-core.md)

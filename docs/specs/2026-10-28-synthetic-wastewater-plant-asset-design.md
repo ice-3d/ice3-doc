@@ -1,8 +1,17 @@
 # 虚构污水处理厂三维资产设计规格
 
+> Document ID: ICE3-DOC-SPEC-010
+>
+> Status: Implemented
+>
+> Owner: ICE3 architecture maintainers
+
+>
+> English summary: Define deterministic generation of the synthetic wastewater plant source and runtime asset hierarchy.
+
 | 项目 | 内容 |
 | --- | --- |
-| 状态 | 已实施，持续增强 |
+| 状态 | 已实现 |
 | 版本 | 1.1 |
 | 日期 | 2026-10-28 |
 | 适用范围 | 虚拟污水厂生成器、GLB 源资产、预处理、空间拆分、LOD 粗模和示例集成 |
@@ -359,3 +368,8 @@ ICE3_WWTP_ARTIFACT_INVALID
 - Agent、Prompt、模型调度或 AI 专用接口。
 - 读取或转换客户模型。
 - 浏览器内实时建模或格式转换。
+
+## Related Documents
+
+- `ICE3-DOC-IDX-001` — [Documentation index](../README.md)
+- `ICE3-DOC-PLAN-014` — [Synthetic wastewater plant implementation](../plans/2026-10-28-synthetic-wastewater-plant-asset.md)

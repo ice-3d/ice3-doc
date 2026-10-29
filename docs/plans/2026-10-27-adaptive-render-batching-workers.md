@@ -1,5 +1,11 @@
 # Adaptive Industrial Render Batching Worker Implementation Plan
 
+> Document ID: ICE3-DOC-PLAN-002
+>
+> Status: Implemented
+>
+> Owner: ICE3 architecture maintainers
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Add an optional idle-time Worker pipeline that creates better runtime batch generations without blocking camera interaction or risking partial GPU state.
@@ -499,3 +505,8 @@ git add packages/runtime/src/batching/ICEAdaptiveRenderBatchController.ts \
   tests/e2e/m1.spec.ts
 git commit -m "feat(runtime): add adaptive worker batching"
 ```
+
+## Related Documents
+
+- `ICE3-DOC-IDX-001` — [Documentation index](../README.md)
+- `ICE3-DOC-SPEC-004` — [Industrial render batching specification](../specs/2026-10-27-industrial-render-batching-design.md)

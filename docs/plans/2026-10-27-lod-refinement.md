@@ -1,5 +1,11 @@
 # ICE3 LOD 精炼实施计划
 
+> Document ID: ICE3-DOC-PLAN-007
+>
+> Status: Implemented
+>
+> Owner: ICE3 architecture maintainers
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** 使用标准 Tileset 多内容把粗模控制在分片和总体预算内，并恢复非阻塞预取与经过实测的 SSE 默认值。
@@ -699,3 +705,8 @@ Merge all repository branches to `main` after clean full verification.
 Use Native execution. Multi-content parsing, chunk planning, logical Tile
 loading, prefetch, and SSE behavior share exact Tile IDs and readiness
 semantics; one continuous implementation session reduces lifecycle drift.
+
+## Related Documents
+
+- `ICE3-DOC-IDX-001` — [Documentation index](../README.md)
+- `ICE3-DOC-SPEC-005` — [LOD refinement and scene API specification](../specs/2026-10-27-lod-refinement-and-scene-api-design.md)

@@ -127,6 +127,7 @@ metadata block:
 > Status: Active
 >
 > Owner: ICE3 Engine maintainers
+
 ```
 
 The document identifier format is:
@@ -491,8 +492,7 @@ docs/
 Repository-specific files such as `AGENTS.md` and third-party notices remain at
 their conventional locations.
 
-Existing documentation under `docs/superpowers/specs` and
-`docs/superpowers/plans` moves to `docs/specs` and `docs/plans`. Internal links
+The former internal workflow directories move to `docs/specs` and `docs/plans`. Internal links
 are updated in the same change. The previous directory is removed after every
 reference is migrated.
 

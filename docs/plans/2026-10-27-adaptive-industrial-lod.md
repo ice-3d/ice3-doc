@@ -1,5 +1,11 @@
 # Adaptive Industrial LOD Implementation Plan
 
+> Document ID: ICE3-DOC-PLAN-001
+>
+> Status: Implemented
+>
+> Owner: ICE3 architecture maintainers
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Add deterministic per-unit adaptive coarse-model budget allocation while preserving the existing standard Tileset, Prepared GLB, and runtime contracts.
@@ -1530,3 +1536,8 @@ cd ../ice3-toolchain
 git add README.md
 git commit -m "docs: describe adaptive lod generation"
 ```
+
+## Related Documents
+
+- `ICE3-DOC-IDX-001` — [Documentation index](../README.md)
+- `ICE3-DOC-SPEC-001` — [Adaptive Industrial LOD specification](../specs/2026-10-27-adaptive-industrial-lod-design.md)
