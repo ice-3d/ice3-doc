@@ -14,3 +14,11 @@ engine and its surrounding tools.
 Repository-specific implementation guides remain in their owning repositories.
 Cross-repository formats, compatibility rules, shared metrics, and diagnostic
 codes belong here.
+
+## AI-assisted development
+
+This project makes substantial use of AI-assisted development. 本项目在设计和实现过程中大量使用了 AI 辅助开发。
+
+## License
+
+This project is licensed under the [MIT License](LICENSE).
