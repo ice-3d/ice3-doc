@@ -37,7 +37,7 @@
 
 ---
 
-## 任务 1：实现中文叙述分析器
+## Task 1：实现中文叙述分析器
 
 **文件：**
 
@@ -278,7 +278,7 @@ git commit -m "feat: add Chinese documentation language checks"
 
 ---
 
-## 任务 2：建立技术词表并更新语言政策
+## Task 2：建立技术词表并更新语言政策
 
 **文件：**
 
@@ -435,7 +435,7 @@ git commit -m "docs: establish Chinese terminology and policy"
 
 ---
 
-## 任务 3：迁移各仓库入口文档
+## Task 3：迁移各仓库入口文档
 
 **文件：**
 
@@ -524,7 +524,7 @@ git -C ice3-engine commit -m "docs: localize repository entry points"
 
 ---
 
-## 任务 4：迁移 `ice3-doc` 当前实现文档
+## Task 4：迁移 `ice3-doc` 当前实现文档
 
 **文件：**
 
@@ -575,7 +575,7 @@ git commit -m "docs: localize shared architecture and contracts"
 
 ---
 
-## 任务 5：迁移 `Agent Console`、`Engine`、`Industrial`、`Toolchain` 当前实现文档
+## Task 5：迁移 `Agent Console`、`Engine`、`Industrial`、`Toolchain` 当前实现文档
 
 **文件：**
 
@@ -684,7 +684,7 @@ git -C ice3-toolchain commit -m "docs: localize toolchain guidance"
 
 ---
 
-## 任务 6：迁移全部历史 Spec 与 Plan
+## Task 6：迁移全部历史 Spec 与 Plan
 
 **文件：**
 
@@ -790,7 +790,7 @@ git -C ice3-toolchain commit -m "docs: localize toolchain design history"
 
 ---
 
-## 任务 7：默认启用语言门禁
+## Task 7：默认启用语言门禁
 
 **文件：**
 
@@ -862,7 +862,7 @@ git commit -m "docs: enforce Chinese narrative by default"
 
 ---
 
-## 任务 8：全仓链接与语义终审
+## Task 8：全仓链接与语义终审
 
 **文件：**
 
@@ -953,7 +953,7 @@ git -C ice3-doc commit -m "docs: repair localized document navigation"
 
 ---
 
-## 任务 9：执行各工程完整验证并合入
+## Task 9：执行各工程完整验证并合入
 
 **文件：**
 
