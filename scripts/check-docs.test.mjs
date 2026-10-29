@@ -6,6 +6,7 @@ import {
   rm,
   writeFile,
 } from 'node:fs/promises';
+import { execFileSync } from 'node:child_process';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -132,6 +133,75 @@ test('excludes invalid validator fixtures from product documentation', async () 
 
     const report = await checkRepository(root, { expectedArea: 'DOC' });
     assert.deepEqual(report.errors, []);
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
+test('discovers repository worktrees in workspace mode', async () => {
+  const root = await mkdtemp(join(tmpdir(), 'ice3-workspace-'));
+  const repository = join(root, 'ice3-doc');
+  const gitDirectory = join(root, 'git-directory');
+  try {
+    await mkdir(repository);
+    execFileSync('git', [
+      'init',
+      '--separate-git-dir',
+      gitDirectory,
+      repository,
+    ]);
+    await mkdir(join(repository, 'docs'));
+    await writeFile(join(repository, 'README.md'), [
+      '# Repository',
+      '',
+      '> Document ID: ICE3-DOC-RM-001',
+      '>',
+      '> Status: Active',
+      '>',
+      '> Owner: Documentation tests',
+      '',
+      '[Index](docs/README.md#documents)',
+      '',
+    ].join('\n'));
+    await writeFile(join(repository, 'docs', 'README.md'), [
+      '# Documents',
+      '',
+      '> Document ID: ICE3-DOC-IDX-001',
+      '>',
+      '> Status: Active',
+      '>',
+      '> Owner: Documentation tests',
+      '',
+      '## Documents',
+      '',
+      '- [README](../README.md)',
+      '',
+    ].join('\n'));
+    execFileSync('git', ['-C', repository, 'add', '.']);
+    execFileSync('git', [
+      '-C',
+      repository,
+      '-c',
+      'user.name=Documentation Tests',
+      '-c',
+      'user.email=docs@example.test',
+      'commit',
+      '-m',
+      'fixture',
+    ]);
+
+    const result = spawnSync(
+      process.execPath,
+      [
+        join(scriptsDirectory, 'check-docs.mjs'),
+        '--workspace-root',
+        root,
+      ],
+      { encoding: 'utf8' },
+    );
+
+    assert.equal(result.status, 0, result.stderr);
+    assert.match(result.stdout, /ice3-doc: 2 documents valid/);
   } finally {
     await rm(root, { recursive: true, force: true });
   }
