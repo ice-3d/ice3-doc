@@ -8,7 +8,7 @@
 
 **Tech Stack:** TypeScript 7, Node.js 24 LTS, npm workspaces, Node.js test runner, Playwright, Webpack, glTF 2.0, OGC 3D Tiles 1.1, Ajv with the official 3D Tiles JSON Schema bundle.
 
-**Spec:** `ice3-doc/docs/superpowers/specs/2026-10-27-spatial-tileset-pipeline-design.md`
+**Spec:** `../specs/2026-10-27-spatial-tileset-pipeline-design.md`
 
 ## Global Constraints
 

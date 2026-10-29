@@ -8,7 +8,7 @@
 
 **Tech Stack:** TypeScript, Node.js 24, ESM, npm workspaces, GLB, Node.js test runner, Playwright
 
-**Spec:** `docs/contracts/asset-preparation-contract-v1.md`
+**Spec:** `../../contracts/asset-preparation-contract-v1.md`
 
 **Repositories:** `ice3-toolchain`, `ice3-engine`
 

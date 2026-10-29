@@ -8,7 +8,7 @@
 
 **Tech Stack:** Node.js 24、TypeScript 7、`@gltf-transform/core` 4.5.1、现有预处理 CLI、Node.js 测试运行器、Playwright、WebGL2
 
-**Spec:** `../ice3-doc/docs/superpowers/specs/2026-10-28-synthetic-wastewater-plant-asset-design.md`
+**Spec:** `../specs/2026-10-28-synthetic-wastewater-plant-asset-design.md`
 
 ## Global Constraints
 

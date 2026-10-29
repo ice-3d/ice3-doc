@@ -8,7 +8,7 @@
 
 **Tech Stack:** TypeScript 7, Node.js 24 LTS, WebGL2, Node.js test runner, Playwright, ICE3 core/runtime
 
-**Spec:** `ice3-doc/docs/superpowers/specs/2026-10-27-lod-refinement-and-scene-api-design.md`
+**Spec:** `../specs/2026-10-27-lod-refinement-and-scene-api-design.md`
 
 ## Global Constraints
 

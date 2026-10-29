@@ -8,7 +8,7 @@
 
 **Tech Stack:** Node.js 24 LTS, TypeScript 7, ESM, npm workspaces, Node.js built-in test runner, `expect`, `tsx`, Prepared GLB, OGC 3D Tiles 1.1
 
-**Spec:** `../ice3-doc/docs/superpowers/specs/2026-10-27-semantic-industrial-proxy-design.md`
+**Spec:** `../specs/2026-10-27-semantic-industrial-proxy-design.md`
 
 ## Global Constraints
 

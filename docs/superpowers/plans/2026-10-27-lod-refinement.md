@@ -8,7 +8,7 @@
 
 **Tech Stack:** TypeScript 7, Node.js 24 LTS, Node.js test runner, Playwright, OGC 3D Tiles 1.1, ICE3 core/assets/runtime/toolchain
 
-**Spec:** `ice3-doc/docs/superpowers/specs/2026-10-27-lod-refinement-and-scene-api-design.md`
+**Spec:** `../specs/2026-10-27-lod-refinement-and-scene-api-design.md`
 
 ## Global Constraints
 
