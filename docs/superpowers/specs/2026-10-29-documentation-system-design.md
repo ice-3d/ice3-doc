@@ -1,7 +1,9 @@
 # ICE3 Documentation System Design Specification
 
-> Document ID: ICE3-DOC-SPEC-011  
-> Status: Draft  
+> Document ID: ICE3-DOC-SPEC-011
+>
+> Status: Approved
+>
 > Owner: ICE3 documentation maintainers
 
 ## Purpose
@@ -120,8 +122,10 @@ metadata block:
 ```md
 # Human-readable title
 
-> Document ID: ICE3-ENG-RM-001  
-> Status: Active  
+> Document ID: ICE3-ENG-RM-001
+>
+> Status: Active
+>
 > Owner: ICE3 Engine maintainers
 ```
 
@@ -323,7 +327,8 @@ definition.
 | `ICE3-DOC-ADR-004` | Generic semantic interfaces and Agent boundary | Active |
 | `ICE3-DOC-CTR-001` | Asset Preparation Contract v1 | Active |
 | `ICE3-DOC-SPEC-001..011` | Existing and current design specifications | Approved or Implemented |
-| `ICE3-DOC-PLAN-001..013` | Existing implementation plans | Implemented or Historical |
+| `ICE3-DOC-PLAN-001..014` | Existing implementation plans | Implemented or Historical |
+| `ICE3-DOC-PLAN-015` | Documentation system implementation | Active |
 
 ### `ice3-engine`
 
