@@ -9,6 +9,7 @@
   "scripts": {
     "docs:check": "node scripts/check-docs.mjs",
     "docs:check:workspace": "node scripts/check-docs.mjs --workspace-root ..",
-    "test": "node --test scripts/check-docs.test.mjs"
+    "test": "node --test scripts/check-docs.test.mjs",
+    "verify:npm-tarballs": "node scripts/verify-npm-tarballs.mjs"
   }
 }

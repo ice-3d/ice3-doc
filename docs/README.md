@@ -29,6 +29,7 @@
 | `ICE3-DOC-ADR-002` | [离线开放 Asset 流水线](decisions/0002-offline-open-asset-pipeline.md) | Active | conversion 留在离线阶段，runtime format 保持标准 |
 | `ICE3-DOC-ADR-003` | [共享 2D/3D 组合](decisions/0003-shared-2d-3d-composition.md) | Active | 使用统一的 engine layer 和 input model |
 | `ICE3-DOC-ADR-004` | [通用 Semantic 接口](decisions/0004-generic-semantic-interfaces.md) | Active | Agent integration 留在 core semantic API 之外 |
+| `ICE3-DOC-ADR-005` | [npm 公开发布拓扑](decisions/0005-npm-public-release-topology.md) | Active | 定义三个公开 package 和内部模块边界 |
 
 ## Spec
 
@@ -67,3 +68,4 @@
 | `ICE3-DOC-PLAN-014` | [Synthetic Wastewater Plant Asset](plans/2026-10-28-synthetic-wastewater-plant-asset.md) | Implemented | 实现合成 Asset 输出 |
 | `ICE3-DOC-PLAN-015` | [文档系统](plans/2026-10-29-documentation-system.md) | Implemented | 实现本文档系统 |
 | `ICE3-DOC-PLAN-016` | [全中文文档改版](plans/2026-10-29-chinese-documentation-policy.md) | Implemented | 迁移全部产品文档并启用中文叙述门禁 |
+| `ICE3-DOC-PLAN-017` | [npm 公开发布](plans/2026-10-29-npm-public-release.md) | Active | 实现三个公开 package 的构建、验证与发布 |
