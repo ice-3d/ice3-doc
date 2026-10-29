@@ -35,6 +35,10 @@ test('rejects duplicate IDs and missing metadata', async () => {
 test('rejects incomplete indexes', async () => {
   const report = await checkRepository(invalidFixtureRoot, { expectedArea: 'DOC' });
   assert.match(report.errors.join('\n'), /index does not link/);
+  assert.match(
+    report.errors.join('\n'),
+    /README does not link docs\/README\.md/,
+  );
 });
 
 test('rejects broken files, anchors, and cross-repository URLs', async () => {
