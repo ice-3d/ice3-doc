@@ -8,7 +8,7 @@
 
 **Tech Stack:** Node.js 24 LTS, TypeScript 7, ESM, npm workspaces, Node.js built-in test runner, `expect`, `tsx`, JSON Schema-compatible TypeScript validation
 
-**Spec:** `../ice3-doc/docs/superpowers/specs/2026-10-28-industrial-semantic-layer-design.md`
+**Spec:** `../specs/2026-10-28-industrial-semantic-layer-design.md`
 
 ## Global Constraints
 

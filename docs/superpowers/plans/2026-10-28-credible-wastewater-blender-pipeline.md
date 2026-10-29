@@ -8,7 +8,7 @@
 
 **Tech Stack:** Node.js 24、TypeScript 7、Blender 5.2.3 Python API、glTF 2.0、现有 ICE3 预处理 CLI、Node.js 测试运行器、Playwright、WebGL2
 
-**Spec:** `../ice3-doc/docs/superpowers/specs/2026-10-28-credible-wastewater-blender-pipeline-design.md`
+**Spec:** `../specs/2026-10-28-credible-wastewater-blender-pipeline-design.md`
 
 ## Global Constraints
 

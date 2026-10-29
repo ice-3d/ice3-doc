@@ -8,7 +8,7 @@
 
 **Tech Stack:** TypeScript 7, Node.js 24 LTS, Node.js test runner, `meshoptimizer@1.3.0`, OGC 3D Tiles 1.1, ICE3 Prepared GLB
 
-**Spec:** `ice3-doc/docs/superpowers/specs/2026-10-27-hierarchical-lod-design.md`
+**Spec:** `../specs/2026-10-27-hierarchical-lod-design.md`
 
 ## Global Constraints
 

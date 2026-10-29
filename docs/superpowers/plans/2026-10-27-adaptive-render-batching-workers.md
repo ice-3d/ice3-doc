@@ -8,7 +8,7 @@
 
 **Tech Stack:** Node.js 24 LTS, TypeScript 7, Web Workers, Transferable ArrayBuffer, WebGL2, Node.js built-in test runner, `expect`, `tsx`, Playwright
 
-**Spec:** `../ice3-doc/docs/superpowers/specs/2026-10-27-industrial-render-batching-design.md`
+**Spec:** `../specs/2026-10-27-industrial-render-batching-design.md`
 
 ## Global Constraints
 
