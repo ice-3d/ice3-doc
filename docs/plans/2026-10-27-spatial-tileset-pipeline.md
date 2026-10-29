@@ -1,53 +1,53 @@
-# ICE3 Spatial Tileset Pipeline Implementation Plan
+# ICE3 空间 Tileset Pipeline 实施计划
 
 > Document ID: ICE3-DOC-PLAN-010
 >
 > Status: Implemented
 >
-> Owner: ICE3 architecture maintainers
+> Owner: ICE3 架构维护者
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **供代理执行者使用：** 必须使用子技能 superpowers:subagent-driven-development（推荐）或 superpowers:executing-plans，按任务逐步实施本计划。使用复选框（`- [ ]`）语法跟踪步骤。
 
-**Goal:** Build a standards-based toolchain pipeline that partitions a large industrial model into independently loadable GLBs and a 3D Tiles 1.1 tileset, then load those partitions incrementally in the public ICE3 runtime and verify the result in the existing browser example.
+**目标：** 构建一个基于标准的工具链 pipeline，将大型工业模型划分为可独立加载的 GLBs 和 3D Tiles 1.1 tileset，然后在 public ICE3 runtime 中增量加载这些 partitions，并在现有浏览器示例中验证结果。
 
-**Architecture:** The toolchain analyzes mesh nodes as atomic semantic units, recursively partitions them by world-space bounds, emits a Prepared GLB per leaf, and writes an explicit 3D Tiles 1.1 tree. A minimal public Tileset runtime loader validates the supported standard subset, schedules partition downloads with bounded concurrency, and commits each completed scene fragment atomically.
+**架构：** 工具链将 mesh nodes 作为原子语义单元进行分析，按 world-space bounds 递归划分它们，为每个 leaf 输出一个 Prepared GLB，并写入显式的 3D Tiles 1.1 tree。一个最小的 public Tileset runtime loader 会验证支持的标准子集，以有界并发调度 partition 下载，并原子提交每个已完成的 scene fragment。
 
-**Tech Stack:** TypeScript 7, Node.js 24.22.1 LTS, npm workspaces, Node.js test runner, Playwright, Webpack, glTF 2.0, OGC 3D Tiles 1.1, Ajv with the official 3D Tiles JSON Schema bundle.
+**技术栈：** TypeScript 7、Node.js 24.22.1 LTS、npm workspaces、Node.js test runner、Playwright、Webpack、glTF 2.0、OGC 3D Tiles 1.1、Ajv 及官方 3D Tiles JSON Schema bundle。
 
-**Spec:** `../specs/2026-10-27-spatial-tileset-pipeline-design.md`
+**规范：** `../specs/2026-10-27-spatial-tileset-pipeline-design.md`
 
-## Global Constraints
+## 全局约束
 
-- Use Node.js 24.22.1 LTS from each repository's `.nvmrc`.
-- Develop on a feature branch; merge to `main` only after the full repository verification passes.
-- Every behavioral change follows RED-GREEN-REFACTOR and commits after a green focused test.
-- Do not use competitor, vendor, or third-party product names in code, identifiers, comments, documentation, tests, screenshots, fixtures, diagnostics, or commit messages.
-- Do not use the general-purpose rendering library brand word or its case, truncation, and concatenation variants in product artifacts.
-- Do not stage, commit, package, log, screenshot, or otherwise expose a real customer model or any derived GLB, report, thumbnail, or preview.
-- Tests and committed demo assets must be synthetic or explicitly distributable.
-- The distribution index is OGC 3D Tiles 1.1; tile content is glTF 2.0 inside ICE3 Prepared GLB Profile v1.
-- Default partition limits are 500,000 triangles and 33,554,432 bytes per leaf.
-- Version 1 supports explicit children, local Cartesian `box` or `sphere`, external Prepared GLB content, finite 4x4 transforms, and `REPLACE` refinement only.
-- Version 1 does not split one mesh, generate LOD, support `region`, external tilesets, implicit tiling, textures, animation, or dynamic unload.
-- `--output` must not exist before a partition command starts.
-- Partition outputs are published by one atomic directory rename; a failed build leaves no final directory.
-- Runtime dependencies may not be added without a separate design decision; test-only dependencies must be declared and justified in the commit.
-- Unless a command starts with `git -C`, run it from the repository root named by the task's file paths.
+- 使用各仓库 `.nvmrc` 指定的 Node.js 24.22.1 LTS。
+- 在功能分支上开发；仅在完整仓库验证通过后合入 `main`。
+- 每项行为变更都遵循 RED-GREEN-REFACTOR，并在聚焦测试通过后提交。
+- 不得在代码、标识符、注释、文档、测试、截图、fixtures、diagnostics 或提交消息中使用竞品、厂商或第三方产品名称。
+- 不得在产品 artifacts 中使用通用渲染库品牌词，也不得使用其大小写、截断或拼接变体。
+- 不得暂存、提交、打包、记录日志、截图或以其他方式暴露真实客户模型或其派生的 GLB、report、thumbnail 或 preview。
+- 测试和已提交的 demo assets 必须是 synthetic 或明确可分发的材料。
+- 分发索引为 OGC 3D Tiles 1.1；tile content 是 ICE3 Prepared GLB Profile v1 中的 glTF 2.0。
+- 默认 partition 限制为每个 leaf 500,000 个三角形和 33,554,432 bytes。
+- Version 1 仅支持显式 children、局部 Cartesian `box` 或 `sphere`、外部 Prepared GLB content、有限 4x4 transforms 和 `REPLACE` refinement。
+- Version 1 不拆分单个 mesh，不生成 LOD，也不支持 `region`、external tilesets、implicit tiling、textures、animation 或动态卸载。
+- partition 命令启动前，`--output` 必须不存在。
+- Partition 输出通过一次原子目录 rename 发布；构建失败时不得留下最终目录。
+- 未经单独的设计决策，不得添加 runtime 依赖；test-only 依赖必须在提交中声明并说明理由。
+- 除非命令以 `git -C` 开头，否则应从任务文件路径所指定的仓库根目录运行。
 
-## Review Focus
+## 审查重点
 
-- A mesh referenced by several nodes must remain in one atomic group, or its geometry may be duplicated or its equipment identity may become ambiguous.
-- Bounds with identical centers or zero extent on the chosen split axis must terminate deterministically instead of recursing forever.
-- A failed partition build or report write must leave the requested output path absent and must not expose a partially useful Tileset.
-- `content.uri` values that are absolute, traverse outside the Tileset directory, or point to unsupported content must be rejected before any fetch occurs.
-- When one tile fails after other tiles have loaded, completed partitions must remain interactive, the failure count must be visible, and disposal must clean up every completed fragment.
+- 被多个 nodes 引用的 mesh 必须保留在同一个原子组中，否则其几何体可能重复，或其设备标识可能变得不明确。
+- 如果边界在所选分割轴上的中心相同或范围为零，必须以确定性方式终止，不得无限递归。
+- partition 构建或 report 写入失败时，必须不留下所请求的输出路径，并且不得暴露仅部分可用的 Tileset。
+- `content.uri` 若为绝对路径、穿越 Tileset 目录之外或指向不受支持的内容，必须在任何 fetch 发生之前被拒绝。
+- 当某些 tiles 已加载后其中一个 tile 失败时，已完成 partitions 必须保持可交互，失败计数必须可见，并且 disposal 必须清理每个已完成 fragment。
 
 ---
 
-### Execution Setup
+### 执行设置
 
-- [ ] Create `feature/spatial-tileset-pipeline` in `ice3-toolchain` and
-  `ice3-engine`; this plan document already lives on that branch in `ice3-doc`.
+- [ ] 创建 `feature/spatial-tileset-pipeline` 于 `ice3-toolchain` 和
+  `ice3-engine` 中；本计划文档已位于 `ice3-doc` 的该分支上。
 
 ```bash
 git -C ../ice3-toolchain \
@@ -56,7 +56,7 @@ git -C ../ice3-engine \
   switch -c feature/spatial-tileset-pipeline
 ```
 
-- [ ] Confirm all repositories start clean:
+- [ ] 确认所有仓库的起始状态干净：
 
 ```bash
 git -C ../ice3-doc status --short
@@ -64,22 +64,22 @@ git -C ../ice3-toolchain status --short
 git -C ../ice3-engine status --short
 ```
 
-Expected: no tracked or untracked non-ignored files after this plan is committed.
+预期：提交本计划后，没有已跟踪或未跟踪且未被忽略的文件。
 
-### Task 1: Contract and Deterministic Partition Analyzer
+### 任务 1：Contract 和确定性 Partition Analyzer
 
-**Files:**
-- Modify: `ice3-doc/docs/contracts/asset-preparation-contract-v1.md`
-- Create: `ice3-toolchain/packages/toolchain-core/src/partition/types.ts`
-- Create: `ice3-toolchain/packages/toolchain-core/src/partition/analyzePartitionUnits.ts`
-- Create: `ice3-toolchain/tests/partition/createPartitionSource.ts`
-- Create: `ice3-toolchain/tests/fixtures/writePartitionGLTF.mjs`
-- Create: `ice3-toolchain/tests/partition/analyzePartitionUnits.test.ts`
-- Modify: `ice3-toolchain/packages/toolchain-core/src/index.ts`
+**文件：**
+- 修改：`ice3-doc/docs/contracts/asset-preparation-contract-v1.md`
+- 创建：`ice3-toolchain/packages/toolchain-core/src/partition/types.ts`
+- 创建：`ice3-toolchain/packages/toolchain-core/src/partition/analyzePartitionUnits.ts`
+- 创建：`ice3-toolchain/tests/partition/createPartitionSource.ts`
+- 创建：`ice3-toolchain/tests/fixtures/writePartitionGLTF.mjs`
+- 创建：`ice3-toolchain/tests/partition/analyzePartitionUnits.test.ts`
+- 修改：`ice3-toolchain/packages/toolchain-core/src/index.ts`
 
-**Interfaces:**
-- Consumes: `ICESourceDocument`, `readAccessor`, `bakeLocalMatrix`, `ICEMatrix4Tuple`.
-- Produces:
+**接口：**
+- 消费：`ICESourceDocument`、`readAccessor`、`bakeLocalMatrix`、`ICEMatrix4Tuple`。
+- 产生：
 
 ```ts
 export interface ICEBounds {
@@ -105,9 +105,9 @@ export function analyzePartitionUnits(
 ): ICEPartitionAnalysis;
 ```
 
-- [ ] **Step 1: Add the cross-repository contract text**
+- [ ] **步骤 1：添加跨仓库 Contract 文本**
 
-Append a section to the canonical asset contract defining:
+向权威 asset contract 追加一节，定义：
 
 ```markdown
 ## 18. Tileset distribution and partition diagnostics
@@ -129,7 +129,7 @@ Append a section to the canonical asset contract defining:
   `ICE3_TILESET_ABORTED`.
 ```
 
-Commit only this canonical contract update:
+仅提交这项权威 contract 更新：
 
 ```bash
 git -C ../ice3-doc \
@@ -138,10 +138,10 @@ git -C ../ice3-doc \
   commit -m "docs: define tileset distribution contract"
 ```
 
-- [ ] **Step 2: Create the synthetic source helper**
+- [ ] **步骤 2：创建 Synthetic 源辅助函数**
 
-The helper must return a 3D document with four separate triangle
-meshes and nodes translated along x:
+该辅助函数必须返回一个 3D 文档，其中包含四个独立的三角形
+meshes，以及沿 x 轴平移的 nodes：
 
 ```ts
 import type { ICESourceDocument } from '../../packages/toolchain-core/src/index.js';
@@ -215,7 +215,7 @@ export function createPartitionSource(
 }
 ```
 
-Create the standalone fixture writer with:
+使用以下内容创建独立的 fixture writer：
 
 ```js
 import { writeFileSync } from 'node:fs';
@@ -281,9 +281,9 @@ if (!process.argv[2]) throw new Error('output path is required');
 writeFileSync(process.argv[2], JSON.stringify(document, null, 2));
 ```
 
-- [ ] **Step 3: Write the failing analyzer tests**
+- [ ] **步骤 3：编写失败的 Analyzer 测试**
 
-Create `analyzePartitionUnits.test.ts`:
+创建 `analyzePartitionUnits.test.ts`：
 
 ```ts
 import { test } from 'node:test';
@@ -320,44 +320,44 @@ test('keeps all nodes sharing one mesh in one atomic unit', () => {
 });
 ```
 
-- [ ] **Step 4: Run the analyzer tests and confirm RED**
+- [ ] **步骤 4：运行 Analyzer 测试并确认 RED**
 
-Run:
+运行：
 
 ```bash
 nvm use
 npm test -- tests/partition/analyzePartitionUnits.test.ts
 ```
 
-Expected: FAIL because `analyzePartitionUnits.ts` does not exist.
+预期：FAIL，因为 `analyzePartitionUnits.ts` 尚不存在。
 
-- [ ] **Step 5: Implement world matrices, bounds, and atomic grouping**
+- [ ] **步骤 5：实现 World Matrices、Bounds 和原子分组**
 
-In `analyzePartitionUnits.ts`:
+在 `analyzePartitionUnits.ts` 中：
 
-1. Traverse the active scene roots and build a `worldMatrices: ICEMatrix4Tuple[]`.
-2. Use `bakeLocalMatrix` for each local node matrix.
-3. Multiply parent and local matrices in glTF column-major order.
-4. Build `meshToNodes: Map<number, number[]>`.
-5. For each referenced source mesh, read triangle primitive accessors and calculate triangle count from `accessor.count`.
-6. Transform all eight corners of each `POSITION` accessor bounds.
-7. Union the transformed bounds of every node that references that mesh.
-8. Sort unit node and mesh index arrays numerically.
-9. Sort units by first node index.
-10. Throw `ICE3_TOOL_PARTITION_EMPTY` when the active scene has no mesh nodes.
+1. 遍历 active scene roots 并构建 `worldMatrices: ICEMatrix4Tuple[]`。
+2. 对每个 local node matrix 使用 `bakeLocalMatrix`。
+3. 按 glTF column-major 顺序将 parent 和 local matrices 相乘。
+4. 构建 `meshToNodes: Map<number, number[]>`。
+5. 对每个被引用的源 mesh，读取三角形 primitive accessors，并根据 `accessor.count` 计算三角形数量。
+6. 变换每个 `POSITION` accessor bounds 的全部八个角。
+7. 对引用该 mesh 的每个 node 的变换后 bounds 求并集。
+8. 按数值对 unit 的 node 和 mesh index 数组排序。
+9. 按首个 node index 对 units 排序。
+10. 当 active scene 没有 mesh nodes 时，抛出 `ICE3_TOOL_PARTITION_EMPTY`。
 
-Export the module from `packages/toolchain-core/src/index.ts`.
+从 `packages/toolchain-core/src/index.ts` 导出该模块。
 
-- [ ] **Step 6: Run the focused test and the toolchain unit suite**
+- [ ] **步骤 6：运行聚焦测试和工具链单元测试套件**
 
 ```bash
 npm test -- tests/partition/analyzePartitionUnits.test.ts
 npm test
 ```
 
-Expected: focused test passes and the existing 107 tests remain green.
+预期：聚焦测试通过，现有 107 项测试保持通过。
 
-- [ ] **Step 7: Commit**
+- [ ] **步骤 7：提交**
 
 ```bash
 git add packages/toolchain-core/src/partition \
@@ -368,17 +368,17 @@ git commit -m "feat(toolchain): analyze spatial partition units"
 
 ---
 
-### Task 2: Deterministic Longest-Axis Partition Planner
+### 任务 2：确定性最长轴 Partition Planner
 
-**Files:**
-- Create: `ice3-toolchain/packages/toolchain-core/src/partition/createPartitionPlan.ts`
-- Create: `ice3-toolchain/tests/partition/createPartitionPlan.test.ts`
-- Modify: `ice3-toolchain/packages/toolchain-core/src/partition/types.ts`
-- Modify: `ice3-toolchain/packages/toolchain-core/src/index.ts`
+**文件：**
+- 创建：`ice3-toolchain/packages/toolchain-core/src/partition/createPartitionPlan.ts`
+- 创建：`ice3-toolchain/tests/partition/createPartitionPlan.test.ts`
+- 修改：`ice3-toolchain/packages/toolchain-core/src/partition/types.ts`
+- 修改：`ice3-toolchain/packages/toolchain-core/src/index.ts`
 
-**Interfaces:**
-- Consumes: `ICEPartitionUnit[]` and the positive `maxTriangles` budget.
-- Produces:
+**接口：**
+- 消费：`ICEPartitionUnit[]` 和正数 `maxTriangles` 预算。
+- 产生：
 
 ```ts
 export interface ICEPartitionPlanNode {
@@ -394,7 +394,7 @@ export function createPartitionPlan(
 ): ICEPartitionPlanNode;
 ```
 
-- [ ] **Step 1: Write failing planner tests**
+- [ ] **步骤 1：编写失败的 Planner 测试**
 
 ```ts
 import { test } from 'node:test';
@@ -439,38 +439,38 @@ test('stops at one indivisible unit when centers coincide', () => {
 });
 ```
 
-- [ ] **Step 2: Run the tests and confirm RED**
+- [ ] **步骤 2：运行测试并确认 RED**
 
 ```bash
 npm test -- tests/partition/createPartitionPlan.test.ts
 ```
 
-Expected: FAIL because `createPartitionPlan.ts` does not exist.
+预期：FAIL，因为 `createPartitionPlan.ts` 尚不存在。
 
-- [ ] **Step 3: Implement the recursive planner**
+- [ ] **步骤 3：实现递归 Planner**
 
-Implement:
+实现：
 
-1. Reject non-positive or non-finite `maxTriangles` with `ICE3_TOOL_PARTITION_OPTIONS_INVALID`.
-2. Throw `ICE3_TOOL_PARTITION_EMPTY` for an empty unit list.
-3. Compute union bounds and total triangles.
-4. Return a leaf when triangle count is within budget or only one unit remains.
-5. Choose the longest center extent axis; tie-break x, then y, then z.
-6. Sort by center on that axis, then first node index.
-7. Choose the first split where cumulative triangle count is at least half the total, clamped to `1..length - 1`.
-8. Recurse on both groups.
-9. Store empty `children` on leaves and the full input units on groups.
+1. 拒绝非正数或非有限的 `maxTriangles`，并使用 `ICE3_TOOL_PARTITION_OPTIONS_INVALID`。
+2. 对空 unit 列表抛出 `ICE3_TOOL_PARTITION_EMPTY`。
+3. 计算并集 bounds 和三角形总数。
+4. 当三角形数量在预算内或仅剩一个 unit 时，返回 leaf。
+5. 选择中心范围最长的轴；若并列，则依次选择 x、y、z。
+6. 按该轴上的中心排序，再按首个 node index 排序。
+7. 选择累计三角形数量至少为总数一半的第一个 split，并限制在 `1..length - 1`。
+8. 对两个分组递归。
+9. 在 leaves 上存储空 `children`，在 groups 上存储完整输入 units。
 
-- [ ] **Step 4: Verify GREEN**
+- [ ] **步骤 4：验证 GREEN**
 
 ```bash
 npm test -- tests/partition/createPartitionPlan.test.ts
 npm test
 ```
 
-Expected: all pass.
+预期：全部通过。
 
-- [ ] **Step 5: Commit**
+- [ ] **步骤 5：提交**
 
 ```bash
 git add packages/toolchain-core/src/partition \
@@ -481,16 +481,16 @@ git commit -m "feat(toolchain): plan deterministic spatial partitions"
 
 ---
 
-### Task 3: Build Independent Prepared GLB Fragments
+### 任务 3：构建独立的 Prepared GLB Fragments
 
-**Files:**
-- Create: `ice3-toolchain/packages/toolchain-core/src/scene/nodeMatrices.ts`
-- Modify: `ice3-toolchain/packages/toolchain-core/src/output/buildPreparedGLB.ts`
-- Create: `ice3-toolchain/tests/output/buildPreparedGLBFragment.test.ts`
-- Modify: `ice3-toolchain/packages/toolchain-core/src/index.ts`
+**文件：**
+- 创建：`ice3-toolchain/packages/toolchain-core/src/scene/nodeMatrices.ts`
+- 修改：`ice3-toolchain/packages/toolchain-core/src/output/buildPreparedGLB.ts`
+- 创建：`ice3-toolchain/tests/output/buildPreparedGLBFragment.test.ts`
+- 修改：`ice3-toolchain/packages/toolchain-core/src/index.ts`
 
-**Interfaces:**
-- Consumes:
+**接口：**
+- 消费：
 
 ```ts
 export interface ICEBuildSelection {
@@ -499,11 +499,11 @@ export interface ICEBuildSelection {
 }
 ```
 
-- Adds `readonly selection?: ICEBuildSelection` to `ICEBuildOptions`.
-- Produces one valid `ICEPreparedGLB` whose node IDs still use the source node index:
+- 将 `readonly selection?: ICEBuildSelection` 添加到 `ICEBuildOptions`。
+- 产生一个有效的 `ICEPreparedGLB`，其 node IDs 仍使用源 node index：
   `${assetId}/node/${sourceNodeIndex}`.
 
-- [ ] **Step 1: Write the failing fragment test**
+- [ ] **步骤 1：编写失败的 Fragment 测试**
 
 ```ts
 import { test } from 'node:test';
@@ -546,18 +546,18 @@ test('builds one selected node with a baked world transform and stable ID', () =
 });
 ```
 
-- [ ] **Step 2: Run RED**
+- [ ] **步骤 2：运行 RED**
 
 ```bash
 npm test -- tests/output/buildPreparedGLBFragment.test.ts
 ```
 
-Expected: TypeScript/test failure because `ICEBuildOptions.selection` does not
-exist and all source nodes are still emitted.
+预期：TypeScript/测试失败，因为 `ICEBuildOptions.selection` 不存在，
+且所有源 nodes 仍会被输出。
 
-- [ ] **Step 3: Extract shared node-matrix helpers**
+- [ ] **步骤 3：提取共享 Node-Matrix 辅助函数**
 
-Create `nodeMatrices.ts` with:
+使用以下内容创建 `nodeMatrices.ts`：
 
 ```ts
 export function multiplyMatrices(
@@ -575,36 +575,36 @@ export function transformBounds(
 ): ICEBounds;
 ```
 
-Implement column-major multiplication matching the engine math convention and
-transform all eight AABB corners. Move equivalent private helpers out of
-`buildPreparedGLB.ts`.
+实现与引擎数学约定一致的 column-major 乘法，并
+变换全部八个 AABB corners。将等价的私有辅助函数移出
+`buildPreparedGLB.ts`。
 
-- [ ] **Step 4: Implement filtered fragment packing**
+- [ ] **步骤 4：实现过滤后的 Fragment 打包**
 
-In `buildPreparedGLB.ts`:
+在 `buildPreparedGLB.ts` 中：
 
-1. Validate and deduplicate selected node indices.
-2. If no selection is supplied, preserve all current behavior.
-3. When selection is supplied, include exactly those nodes.
-4. When `flattenWorldTransforms` is true, emit each selected node as a scene root
-   with its collected world matrix and no `children`.
-5. Skip meshes that have no selected owner.
-6. Remap source mesh indices to packed mesh indices before writing nodes.
-7. Keep `extras.ice3.id` based on the original source node index.
-8. Compute bounds from the selected mesh instances.
-9. Compute `maxNodeDepth` as `0` for flattened selections.
-10. Preserve all existing unselected build behavior and snapshots.
+1. 验证并去重选定的 node indices。
+2. 如果未提供 selection，则保留当前全部行为。
+3. 如果提供了 selection，则仅包含这些 nodes。
+4. 当 `flattenWorldTransforms` 为 true 时，将每个选定 node 作为 scene root
+   输出，并使用其收集的 world matrix，且不包含 `children`。
+5. 跳过没有选定 owner 的 meshes。
+6. 在写入 nodes 之前，将源 mesh indices 重映射为打包后的 mesh indices。
+7. 保留基于原始源 node index 的 `extras.ice3.id`。
+8. 根据选定的 mesh instances 计算 bounds。
+9. 对于 flattened selections，将 `maxNodeDepth` 计算为 `0`。
+10. 保留所有现有的未选定构建行为和 snapshots。
 
-- [ ] **Step 5: Verify GREEN**
+- [ ] **步骤 5：验证 GREEN**
 
 ```bash
 npm test -- tests/output/buildPreparedGLBFragment.test.ts
 npm test
 ```
 
-Expected: all tests pass.
+预期：所有测试通过。
 
-- [ ] **Step 6: Commit**
+- [ ] **步骤 6：提交**
 
 ```bash
 git add packages/toolchain-core/src/scene/nodeMatrices.ts \
@@ -616,19 +616,19 @@ git commit -m "feat(toolchain): build prepared GLB fragments"
 
 ---
 
-### Task 4: Write and Validate the 3D Tiles 1.1 Tree
+### 任务 4：写入并验证 3D Tiles 1.1 Tree
 
-**Files:**
-- Create: `ice3-toolchain/packages/toolchain-core/src/partition/tileset.ts`
-- Create: `ice3-toolchain/tests/partition/tileset.test.ts`
-- Create: `ice3-toolchain/tests/fixtures/3d-tiles-1.1-schema/` using the official
-  OGC 3D Tiles 1.1 JSON Schema bundle
-- Modify: `ice3-toolchain/package.json`
-- Modify: `ice3-toolchain/packages/toolchain-core/src/index.ts`
+**文件：**
+- 创建：`ice3-toolchain/packages/toolchain-core/src/partition/tileset.ts`
+- 创建：`ice3-toolchain/tests/partition/tileset.test.ts`
+- 使用官方 OGC 3D Tiles 1.1 JSON Schema bundle 创建
+  `ice3-toolchain/tests/fixtures/3d-tiles-1.1-schema/`
+- 修改：`ice3-toolchain/package.json`
+- 修改：`ice3-toolchain/packages/toolchain-core/src/index.ts`
 
-**Interfaces:**
-- Consumes: partition bounds and finished part descriptors.
-- Produces:
+**接口：**
+- 消费：partition bounds 和已完成的 part descriptors。
+- 产生：
 
 ```ts
 export interface ICEFinishedTile {
@@ -658,21 +658,21 @@ export function createTilesetDocument(
 ): ICETilesetDocument;
 ```
 
-- [ ] **Step 1: Add test-only schema validation dependencies**
+- [ ] **步骤 1：添加 Test-Only Schema Validation 依赖**
 
-Run:
+运行：
 
 ```bash
 npm install --save-dev ajv@8.20.0 ajv-formats@3.0.1
 ```
 
-Extract the complete JSON Schema Annex B from the official specification at
-`https://docs.ogc.org/cs/22-025r4/22-025r4.html` into
-`tests/fixtures/3d-tiles-1.1-schema/`. Preserve the OGC source notice and
-specification revision in `SOURCE.md`. Do not add a vendor-branded validator
-package.
+将官方规范 `https://docs.ogc.org/cs/22-025r4/22-025r4.html` 中的完整
+JSON Schema Annex B 提取到
+`tests/fixtures/3d-tiles-1.1-schema/`。在 `SOURCE.md` 中保留 OGC 来源声明和
+规范修订版本。不得添加带厂商品牌的 validator
+软件包。
 
-- [ ] **Step 2: Write failing tree tests**
+- [ ] **步骤 2：编写失败的 Tree 测试**
 
 ```ts
 import { readFileSync, readdirSync } from 'node:fs';
@@ -764,30 +764,30 @@ test('validates against the official OGC schema bundle', () => {
 });
 ```
 
-- [ ] **Step 3: Run RED**
+- [ ] **步骤 3：运行 RED**
 
 ```bash
 npm test -- tests/partition/tileset.test.ts
 ```
 
-Expected: FAIL because the writer does not exist.
+预期：FAIL，因为 writer 尚不存在。
 
-- [ ] **Step 4: Implement the standard serializer**
+- [ ] **步骤 4：实现标准 Serializer**
 
-Implement:
+实现：
 
-1. Convert each y-up AABB to a 3D Tiles z-up oriented box:
-   center `[cx, -cz, cy]`, axes `[hx,0,0, 0,0,hy, 0,hz,0]`.
-2. Group bounds use the union of child bounds.
-3. Internal `geometricError` is the box diagonal in meters.
-4. Leaf `geometricError` is `0`.
-5. Every tile has `refine: "REPLACE"`.
-6. Content uses the exact relative URI supplied by the orchestrator.
-7. Add `extras.ice3` with logical asset ID and partition ID.
-8. Use deterministic object property insertion order.
-9. Reject non-finite bounds with `ICE3_TOOL_TILESET_INVALID`.
+1. 将每个 y-up AABB 转换为 3D Tiles z-up oriented box：
+   center `[cx, -cz, cy]`、axes `[hx,0,0, 0,0,hy, 0,hz,0]`。
+2. Group bounds 使用 child bounds 的并集。
+3. 内部 `geometricError` 为以米为单位的 box diagonal。
+4. Leaf `geometricError` 为 `0`。
+5. 每个 tile 都有 `refine: "REPLACE"`。
+6. Content 使用 orchestrator 提供的精确相对 URI。
+7. 添加 `extras.ice3`，包含逻辑 asset ID 和 partition ID。
+8. 使用确定性的 object 属性插入顺序。
+9. 使用 `ICE3_TOOL_TILESET_INVALID` 拒绝非有限 bounds。
 
-- [ ] **Step 5: Verify GREEN and commit**
+- [ ] **步骤 5：验证 GREEN 并提交**
 
 ```bash
 npm test -- tests/partition/tileset.test.ts
@@ -802,18 +802,18 @@ git commit -m "feat(toolchain): emit standard 3D Tiles trees"
 
 ---
 
-### Task 5: Orchestrate Partition Builds and Byte Limits
+### 任务 5：编排 Partition 构建和字节限制
 
-**Files:**
-- Create: `ice3-toolchain/packages/toolchain-core/src/partition/partitionAsset.ts`
-- Create: `ice3-toolchain/tests/partition/partitionAsset.test.ts`
-- Modify: `ice3-toolchain/packages/toolchain-core/src/partition/types.ts`
-- Modify: `ice3-toolchain/packages/toolchain-core/src/index.ts`
+**文件：**
+- 创建：`ice3-toolchain/packages/toolchain-core/src/partition/partitionAsset.ts`
+- 创建：`ice3-toolchain/tests/partition/partitionAsset.test.ts`
+- 修改：`ice3-toolchain/packages/toolchain-core/src/partition/types.ts`
+- 修改：`ice3-toolchain/packages/toolchain-core/src/index.ts`
 
-**Interfaces:**
-- Consumes: `readSource`, `analyzePartitionUnits`, `createPartitionPlan`,
-  `buildPreparedGLB`, `createTilesetDocument`.
-- Produces:
+**接口：**
+- 消费：`readSource`、`analyzePartitionUnits`、`createPartitionPlan`、
+  `buildPreparedGLB`、`createTilesetDocument`。
+- 产生：
 
 ```ts
 export interface ICEPartitionOptions {
@@ -847,7 +847,7 @@ export function partitionAsset(
 ): ICEPartitionResult;
 ```
 
-- [ ] **Step 1: Write failing orchestration tests**
+- [ ] **步骤 1：编写失败的编排测试**
 
 ```ts
 import { test } from 'node:test';
@@ -905,44 +905,44 @@ test('produces byte-identical files and Tileset for identical inputs', () => {
 });
 ```
 
-- [ ] **Step 2: Run RED**
+- [ ] **步骤 2：运行 RED**
 
 ```bash
 npm test -- tests/partition/partitionAsset.test.ts
 ```
 
-Expected: FAIL because `partitionAsset.ts` does not exist.
+预期：FAIL，因为 `partitionAsset.ts` 尚不存在。
 
-- [ ] **Step 3: Implement deterministic recursive assembly**
+- [ ] **步骤 3：实现确定性递归组装**
 
-Implement:
+实现：
 
-1. Validate positive finite defaults: `500_000` triangles and `33_554_432` bytes.
-2. Read the active-scene analysis and create the triangle plan.
-3. Recursively build every plan node.
-4. For a leaf, call `buildPreparedGLB` with the unit's node indices and flattened
-   world transforms.
-5. If actual GLB bytes exceed `maxBytes` and the leaf has multiple atomic units,
-   split that leaf once at its longest axis and build both children recursively.
-6. If a one-unit leaf exceeds `maxBytes`, throw
-   `ICE3_TOOL_PARTITION_UNSPLITTABLE`.
-7. Reject any shard whose existing ICE3 budget status is `error`.
-8. Assign leaf paths in depth-first order as `parts/part-000.glb`.
-9. Build the standard Tileset tree from the same leaf order and bounds.
-10. Verify triangle counts, original mesh node IDs, path uniqueness, and
-    maximum bytes before returning.
-11. Ensure result ordering and bytes are identical across repeated calls.
+1. 验证正数有限默认值：`500_000` 个三角形和 `33_554_432` bytes。
+2. 读取 active-scene analysis 并创建 triangle plan。
+3. 递归构建每个 plan node。
+4. 对于 leaf，使用该 unit 的 node indices 和 flattened
+   world transforms 调用 `buildPreparedGLB`。
+5. 如果实际 GLB bytes 超过 `maxBytes`，且该 leaf 有多个原子 units，
+   则沿最长轴拆分该 leaf 一次，并递归构建两个 children。
+6. 如果单 unit leaf 超过 `maxBytes`，则抛出
+   `ICE3_TOOL_PARTITION_UNSPLITTABLE`。
+7. 拒绝任何现有 ICE3 budget status 为 `error` 的 shard。
+8. 按 depth-first 顺序将 leaf paths 分配为 `parts/part-000.glb`。
+9. 使用相同的 leaf 顺序和 bounds 构建标准 Tileset tree。
+10. 返回之前验证三角形数量、原始 mesh node IDs、路径唯一性和
+    最大 bytes 数量。
+11. 确保重复调用时的结果顺序和 bytes 相同。
 
-- [ ] **Step 4: Verify GREEN**
+- [ ] **步骤 4：验证 GREEN**
 
 ```bash
 npm test -- tests/partition/partitionAsset.test.ts
 npm test
 ```
 
-Expected: all pass, including existing single-GLB tests.
+预期：全部通过，包括现有的 single-GLB 测试。
 
-- [ ] **Step 5: Commit**
+- [ ] **步骤 5：提交**
 
 ```bash
 git add packages/toolchain-core/src/partition \
@@ -953,16 +953,16 @@ git commit -m "feat(toolchain): partition assets into tiled GLBs"
 
 ---
 
-### Task 6: Add the Atomic Partition CLI
+### 任务 6：添加原子 Partition CLI
 
-**Files:**
-- Modify: `ice3-toolchain/packages/cli/src/commands.ts`
-- Modify: `ice3-toolchain/tests/cli/commands.test.ts`
-- Modify: `ice3-toolchain/README.md`
+**文件：**
+- 修改：`ice3-toolchain/packages/cli/src/commands.ts`
+- 修改：`ice3-toolchain/tests/cli/commands.test.ts`
+- 修改：`ice3-toolchain/README.md`
 
-**Interfaces:**
-- Consumes: `partitionAsset(source, options)`.
-- Produces CLI command:
+**接口：**
+- 消费：`partitionAsset(source, options)`。
+- 产生 CLI 命令：
 
 ```text
 ice3-tool partition <source> --output <directory> --asset-id <id>
@@ -971,9 +971,9 @@ ice3-tool partition <source> --output <directory> --asset-id <id>
   [--warnings-as-errors] [--json]
 ```
 
-- [ ] **Step 1: Write failing CLI tests**
+- [ ] **步骤 1：编写失败的 CLI 测试**
 
-Append tests:
+追加测试：
 
 ```ts
 test('partition writes tileset and numbered GLBs without partial output', async () => {
@@ -1020,8 +1020,8 @@ test('partition rejects an existing output directory', async () => {
 });
 ```
 
-Add `writePartitionGLTF` to the test file by serializing
-`createPartitionSource().json` with a base64 data URI for its buffer:
+将 `writePartitionGLTF` 添加到测试文件，并通过为
+`createPartitionSource().json` 的 buffer 使用 base64 data URI 进行序列化：
 
 ```ts
 const writePartitionGLTF = (path: string): void => {
@@ -1038,51 +1038,51 @@ const writePartitionGLTF = (path: string): void => {
 };
 ```
 
-- [ ] **Step 2: Run RED**
+- [ ] **步骤 2：运行 RED**
 
 ```bash
 npm test -- tests/cli/commands.test.ts -t partition
 ```
 
-Expected: FAIL because `partition` is an unknown command and its options are not
-parsed.
+预期：FAIL，因为 `partition` 是未知命令，且其选项未被
+解析。
 
-- [ ] **Step 3: Implement CLI parsing and atomic publication**
+- [ ] **步骤 3：实现 CLI 解析和原子发布**
 
-Implement:
+实现：
 
-1. Add `partition` to the command dispatcher.
-2. Add `--max-triangles` and `--max-bytes` to valued options.
-3. Require `--output`, `--asset-id`, and one source positional.
-4. Reject unknown flags.
-5. Validate positive finite budgets before reading the source.
-6. Resolve the output and sibling temporary path from the same parent.
-7. Refuse existing output paths before building.
-8. Create the temporary `parts/` directory.
-9. Write part files and `tileset.json`.
-10. Validate all generated GLBs and the Tileset before rename.
-11. Rename the temporary directory to the requested output only on success.
-12. On any failure, recursively remove only the generated temporary directory.
-13. Print deterministic JSON containing output path, partition count, and stats.
-14. Keep existing `build`, `inspect`, and `validate` behavior unchanged.
+1. 将 `partition` 添加到 command dispatcher。
+2. 将 `--max-triangles` 和 `--max-bytes` 添加到 valued options。
+3. 要求提供 `--output`、`--asset-id` 和一个源 positional。
+4. 拒绝未知 flags。
+5. 在读取源之前验证正数有限预算。
+6. 从同一个 parent 解析输出路径和同级临时路径。
+7. 在构建之前拒绝已存在的输出路径。
+8. 创建临时 `parts/` 目录。
+9. 写入 part files 和 `tileset.json`。
+10. 在 rename 之前验证所有生成的 GLBs 和 Tileset。
+11. 仅在成功时将临时目录 rename 为所请求的输出。
+12. 发生任何失败时，仅递归删除生成的临时目录。
+13. 打印包含 output path、partition count 和 stats 的确定性 JSON。
+14. 保持现有 `build`、`inspect` 和 `validate` 行为不变。
 
-Fix the command format above to exactly:
+将上述命令格式准确修正为：
 
 ```bash
 ice3-tool partition <source> --output <directory> --asset-id <id>
 ```
 
-- [ ] **Step 4: Exercise success and failure**
+- [ ] **步骤 4：执行成功和失败场景**
 
 ```bash
 npm test -- tests/cli/commands.test.ts
 npm run verify
 ```
 
-Expected: all tests pass and no temporary directory remains after the rejection
-test.
+预期：所有测试通过，并且在 rejection
+测试之后没有临时目录残留。
 
-- [ ] **Step 5: Commit**
+- [ ] **步骤 5：提交**
 
 ```bash
 git add packages/cli/src/commands.ts tests/cli/commands.test.ts README.md
@@ -1091,17 +1091,17 @@ git commit -m "feat(cli): add atomic partition command"
 
 ---
 
-### Task 7: Parse the Supported 3D Tiles Subset
+### 任务 7：解析支持的 3D Tiles 子集
 
-**Files:**
-- Create: `ice3-engine/packages/assets/src/ICETileset.ts`
-- Create: `ice3-engine/packages/assets/src/ICETilesetReader.ts`
-- Create: `ice3-engine/packages/assets/tests/TilesetReader.test.ts`
-- Modify: `ice3-engine/packages/assets/src/index.ts`
+**文件：**
+- 创建：`ice3-engine/packages/assets/src/ICETileset.ts`
+- 创建：`ice3-engine/packages/assets/src/ICETilesetReader.ts`
+- 创建：`ice3-engine/packages/assets/tests/TilesetReader.test.ts`
+- 修改：`ice3-engine/packages/assets/src/index.ts`
 
-**Interfaces:**
-- Consumes: a fetched `tileset.json` text and its base URL.
-- Produces:
+**接口：**
+- 消费：已获取的 `tileset.json` 文本及其 base URL。
+- 产生：
 
 ```ts
 export interface ICETilesetTile {
@@ -1125,10 +1125,10 @@ export function readTileset(
 ): ICETilesetSnapshot;
 ```
 
-`bounds` in `ICETilesetSnapshot` are converted from standard z-up boxes or
-spheres into the engine's y-up bounds.
+`bounds` 在 `ICETilesetSnapshot` 中由标准 z-up boxes 或
+spheres 转换为引擎的 y-up bounds。
 
-- [ ] **Step 1: Write failing parser tests**
+- [ ] **步骤 1：编写失败的 Parser 测试**
 
 ```ts
 import { test } from 'node:test';
@@ -1183,38 +1183,37 @@ test('rejects region and implicit tiling before fetching tile content', () => {
 });
 ```
 
-- [ ] **Step 2: Run RED**
+- [ ] **步骤 2：运行 RED**
 
 ```bash
 nvm use
 npm test -- packages/assets/tests/TilesetReader.test.ts
 ```
 
-Expected: FAIL because `ICETilesetReader.ts` does not exist.
+预期：FAIL，因为 `ICETilesetReader.ts` 尚不存在。
 
-- [ ] **Step 3: Implement parser and subset validation**
+- [ ] **步骤 3：实现 Parser 和子集验证**
 
-Implement:
+实现：
 
-1. Parse JSON and require an object root.
-2. Require `asset.version === '1.1'`.
-3. Recursively validate explicit `children`.
-4. Require exactly one supported bounding volume per tile: `box` length 12 or
-   `sphere` length 4.
-5. Require non-negative finite `geometricError`.
-6. Require root `refine` or an inherited explicit parent value; only `REPLACE`
-   is supported.
-7. Accept finite `transform` arrays of length 16.
-8. Resolve `content.uri` with `new URL(uri, baseUrl)`.
-9. Reject failed URL resolution, path traversal, absolute-path tricks, non-GLB
-   suffixes, `.json` external tilesets, `region`, `implicitTiling`, unsupported
-   required extensions, and missing ICE3 asset ID.
-10. Convert z-up AABBs to y-up bounds:
+1. 解析 JSON，并要求根节点为 object。
+2. 要求 `asset.version === '1.1'`。
+3. 递归验证显式 `children`。
+4. 要求每个 tile 恰好有一个受支持的 bounding volume：`box` 长度为 12，或
+   `sphere` 长度为 4。
+5. 要求 `geometricError` 为非负有限值。
+6. 要求根 `refine` 或继承的显式 parent 值；仅支持 `REPLACE`。
+7. 接受长度为 16 的有限 `transform` arrays。
+8. 解析 `content.uri`，使用 `new URL(uri, baseUrl)`。
+9. 拒绝 URL 解析失败、path traversal、绝对路径技巧、非 GLB
+   suffixes、`.json` external tilesets、`region`、`implicitTiling`、不受支持的
+   required extensions，以及缺失 ICE3 asset ID 的情况。
+10. 将 z-up AABBs 转换为 y-up bounds：
     `(x, y, z)` → `(x, -z, y)`.
-11. For spheres, convert center but retain radius.
-12. Deduplicate tile IDs formed from deterministic DFS paths.
+11. 对于 spheres，转换 center 但保留 radius。
+12. 对根据确定性 DFS paths 形成的 tile IDs 去重。
 
-- [ ] **Step 4: Verify GREEN and commit**
+- [ ] **步骤 4：验证 GREEN 并提交**
 
 ```bash
 npm test -- packages/assets/tests/TilesetReader.test.ts
@@ -1225,18 +1224,18 @@ git commit -m "feat(assets): parse supported 3D Tiles"
 
 ---
 
-### Task 8: Load Tiles Incrementally with the Public Runtime API
+### 任务 8：使用 Public Runtime API 增量加载 Tiles
 
-**Files:**
-- Create: `ice3-engine/packages/runtime/src/asset/ICETilesetLoader.ts`
-- Create: `ice3-engine/packages/runtime/tests/TilesetLoader.test.ts`
-- Modify: `ice3-engine/packages/runtime/src/index.ts`
-- Modify: `ice3-engine/packages/ice3/src/index.ts`
-- Modify: `ice3-engine/examples/m1/global.d.ts`
+**文件：**
+- 创建：`ice3-engine/packages/runtime/src/asset/ICETilesetLoader.ts`
+- 创建：`ice3-engine/packages/runtime/tests/TilesetLoader.test.ts`
+- 修改：`ice3-engine/packages/runtime/src/index.ts`
+- 修改：`ice3-engine/packages/ice3/src/index.ts`
+- 修改：`ice3-engine/examples/m1/global.d.ts`
 
-**Interfaces:**
-- Consumes: `readTileset`, `ICEAssetLoader`, `ICE3`, `ICEPerspectiveCamera`.
-- Produces:
+**接口：**
+- 消费：`readTileset`、`ICEAssetLoader`、`ICE3`、`ICEPerspectiveCamera`。
+- 产生：
 
 ```ts
 export type ICETilesetTileState =
@@ -1279,14 +1278,14 @@ export class ICETilesetLoader {
 }
 ```
 
-The handle emits `TILESET_TILE_LOADING`, `TILESET_TILE_LOADED`,
-`TILESET_TILE_FAILED`, `TILESET_READY`, and `TILESET_COMPLETE`. Every event
-parameter includes an immutable `ICETilesetStats` snapshot and, where relevant,
-the tile ID.
+Handle 会发出 `TILESET_TILE_LOADING`、`TILESET_TILE_LOADED`、
+`TILESET_TILE_FAILED`、`TILESET_READY` 和 `TILESET_COMPLETE`。每个 event
+parameter 都包含一个不可变的 `ICETilesetStats` snapshot，并在相关时
+包含 tile ID。
 
-- [ ] **Step 1: Create a frozen synthetic Tileset fixture**
+- [ ] **步骤 1：创建冻结的 Synthetic Tileset Fixture**
 
-After Task 6 is green, generate the synthetic source file and Tileset with:
+任务 6 通过后，使用以下命令生成 synthetic source file 和 Tileset：
 
 ```bash
 node tests/fixtures/writePartitionGLTF.mjs \
@@ -1297,10 +1296,10 @@ node packages/cli/dist/main.js partition ../ice3-engine/tests/fixtures/partition
   --max-triangles 1
 ```
 
-Do not copy any local or customer asset. Commit the source and four-part
-synthetic Tileset in the engine repository.
+不得复制任何本地或客户 asset。在 engine repository 中提交源文件和
+四部分 Synthetic Tileset。
 
-- [ ] **Step 2: Write failing runtime tests**
+- [ ] **步骤 2：编写失败的 Runtime 测试**
 
 ```ts
 import { it } from 'node:test';
@@ -1448,55 +1447,55 @@ it('aborts pending work and disposes its scene idempotently', async () => {
 });
 ```
 
-- [ ] **Step 3: Run RED**
+- [ ] **步骤 3：运行 RED**
 
 ```bash
 npm test -- packages/runtime/tests/TilesetLoader.test.ts
 ```
 
-Expected: FAIL because `ICETilesetLoader` does not exist.
+预期：FAIL，因为 `ICETilesetLoader` 尚不存在。
 
-- [ ] **Step 4: Implement handle, scheduler, and scene merging**
+- [ ] **步骤 4：实现 Handle、Scheduler 和 Scene 合并**
 
-Implement:
+实现：
 
-1. Fetch and parse the Tileset before returning the handle.
-2. Create the unified `ICEScene` with ID `${assetId}:scene`.
-3. Sort content tiles by bounds center distance to camera target; if no camera,
-   preserve Tileset DFS order.
-4. Start at most two tile loads by default.
-5. Use one `AbortController` owned by the handle plus the caller signal.
-6. Load each tile with `ICEAssetLoader`.
-7. Before merging, validate all child IDs against the unified scene through the
-   existing `addChild` duplicate check.
-8. Compose inherited standard z-up tile transforms and conjugate the result into
-   the engine's y-up frame; the generated pipeline normally uses identity.
-9. Wrap each loaded partition under one tile root with the converted matrix,
-   then move that root into the unified scene.
-10. Dispose the now-empty partition scene after moving children.
-11. Request a render and emit `TILESET_TILE_LOADED` after each successful merge.
-12. On per-tile error, emit `TILESET_TILE_FAILED` and report
-    `ICE3_TILESET_TILE_FAILED`; do not remove successful tiles.
-13. Resolve `whenReady` on the first successful merge.
-14. Resolve `whenComplete` after all queued tiles settle.
-15. Clear event listeners, abort in-flight requests, and dispose the unified
-    scene exactly once in `dispose`; reject an unresolved `whenReady` with
-    `ICE3_TILESET_ABORTED` and settle `whenComplete` after active loads stop.
-16. Expose state counts through a fresh immutable snapshot getter.
+1. 在返回 handle 之前 fetch 并解析 Tileset。
+2. 创建统一 `ICEScene`，其 ID 为 `${assetId}:scene`。
+3. 按 bounds center 到 camera target 的距离对 content tiles 排序；如果没有 camera，
+   则保持 Tileset DFS 顺序。
+4. 默认最多启动两个 tile loads。
+5. 使用一个由 handle 拥有、并结合 caller signal 的 `AbortController`。
+6. 使用 `ICEAssetLoader` 加载每个 tile。
+7. 合并之前，通过现有 `addChild` duplicate check，针对统一 scene
+   验证所有 child IDs。
+8. 组合继承的标准 z-up tile transforms，并将结果共轭到
+   引擎的 y-up frame；生成的 pipeline 通常使用 identity。
+9. 使用转换后的 matrix 将每个已加载 partition 包装在一个 tile root 下，
+   然后将该 root 移入统一 scene。
+10. 移动 children 后，dispose 此时为空的 partition scene。
+11. 每次成功合并后请求 render，并发出 `TILESET_TILE_LOADED`。
+12. 发生 per-tile error 时，发出 `TILESET_TILE_FAILED` 并报告
+    `ICE3_TILESET_TILE_FAILED`；不得移除成功的 tiles。
+13. 在首次成功合并时 resolve `whenReady`。
+14. 在所有排队 tiles 完成处理后 resolve `whenComplete`。
+15. 在 `dispose` 中清除 event listeners、中止 in-flight requests，并仅 dispose 统一
+    scene 一次；reject 未完成的 `whenReady`，其错误为
+    `ICE3_TILESET_ABORTED`，并在 active loads 停止后 settle `whenComplete`。
+16. 通过一个返回新 immutable snapshot 的 getter 公开 state counts。
 
-- [ ] **Step 5: Verify GREEN**
+- [ ] **步骤 5：验证 GREEN**
 
 ```bash
 npm test -- packages/runtime/tests/TilesetLoader.test.ts
 npm test
 ```
 
-Expected: all pass.
+预期：全部通过。
 
-- [ ] **Step 6: Export through the public entry point**
+- [ ] **步骤 6：通过 Public Entry Point 导出**
 
-Add exports in `packages/runtime/src/index.ts` and re-export from
-`packages/ice3/src/index.ts`:
+在 `packages/runtime/src/index.ts` 中添加 exports，并从
+`packages/ice3/src/index.ts` 重新导出：
 
 ```ts
 export {
@@ -1507,10 +1506,10 @@ export {
 } from './asset/ICETilesetLoader.js';
 ```
 
-Update `examples/m1/global.d.ts` with `tilesetStats()` returning
-`ICETilesetStats`.
+更新 `examples/m1/global.d.ts`，使 `tilesetStats()` 返回
+`ICETilesetStats`。
 
-- [ ] **Step 7: Commit**
+- [ ] **步骤 7：提交**
 
 ```bash
 git add packages/assets/src packages/runtime/src packages/ice3/src \
@@ -1522,34 +1521,34 @@ git commit -m "feat(runtime): load tiled assets incrementally"
 
 ---
 
-### Task 9: Switch the Existing Example to Incremental Tileset Loading
+### 任务 9：将现有示例切换为增量 Tileset 加载
 
-**Files:**
-- Modify: `ice3-engine/examples/m1/main.ts`
-- Modify: `ice3-engine/examples/m1/index.html`
-- Modify: `ice3-engine/examples/m1/styles.css`
-- Modify: `ice3-engine/tests/e2e/m1.spec.ts`
-- Create: `ice3-engine/examples/m1/assets/partitioned/tileset.json`
-- Create: `ice3-engine/examples/m1/assets/partitioned/parts/*.glb`
+**文件：**
+- 修改：`ice3-engine/examples/m1/main.ts`
+- 修改：`ice3-engine/examples/m1/index.html`
+- 修改：`ice3-engine/examples/m1/styles.css`
+- 修改：`ice3-engine/tests/e2e/m1.spec.ts`
+- 创建：`ice3-engine/examples/m1/assets/partitioned/tileset.json`
+- 创建：`ice3-engine/examples/m1/assets/partitioned/parts/*.glb`
 
-**Interfaces:**
-- Consumes: `ICETilesetLoader.open`, `ICETilesetHandle.stats`,
-  `whenReady`, `whenComplete`.
-- Produces an example using the public package import from `ice3`.
+**接口：**
+- 消费：`ICETilesetLoader.open`、`ICETilesetHandle.stats`、
+  `whenReady`、`whenComplete`。
+- 产生一个使用来自 `ice3` 的 public package import 的示例。
 
-- [ ] **Step 1: Generate and commit the synthetic demo Tileset**
+- [ ] **步骤 1：生成并提交 Synthetic Demo Tileset**
 
-Run the partition CLI over the synthetic source and copy the validated output
-into `examples/m1/assets/partitioned/`. The command must use:
+对 synthetic source 运行 partition CLI，并将验证通过的输出复制到
+`examples/m1/assets/partitioned/`。该命令必须使用：
 
 ```bash
 --asset-id partition-demo --max-triangles 1
 ```
 
-The example Tileset must contain at least four part files. Do not use a customer
-asset.
+示例 Tileset 必须包含至少四个 part files。不得使用客户
+asset。
 
-- [ ] **Step 2: Write the failing E2E incremental test**
+- [ ] **步骤 2：编写失败的 E2E 增量测试**
 
 ```ts
 test('shows completed partitions before all tile requests finish', async ({ page }) => {
@@ -1574,7 +1573,7 @@ test('shows completed partitions before all tile requests finish', async ({ page
 });
 ```
 
-- [ ] **Step 3: Run RED**
+- [ ] **步骤 3：运行 RED**
 
 ```bash
 source "$HOME/.nvm/nvm.sh"
@@ -1582,38 +1581,38 @@ nvm use
 npm run test:e2e -- --project=chromium -g "shows completed partitions"
 ```
 
-Expected: FAIL because the example still loads one GLB and has no
-`tileset-progress` element.
+预期：FAIL，因为示例仍加载一个 GLB，且没有
+`tileset-progress` 元素。
 
-- [ ] **Step 4: Update the example**
+- [ ] **步骤 4：更新示例**
 
-Implement:
+实现：
 
-1. Replace `ICEAssetLoader` with `ICETilesetLoader`.
-2. Open `/assets/partitioned/tileset.json`.
-3. Obtain `handle.bounds` for camera fitting before tile completion.
-4. Set the empty unified scene immediately.
-5. Add a compact toolbar indicator with `data-role="tileset-progress"`.
-6. Show `分区 loaded/total` while loading.
-7. Hide the full-stage loading overlay after the first tile is committed.
-8. Update the status to `资产已加载` only after all tiles settle successfully.
-9. On partial failure, keep the scene and show
-   `部分分区加载失败（failed/total）`.
-10. Rebind selection lookup to `tileset.scene`.
-11. Dispose the Tileset handle idempotently.
-12. Keep black background, flat lighting, original colors, edge lines, camera
-    keys, mouse controls, selection highlight, and info panel.
-13. Expose `window.__ice3M1.tilesetStats()` for tests.
+1. 将 `ICEAssetLoader` 替换为 `ICETilesetLoader`。
+2. 打开 `/assets/partitioned/tileset.json`。
+3. 在 tile 完成之前获取 `handle.bounds` 用于 camera fitting。
+4. 立即设置空的 unified scene。
+5. 添加带 `data-role="tileset-progress"` 的紧凑 toolbar indicator。
+6. 加载期间显示 `分区 loaded/total`。
+7. 首个 tile 提交后隐藏 full-stage loading overlay。
+8. 仅在所有 tiles 成功完成后，将状态更新为 `资产已加载`。
+9. 发生部分失败时，保留 scene 并显示
+    `部分分区加载失败（failed/total）`。
+10. 将 selection lookup 重新绑定到 `tileset.scene`。
+11. 幂等地 dispose Tileset handle。
+12. 保持黑色背景、flat lighting、原始颜色、edge lines、camera
+    keys、mouse controls、selection highlight 和 info panel。
+13. 为测试公开 `window.__ice3M1.tilesetStats()`。
 
-- [ ] **Step 5: Run focused Chromium tests**
+- [ ] **步骤 5：运行聚焦 Chromium 测试**
 
 ```bash
 npm run test:e2e -- --project=chromium -g "partitions|selects one equipment"
 ```
 
-Expected: incremental and selection tests pass.
+预期：增量测试和选择测试通过。
 
-- [ ] **Step 6: Commit**
+- [ ] **步骤 6：提交**
 
 ```bash
 git add examples/m1 tests/e2e/m1.spec.ts packages/ice3/src packages/runtime/src \
@@ -1623,26 +1622,25 @@ git commit -m "feat(example): demonstrate incremental tiled loading"
 
 ---
 
-### Task 10: Finish Documentation, Full Verification, and Controlled Asset Smoke Test
+### 任务 10：完成文档、完整验证和受控 Asset Smoke Test
 
-**Files:**
-- Modify: `ice3-toolchain/README.md`
-- Modify: `ice3-engine/README.md`
-- Modify: `ice3-engine/docs/api/m1.md`
-- Modify: `ice3-doc/docs/contracts/asset-preparation-contract-v1.md`
-- Modify if implementation required extra tests or exports:
+**文件：**
+- 修改：`ice3-toolchain/README.md`
+- 修改：`ice3-engine/README.md`
+- 修改：`ice3-engine/docs/api/m1.md`
+- 修改：`ice3-doc/docs/contracts/asset-preparation-contract-v1.md`
+- 如果实现需要额外测试或 exports，则修改：
   `ice3-toolchain/packages/toolchain-core/src/index.ts`,
   `ice3-engine/packages/runtime/src/index.ts`,
   `ice3-engine/packages/ice3/src/index.ts`
 
-**Interfaces:**
-- Consumes all prior tasks.
-- Produces user-facing command/API documentation and evidence that the complete
-  cross-repository pipeline works.
+**接口：**
+- 消费所有先前任务。
+- 产生面向用户的 command/API 文档，以及完整跨仓库 pipeline 可工作的证据。
 
-- [ ] **Step 1: Document exact usage**
+- [ ] **步骤 1：记录准确用法**
 
-Add this toolchain example:
+添加以下工具链示例：
 
 ```bash
 node packages/cli/dist/main.js partition \
@@ -1653,7 +1651,7 @@ node packages/cli/dist/main.js partition \
   --max-bytes 33554432
 ```
 
-Add this runtime example:
+添加以下 runtime 示例：
 
 ```ts
 const tileset = await new ICETilesetLoader(engine, { camera }).open(
@@ -1663,10 +1661,10 @@ engine.setScene(tileset.scene).setCamera(camera).start();
 await tileset.whenReady();
 ```
 
-Document the supported 3D Tiles subset, non-goals, progress events, and the fact
-that first release does not unload or synthesize LOD.
+记录支持的 3D Tiles 子集、non-goals、progress events，以及首个版本
+不卸载或合成 LOD 这一事实。
 
-- [ ] **Step 2: Run all repository verification gates**
+- [ ] **步骤 2：运行所有仓库验证门禁**
 
 ```bash
 cd ../ice3-toolchain
@@ -1679,16 +1677,16 @@ npm run verify
 npm pack --workspaces --dry-run
 ```
 
-Expected:
+预期：
 
-- toolchain architecture, typecheck, unit tests, schema tests pass;
-- engine architecture, typecheck, unit tests, Chromium and WebKit E2E pass;
-- package dry-runs contain no customer assets.
+- toolchain architecture、typecheck、unit tests、schema tests 通过；
+- engine architecture、typecheck、unit tests、Chromium 和 WebKit E2E 通过；
+- package dry-runs 不包含客户 assets。
 
-If either command fails, fix the failing test or implementation and rerun the
-entire failing repository gate.
+如果任一命令失败，则修复失败的测试或实现，并重新运行
+整个失败的仓库门禁。
 
-- [ ] **Step 3: Run one controlled large-asset smoke test outside Git**
+- [ ] **步骤 3：在 Git 之外运行一次受控 Large-Asset Smoke Test**
 
 ```bash
 mkdir -p /tmp/ice3-controlled-smoke
@@ -1703,7 +1701,7 @@ node packages/cli/dist/main.js partition \
   > /tmp/ice3-controlled-smoke/result.json
 ```
 
-Limit displayed evidence to aggregate values only:
+仅展示聚合值作为证据：
 
 ```bash
 node -e '
@@ -1718,10 +1716,10 @@ console.log(JSON.stringify({
 '
 ```
 
-Do not print node names, source names, directory listings, screenshots, or
-geometry.
+不得打印 node names、source names、directory listings、screenshots 或
+geometry。
 
-- [ ] **Step 4: Audit and remove controlled outputs**
+- [ ] **步骤 4：审计并移除受控输出**
 
 ```bash
 rm -rf /tmp/ice3-controlled-smoke
@@ -1729,11 +1727,11 @@ git status --short --ignored
 git ls-files | rg -i '\.(glb|gltf|bin)$'
 ```
 
-Expected: the last command lists only reviewed synthetic fixtures and explicitly
-distributable test assets. No tracked or staged customer asset or derivative may
-remain. `rm -rf` is scoped only to `/tmp/ice3-controlled-smoke`.
+预期：最后一条命令仅列出已审查的 synthetic fixtures 和明确
+可分发的 test assets。不得残留已跟踪或暂存的客户 asset 或派生内容。
+`rm -rf` 仅作用于 `/tmp/ice3-controlled-smoke`。
 
-- [ ] **Step 5: Run the final full gates after cleanup**
+- [ ] **步骤 5：清理后运行最终完整门禁**
 
 ```bash
 cd ../ice3-toolchain
@@ -1744,9 +1742,9 @@ npm run verify
 npm pack --workspaces --dry-run
 ```
 
-Expected: both exit `0`.
+预期：两者都退出 `0`。
 
-- [ ] **Step 6: Commit documentation and final adjustments**
+- [ ] **步骤 6：提交文档和最终调整**
 
 ```bash
 git -C ../ice3-doc add \
@@ -1764,9 +1762,9 @@ git -C ../ice3-engine commit \
   -m "docs: document incremental tileset loading"
 ```
 
-- [ ] **Step 7: Merge each verified feature branch**
+- [ ] **步骤 7：合并每个已验证的功能分支**
 
-From each repository, after confirming `git status --short --branch` is clean:
+在每个仓库中确认 `git status --short --branch` 显示干净后：
 
 ```bash
 git switch main
@@ -1775,18 +1773,17 @@ git merge --no-ff feature/spatial-tileset-pipeline \
 git branch -d feature/spatial-tileset-pipeline
 ```
 
-Run the repository's `npm run verify` once more on the merged branch. Do not
-delete a branch or claim completion if verification is not green.
+在合并后的分支上再次运行该仓库的 `npm run verify`。如果验证未通过，
+不得删除分支或声称完成。
 
-## Execution Recommendation
+## 执行建议
 
-Native execution is the better default for this plan. The toolchain output
-schema, engine parser, runtime fixture, and browser demonstration share exact
-field names and dependency ordering; keeping those interface decisions in one
-continuous session reduces cross-repository mismatch. The full verification
-gate still provides an independent final check.
+本计划更适合采用 native execution 作为默认方式。Toolchain output
+schema、engine parser、runtime fixture 和 browser demonstration 共享精确的
+field names 和 dependency ordering；在同一连续会话中保留这些接口决策
+可减少跨仓库不一致。完整验证门禁仍提供独立的最终检查。
 
-## Related Documents
+## 相关文档
 
-- `ICE3-DOC-IDX-001` — [Documentation index](../README.md)
-- `ICE3-DOC-SPEC-007` — [Spatial Tileset pipeline specification](../specs/2026-10-27-spatial-tileset-pipeline-design.md)
+- `ICE3-DOC-IDX-001` — [文档索引](../README.md)
+- `ICE3-DOC-SPEC-007` — [空间 Tileset Pipeline 规范](../specs/2026-10-27-spatial-tileset-pipeline-design.md)

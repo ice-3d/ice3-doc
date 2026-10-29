@@ -1,22 +1,22 @@
-# 虚构污水处理厂三维资产 Implementation Plan
+# 虚构污水处理厂三维资产实施计划
 
 > Document ID: ICE3-DOC-PLAN-014
 >
 > Status: Implemented
 >
-> Owner: ICE3 architecture maintainers
+> Owner: ICE3 架构维护者
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **供智能代理工作者使用：** 需要使用子技能：`superpowers:subagent-driven-development`（推荐）或逐项执行本计划的 `superpowers:executing-plans`。步骤使用复选框（`- [ ]`）跟踪。
 
-**Goal:** 程序化生成一个完全虚构、可确定性重建的市政污水处理厂 GLB，并完成 prepared、空间拆分、LOD 粗模、粗模分块和示例集成。
+**目标：** 程序化生成一个完全虚构、可确定性重建的市政污水处理厂 GLB，并完成 prepared、空间拆分、LOD 粗模、粗模分块和示例集成。
 
-**Architecture:** 在预处理工具工程中增加独立的 TypeScript 生成器，使用 `@gltf-transform/core` 构建几何、材质、场景层级和设备身份。生成器只产出 source GLB；现有 CLI 负责 prepared GLB、空间拆分、LOD 粗模与粗模分块，浏览器示例只加载处理后的 Tileset。
+**架构：** 在预处理工具工程中增加独立的 TypeScript 生成器，使用 `@gltf-transform/core` 构建几何、材质、场景层级和设备身份。生成器只产出 source GLB；现有 CLI 负责 prepared GLB、空间拆分、LOD 粗模与粗模分块，浏览器示例只加载处理后的 Tileset。
 
-**Tech Stack:** Node.js 24.22.1 LTS、TypeScript 7、`@gltf-transform/core` 4.5.1、现有预处理 CLI、Node.js 测试运行器、Playwright、WebGL2
+**技术栈：** Node.js 24.22.1 LTS、TypeScript 7、`@gltf-transform/core` 4.5.1、现有预处理 CLI、Node.js 测试运行器、Playwright、WebGL2
 
-**Spec:** `../specs/2026-10-28-synthetic-wastewater-plant-asset-design.md`
+**规格：** `../specs/2026-10-28-synthetic-wastewater-plant-asset-design.md`
 
-## Global Constraints
+## 全局约束
 
 - 生成器不得读取、引用、复制或派生任何真实客户模型。
 - 不实现 Agent、Prompt、工具调用或 AI 专用接口。
@@ -28,7 +28,7 @@
 - 代码、文档、测试、日志和提交信息不得包含禁止名称或客户信息。
 - 使用仓库现有的 Node.js 测试运行器；不得重新引入已移除的测试体系。
 
-## Review Focus
+## 审查重点
 
 - 生成器意外读取本地客户资产：测试必须证明生成只使用仓库内常量与几何函数。
 - 设备在离屏合批或分区后丢失选择身份：测试必须比较 source、prepared 和 Tileset 的语义身份集合。
@@ -38,17 +38,17 @@
 
 ---
 
-### Task 1: 建立程序化几何基础
+### 任务 1：建立程序化几何基础
 
-**Files:**
-- Modify: `ice3-toolchain/package.json`
-- Create: `ice3-toolchain/tools/wastewater-plant/tsconfig.json`
-- Create: `ice3-toolchain/tools/wastewater-plant/types.ts`
-- Create: `ice3-toolchain/tools/wastewater-plant/palette.ts`
-- Create: `ice3-toolchain/tools/wastewater-plant/primitives.ts`
-- Test: `ice3-toolchain/tests/wastewater/primitives.test.ts`
+**文件：**
+- 修改：`ice3-toolchain/package.json`
+- 创建：`ice3-toolchain/tools/wastewater-plant/tsconfig.json`
+- 创建：`ice3-toolchain/tools/wastewater-plant/types.ts`
+- 创建：`ice3-toolchain/tools/wastewater-plant/palette.ts`
+- 创建：`ice3-toolchain/tools/wastewater-plant/primitives.ts`
+- 测试：`ice3-toolchain/tests/wastewater/primitives.test.ts`
 
-**Interfaces:**
+**接口：**
 
 ```ts
 interface ICEWWTPMeshData {
@@ -63,12 +63,12 @@ function createOpenCylinder(radius: number, height: number, segments?: number): 
 function createPipeSegment(from: readonly [number, number, number], to: readonly [number, number, number], radius: number): ICEWWTPMeshData;
 ```
 
-- Consumes: glTF 2.0 triangle conventions and the existing preprocessing subset.
-- Produces: finite, indexed triangle geometry used by all later equipment builders.
+- 消费：glTF 2.0 三角形约定和现有预处理子集。
+- 产出：所有后续设备构建器使用的有限、带索引的三角形几何。
 
-- [ ] **Step 1: Add the generation dependency and typecheck entry**
+- [ ] **步骤 1：添加生成依赖和类型检查入口**
 
-Add the fixed build-time dependency and script:
+添加固定的构建时依赖和脚本：
 
 ```json
 {
@@ -82,7 +82,7 @@ Add the fixed build-time dependency and script:
 }
 ```
 
-`tools/wastewater-plant/tsconfig.json`:
+`tools/wastewater-plant/tsconfig.json`：
 
 ```json
 {
@@ -97,7 +97,7 @@ Add the fixed build-time dependency and script:
 }
 ```
 
-- [ ] **Step 2: Write the failing primitive tests**
+- [ ] **步骤 2：编写失败的基础几何测试**
 
 ```ts
 import { test } from 'node:test';
@@ -136,9 +136,9 @@ test('creates a pipe segment aligned with two finite endpoints', () => {
 });
 ```
 
-- [ ] **Step 3: Run the primitive tests and verify RED**
+- [ ] **步骤 3：运行基础几何测试并验证 RED**
 
-Run:
+运行：
 
 ```bash
 cd ../ice3-toolchain
@@ -146,11 +146,11 @@ source ~/.nvm/nvm.sh && nvm use 24
 npm run test -- tests/wastewater/primitives.test.ts
 ```
 
-Expected: FAIL because the generator modules do not exist.
+预期：FAIL，因为生成器模块不存在。
 
-- [ ] **Step 4: Implement the geometry contract and palette**
+- [ ] **步骤 4：实现几何契约和调色板**
 
-Define the exact palette values in `palette.ts`:
+在 `palette.ts` 中定义精确的调色板值：
 
 ```ts
 export const WASTEWATER_PALETTE = Object.freeze({
@@ -171,19 +171,19 @@ export const WASTEWATER_PALETTE = Object.freeze({
 });
 ```
 
-Implement primitives with these invariants:
+实现具有以下不变量的基础几何：
 
-- Every position and normal is finite.
-- Every index is an unsigned integer within the vertex count.
-- Box faces have independent vertices and flat face normals.
-- Cylinder segment count is an integer from 8 to 64.
-- Open cylinders omit caps and preserve outer wall winding.
-- Pipe segments produce a closed cylinder oriented from the first endpoint to the second.
-- All arrays are typed arrays and never contain external resources.
+- 每个位置和法线均为有限值。
+- 每个索引均为顶点数范围内的无符号整数。
+- 盒体各面具有独立顶点和平坦面法线。
+- 圆柱分段数为 8 到 64 之间的整数。
+- 开口圆柱省略端盖，并保留外壁绕序。
+- 管段生成从第一个端点到第二个端点的封闭圆柱。
+- 所有数组均为类型化数组，且绝不包含外部资源。
 
-- [ ] **Step 5: Run focused and full toolchain tests**
+- [ ] **步骤 5：运行聚焦测试和完整工具链测试**
 
-Run:
+运行：
 
 ```bash
 npm run typecheck:tools
@@ -192,9 +192,9 @@ npm run test -- tests/wastewater/primitives.test.ts
 npm test
 ```
 
-Expected: PASS.
+预期：PASS。
 
-- [ ] **Step 6: Commit**
+- [ ] **步骤 6：提交**
 
 ```bash
 git add package.json tsconfig.json tools/wastewater-plant tests/wastewater/primitives.test.ts
@@ -203,15 +203,15 @@ git commit -m "feat(toolchain): add wastewater geometry primitives"
 
 ---
 
-### Task 2: Build the Full Facility Scene
+### 任务 2：构建完整厂区场景
 
-**Files:**
-- Create: `ice3-toolchain/tools/wastewater-plant/equipment.ts`
-- Create: `ice3-toolchain/tools/wastewater-plant/layout.ts`
-- Create: `ice3-toolchain/tools/wastewater-plant/scene.ts`
-- Test: `ice3-toolchain/tests/wastewater/scene.test.ts`
+**文件：**
+- 创建：`ice3-toolchain/tools/wastewater-plant/equipment.ts`
+- 创建：`ice3-toolchain/tools/wastewater-plant/layout.ts`
+- 创建：`ice3-toolchain/tools/wastewater-plant/scene.ts`
+- 测试：`ice3-toolchain/tests/wastewater/scene.test.ts`
 
-**Interfaces:**
+**接口：**
 
 ```ts
 type ICEWWTPStage =
@@ -241,10 +241,10 @@ function createWastewaterPlantDocument(): {
 };
 ```
 
-- Consumes: Task 1 geometry and palette.
-- Produces: an in-memory glTF document with complete process hierarchy and stable equipment identities.
+- 消费：任务 1 的几何和调色板。
+- 产出：包含完整工艺层级和稳定设备身份的内存中 glTF 文档。
 
-- [ ] **Step 1: Write failing scene tests**
+- [ ] **步骤 1：编写失败的场景测试**
 
 ```ts
 import { test } from 'node:test';
@@ -292,17 +292,17 @@ test('covers all primary, auxiliary, and return-flow systems', () => {
 });
 ```
 
-- [ ] **Step 2: Run scene tests and verify RED**
+- [ ] **步骤 2：运行场景测试并验证 RED**
 
 ```bash
 npm run test -- tests/wastewater/scene.test.ts
 ```
 
-Expected: FAIL because the scene builder does not exist.
+预期：FAIL，因为场景构建器不存在。
 
-- [ ] **Step 3: Define the exact equipment inventory**
+- [ ] **步骤 3：定义精确的设备清单**
 
-Create a deterministic inventory with at least these tag families:
+创建至少包含这些 tag 族的确定性清单：
 
 ```text
 IN-001
@@ -331,7 +331,7 @@ NACLO-101, NACLO-102, CARBON-101, CARBON-102
 ODR-101, ODR-102, FAN-101
 ```
 
-Each equipment specification uses the exact tag as its stable identity suffix. Place the inventory in fixed groups:
+每项设备规格都使用精确的 tag 作为其稳定身份后缀。将清单放入固定分组：
 
 ```text
 WaterTreatmentArea
@@ -348,13 +348,13 @@ UtilitiesArea
 SiteInfrastructure
 ```
 
-- [ ] **Step 4: Assemble the scene and equipment geometry**
+- [ ] **步骤 4：组装场景和设备几何**
 
-Create one selectable node per equipment specification. Every selectable node must:
+为每项设备规格创建一个可选节点。每个可选节点必须：
 
-- Reference one mesh containing one or more triangle primitives.
-- Set a stable name equal to its equipment tag.
-- Store extras under `ice3`:
+- 引用一个包含一个或多个三角形图元的网格。
+- 设置与设备 tag 相同的稳定名称。
+- 将 extras 存储在 `ice3` 下：
 
 ```ts
 node.setExtras({
@@ -367,36 +367,36 @@ node.setExtras({
 });
 ```
 
-Use specialized builders:
+使用专用构建器：
 
-- Rectangular process basins have floor, four walls, water surface, walkway, and simplified railing.
-- Circular clarifiers have an annular wall, center mechanism, cross bridge, and railing.
-- Pumps have base, body, motor, coupling, and one inlet/outlet pipe.
-- Screens have frame, parallel bars, motor, and collection trough.
-- Blowers and dewatering machines have base, enclosure, motor, and service face.
-- Filters and contact tanks have walls, water surface, media bays, and pipe headers.
-- Valves have body, actuator, and pipe stubs.
-- Analyzers have cabinet, pole, display face, and cable conduit.
+- 矩形工艺池包含底板、四面池壁、水面、步道和简化栏杆。
+- 圆形澄清池包含环形池壁、中心机构、横桥和栏杆。
+- 泵包含底座、泵体、电机、联轴器和一根进口/出口管道。
+- 格栅包含框架、平行栅条、电机和收集槽。
+- 鼓风机和脱水机包含底座、外壳、电机和检修面。
+- 过滤器和接触池包含池壁、水面、介质隔间和管道集管。
+- 阀门包含阀体、执行器和管接头。
+- 分析仪包含机柜、立杆、显示面和电缆导管。
 
-Add non-selectable site infrastructure:
+添加不可选择的场地基础设施：
 
-- Ground slab.
-- Internal roads and safety zones.
-- Main water, sludge, air, and chemical pipe runs.
-- Control building and utility building.
-- Perimeter fencing and a small number of access walkways.
+- 地面底板。
+- 内部道路和安全区。
+- 主水、污泥、空气和化学药剂管线。
+- 控制楼和公用工程楼。
+- 周界围栏和少量通行步道。
 
-Pipe routes must connect adjacent process stages in the 2D reference flow. Add the 3 return routes:
+管道走向必须连接 2D 参考流程中的相邻工艺阶段。添加 3 条回流路径：
 
-- Filter backwash to distribution well.
-- Sludge thickener supernatant to distribution well.
-- Dewatering filtrate to distribution well.
+- 滤池反冲洗至配水井。
+- 污泥浓缩池上清液至配水井。
+- 脱水滤液至配水井。
 
-- [ ] **Step 5: Verify scene structure and update architecture test**
+- [ ] **步骤 5：验证场景结构并更新架构测试**
 
-Extend `tests/architecture/layout.test.ts` so the GLB generation dependency is a toolchain development dependency and no browser package imports it.
+扩展 `tests/architecture/layout.test.ts`，确保 GLB 生成依赖属于工具链开发依赖，且没有浏览器包导入它。
 
-Run:
+运行：
 
 ```bash
 npm run typecheck:tools
@@ -404,9 +404,9 @@ npm run test -- tests/wastewater/scene.test.ts tests/architecture/layout.test.ts
 npm test
 ```
 
-Expected: PASS.
+预期：PASS。
 
-- [ ] **Step 6: Commit**
+- [ ] **步骤 6：提交**
 
 ```bash
 git add tools/wastewater-plant tests/wastewater/scene.test.ts tests/architecture/layout.test.ts
@@ -415,19 +415,19 @@ git commit -m "feat(toolchain): build virtual wastewater facility"
 
 ---
 
-### Task 3: Export Source GLB and Prepared Preview
+### 任务 3：导出 Source GLB 和 Prepared 预览
 
-**Files:**
-- Create: `ice3-toolchain/tools/wastewater-plant/generate.ts`
-- Create: `ice3-toolchain/tools/wastewater-plant/build-example.mjs`
-- Create: `ice3-toolchain/tools/wastewater-plant/verify.ts`
-- Modify: `ice3-toolchain/package.json`
-- Create: `ice3-engine/examples/m1/assets/wastewater-plant/source/wastewater-plant.glb`
-- Create: `ice3-engine/examples/m1/assets/wastewater-plant/prepared/wastewater-plant.glb`
-- Create: `ice3-engine/examples/m1/assets/wastewater-plant/prepared/wastewater-plant.report.json`
-- Test: `ice3-toolchain/tests/wastewater/export.test.ts`
+**文件：**
+- 创建：`ice3-toolchain/tools/wastewater-plant/generate.ts`
+- 创建：`ice3-toolchain/tools/wastewater-plant/build-example.mjs`
+- 创建：`ice3-toolchain/tools/wastewater-plant/verify.ts`
+- 修改：`ice3-toolchain/package.json`
+- 创建：`ice3-engine/examples/m1/assets/wastewater-plant/source/wastewater-plant.glb`
+- 创建：`ice3-engine/examples/m1/assets/wastewater-plant/prepared/wastewater-plant.glb`
+- 创建：`ice3-engine/examples/m1/assets/wastewater-plant/prepared/wastewater-plant.report.json`
+- 测试：`ice3-toolchain/tests/wastewater/export.test.ts`
 
-**Interfaces:**
+**接口：**
 
 ```ts
 interface ICEWWTPGenerateOptions {
@@ -443,10 +443,10 @@ async function generateWastewaterPlant(
 }>;
 ```
 
-- Consumes: Task 2 scene document.
-- Produces: deterministic source GLB and prepared runtime GLB.
+- 消费：任务 2 的场景文档。
+- 产出：确定性的 source GLB 和 prepared 运行时 GLB。
 
-- [ ] **Step 1: Write failing deterministic export tests**
+- [ ] **步骤 1：编写失败的确定性导出测试**
 
 ```ts
 import { mkdtemp, readFile, rm } from 'node:fs/promises';
@@ -472,41 +472,41 @@ test('exports deterministic source GLB bytes', async () => {
 });
 ```
 
-- [ ] **Step 2: Run export tests and verify RED**
+- [ ] **步骤 2：运行导出测试并验证 RED**
 
 ```bash
 npm run test -- tests/wastewater/export.test.ts
 ```
 
-Expected: FAIL because the generator entrypoint does not exist.
+预期：FAIL，因为生成器入口不存在。
 
-- [ ] **Step 3: Implement deterministic source export**
+- [ ] **步骤 3：实现确定性的 source 导出**
 
-Use `NodeIO.writeBinary(document)`, hash the bytes with SHA-256, create the parent directory, and write through a temporary sibling before renaming to the final path.
+使用 `NodeIO.writeBinary(document)`，用 SHA-256 对字节计算哈希，创建父目录，并通过临时同级文件写入后再重命名为最终路径。
 
-Expose a CLI entrypoint:
+公开一个 CLI 入口：
 
 ```bash
 node --import tsx tools/wastewater-plant/generate.ts \
   --output ../ice3-engine/examples/m1/assets/wastewater-plant/source/wastewater-plant.glb
 ```
 
-The CLI must reject a missing `--output`, unexpected arguments, empty output paths, and write failures with `ICE3_WWTP_EXPORT_FAILED`.
+CLI 必须以 `ICE3_WWTP_EXPORT_FAILED` 拒绝缺失的 `--output`、意外参数、空输出路径和写入失败。
 
-- [ ] **Step 4: Add the complete example build script**
+- [ ] **步骤 4：添加完整的示例构建脚本**
 
-`build-example.mjs` must:
+`build-example.mjs` 必须：
 
-1. Resolve the sibling `ice3-engine` directory.
-2. Create a staging directory under the target asset directory.
-3. Generate the source GLB into staging.
-4. Run the toolchain build command to create prepared GLB and report.
-5. Validate the prepared GLB.
-6. Run the splitting pipeline from Task 4 into staging.
-7. Validate the finished directory.
-8. Replace the previous `wastewater-plant` directory only after all steps pass.
+1. 解析同级 `ice3-engine` 目录。
+2. 在目标资产目录下创建暂存目录。
+3. 将 source GLB 生成到暂存目录中。
+4. 运行工具链构建命令，生成 prepared GLB 和报告。
+5. 验证 prepared GLB。
+6. 将任务 4 的拆分流水线运行到暂存目录中。
+7. 验证完成后的目录。
+8. 仅在所有步骤通过后替换先前的 `wastewater-plant` 目录。
 
-Add scripts:
+添加脚本：
 
 ```json
 {
@@ -515,7 +515,7 @@ Add scripts:
 }
 ```
 
-The build command for the preview is:
+预览的构建命令是：
 
 ```bash
 node packages/cli/dist/main.js build \
@@ -526,9 +526,9 @@ node packages/cli/dist/main.js build \
   --asset-id ice3-virtual-wwtp
 ```
 
-- [ ] **Step 5: Generate and verify source/prepared artifacts**
+- [ ] **步骤 5：生成并验证 source/prepared 产物**
 
-Run:
+运行：
 
 ```bash
 npm run build:wastewater-demo
@@ -536,24 +536,24 @@ node packages/cli/dist/main.js validate \
   ../ice3-engine/examples/m1/assets/wastewater-plant/prepared/wastewater-plant.glb
 ```
 
-Expected:
+预期：
 
-- Source GLB is a standard single-JSON/single-BIN GLB.
-- Prepared GLB passes the active asset contract.
-- Selection group count is at least 60.
-- Source and prepared assets contain no textures or external resources.
-- Generated bytes are reproducible.
+- Source GLB 是标准的单 JSON/单 BIN GLB。
+- Prepared GLB 通过当前生效的资产契约。
+- 选择组数量至少为 60。
+- Source 和 prepared 资产不包含纹理或外部资源。
+- 生成的字节可复现。
 
-- [ ] **Step 6: Commit generated source and preview**
+- [ ] **步骤 6：提交生成的 source 和预览**
 
-In the toolchain repository:
+在工具链仓库中：
 
 ```bash
 git add package.json tools/wastewater-plant tests/wastewater/export.test.ts
 git commit -m "feat(toolchain): export virtual wastewater assets"
 ```
 
-In the engine repository:
+在引擎仓库中：
 
 ```bash
 git add examples/m1/assets/wastewater-plant/source \
@@ -563,16 +563,16 @@ git commit -m "feat(example): add virtual wastewater models"
 
 ---
 
-### Task 4: Split the Asset and Generate LOD Content
+### 任务 4：拆分资产并生成 LOD 内容
 
-**Files:**
-- Modify: `ice3-toolchain/tools/wastewater-plant/build-example.mjs`
-- Create: `ice3-engine/examples/m1/assets/wastewater-plant/tiled/tileset.json`
-- Create: `ice3-engine/examples/m1/assets/wastewater-plant/tiled/parts/*.glb`
-- Create: `ice3-engine/examples/m1/assets/wastewater-plant/tiled/coarse/*.glb`
-- Test: `ice3-toolchain/tests/wastewater/pipeline.test.ts`
+**文件：**
+- 修改：`ice3-toolchain/tools/wastewater-plant/build-example.mjs`
+- 创建：`ice3-engine/examples/m1/assets/wastewater-plant/tiled/tileset.json`
+- 创建：`ice3-engine/examples/m1/assets/wastewater-plant/tiled/parts/*.glb`
+- 创建：`ice3-engine/examples/m1/assets/wastewater-plant/tiled/coarse/*.glb`
+- 测试：`ice3-toolchain/tests/wastewater/pipeline.test.ts`
 
-**Interfaces:**
+**接口：**
 
 ```ts
 interface ICEWWTPArtifactSummary {
@@ -587,10 +587,10 @@ async function inspectWastewaterArtifacts(
 ): Promise<ICEWWTPArtifactSummary>;
 ```
 
-- Consumes: Task 3 source GLB's original geometry. Prepared output contains generated edge primitives and is not a valid second partition input.
-- Produces: loadable Tileset with multiple fine partitions and multiple coarse chunks.
+- 消费：任务 3 source GLB 的原始几何。Prepared 输出包含生成的边图元，不能作为有效的二次拆分输入。
+- 产出：可加载的 Tileset，包含多个细模分区和多个粗模分块。
 
-- [ ] **Step 1: Write failing artifact tests**
+- [ ] **步骤 1：编写失败的产物测试**
 
 ```ts
 import { readFile } from 'node:fs/promises';
@@ -622,17 +622,17 @@ test('writes a valid local Tileset with no external roots', async () => {
 });
 ```
 
-- [ ] **Step 2: Run pipeline tests and verify RED**
+- [ ] **步骤 2：运行流水线测试并验证 RED**
 
 ```bash
 npm run test -- tests/wastewater/pipeline.test.ts
 ```
 
-Expected: FAIL because Tiled artifacts and inspection helper do not exist.
+预期：FAIL，因为 Tiled 产物和检查辅助程序不存在。
 
-- [ ] **Step 3: Add splitting and LOD generation to the build script**
+- [ ] **步骤 3：在构建脚本中添加拆分和 LOD 生成**
 
-Run the partition CLI on the validated source GLB after prepared validation:
+在 prepared 验证完成后，对已验证的 source GLB 运行分区 CLI：
 
 ```bash
 node packages/cli/dist/main.js partition \
@@ -651,22 +651,22 @@ node packages/cli/dist/main.js partition \
   --coarse-chunk-max-bytes 2097152
 ```
 
-If measured geometry produces only one fine part or one coarse chunk, lower the relevant byte/triangle threshold until both assertions pass. Do not weaken the tests by accepting a single container.
+如果实测几何仅产生一个细模分区或一个粗模分块，则降低相关的字节/三角形阈值，直到两项断言均通过。不得通过接受单个容器来削弱测试。
 
-- [ ] **Step 4: Implement artifact inspection**
+- [ ] **步骤 4：实现产物检查**
 
-`verify.ts` must:
+`verify.ts` 必须：
 
-- Parse and validate the Tileset.
-- Read every fine and coarse GLB with the existing prepared reader.
-- Collect unique semantic selection IDs.
-- Reject duplicate selection IDs across visible semantic nodes.
-- Confirm all expected equipment tags are present in the prepared hierarchy.
-- Reject external HTTP references, missing files, malformed GLBs and empty coarse coverage.
+- 解析并验证 Tileset。
+- 使用现有 prepared 读取器读取每个细模和粗模 GLB。
+- 收集唯一的语义选择 ID。
+- 拒绝可见语义节点中重复的选择 ID。
+- 确认 prepared 层级中包含所有预期的设备 tag。
+- 拒绝外部 HTTP 引用、缺失文件、格式错误的 GLB 和空粗模覆盖。
 
-- [ ] **Step 5: Rebuild and verify all generated assets**
+- [ ] **步骤 5：重新构建并验证所有生成的资产**
 
-Run:
+运行：
 
 ```bash
 npm run build:wastewater-demo
@@ -675,16 +675,16 @@ node packages/cli/dist/main.js validate \
   ../ice3-engine/examples/m1/assets/wastewater-plant/prepared/wastewater-plant.glb
 ```
 
-Expected:
+预期：
 
-- At least two fine partitions.
-- At least two coarse chunks.
-- All generated GLBs and the Tileset validate.
-- Fine and coarse assets retain the complete stable identity set.
+- 至少两个细模分区。
+- 至少两个粗模分块。
+- 所有生成的 GLB 和 Tileset 均通过验证。
+- 细模和粗模资产保留完整的稳定身份集合。
 
-- [ ] **Step 6: Commit**
+- [ ] **步骤 6：提交**
 
-In the toolchain repository:
+在工具链仓库中：
 
 ```bash
 git add tools/wastewater-plant/build-example.mjs \
@@ -692,7 +692,7 @@ git add tools/wastewater-plant/build-example.mjs \
 git commit -m "feat(toolchain): split and simplify virtual wastewater assets"
 ```
 
-In the engine repository:
+在引擎仓库中：
 
 ```bash
 git add examples/m1/assets/wastewater-plant/tiled
@@ -701,20 +701,20 @@ git commit -m "feat(example): add virtual wastewater tileset"
 
 ---
 
-### Task 5: Make the Virtual Plant the Default Example
+### 任务 5：将虚拟污水处理厂设为默认示例
 
-**Files:**
-- Modify: `ice3-engine/examples/m1/main.ts`
-- Modify: `ice3-engine/tests/e2e/m1.spec.ts`
-- Modify: `ice3-engine/tests/e2e/selection-dpr.spec.ts`
-- Create: `ice3-engine/tests/e2e/wastewater-plant.spec.ts`
+**文件：**
+- 修改：`ice3-engine/examples/m1/main.ts`
+- 修改：`ice3-engine/tests/e2e/m1.spec.ts`
+- 修改：`ice3-engine/tests/e2e/selection-dpr.spec.ts`
+- 创建：`ice3-engine/tests/e2e/wastewater-plant.spec.ts`
 
-**Interfaces:**
+**接口：**
 
-- Consumes: `/assets/wastewater-plant/tiled/tileset.json`.
-- Produces: root URL defaulting to the virtual plant while preserving the same-origin local preview override.
+- 消费：`/assets/wastewater-plant/tiled/tileset.json`。
+- 产出：默认指向虚拟污水处理厂的根 URL，同时保留同源本地预览覆盖。
 
-Asset precedence:
+资产优先级：
 
 ```text
 explicit ?asset=...
@@ -722,9 +722,9 @@ explicit ?asset=...
   → virtual wastewater plant
 ```
 
-The adaptive demo query continues to select the adaptive fixture.
+自适应演示查询继续选择自适应夹具。
 
-- [ ] **Step 1: Write failing default-asset browser tests**
+- [ ] **步骤 1：编写失败的默认资产浏览器测试**
 
 ```ts
 import { expect, test } from '@playwright/test';
@@ -770,7 +770,7 @@ test('selects a virtual wastewater device from the default scene', async ({ page
 });
 ```
 
-- [ ] **Step 2: Run the default-asset tests and verify RED**
+- [ ] **步骤 2：运行默认资产测试并验证 RED**
 
 ```bash
 cd ../ice3-engine
@@ -778,11 +778,11 @@ npx playwright test tests/e2e/wastewater-plant.spec.ts \
   --project=chromium --workers=1
 ```
 
-Expected: FAIL because the root URL still selects the old fallback.
+预期：FAIL，因为根 URL 仍选择旧的回退项。
 
-- [ ] **Step 3: Change the default asset fallback**
+- [ ] **步骤 3：更改默认资产回退项**
 
-Replace the old default fallback with:
+将旧的默认回退项替换为：
 
 ```ts
 const defaultAssetUrl = adaptiveDemo
@@ -790,21 +790,21 @@ const defaultAssetUrl = adaptiveDemo
   : '/assets/wastewater-plant/tiled/tileset.json';
 ```
 
-Do not change the local-preview probe or explicit `?asset=` behavior.
+不得更改本地预览探测或显式 `?asset=` 行为。
 
-- [ ] **Step 4: Pin legacy fixture-specific tests**
+- [ ] **步骤 4：固定旧版夹具专用测试**
 
-Tests that intentionally depend on the old hierarchical fixture must navigate with:
+有意依赖旧版分层夹具的测试必须使用以下方式导航：
 
 ```text
 http://127.0.0.1:8104/?asset=/assets/hierarchical-demo/tileset.json
 ```
 
-This includes tests that delay or fail hierarchical part requests and tests that assert the old coarse overview behavior. Tests of generic loading, keyboard control, selection and layout may continue using the virtual plant when their assertions are fixture-independent.
+这包括延迟或使分层分区请求失败的测试，以及断言旧版粗模总览行为的测试。当断言与夹具无关时，通用加载、键盘控制、选择和布局测试可以继续使用虚拟污水处理厂。
 
-Update the local-override test to use the virtual wastewater Tileset as the override fixture.
+更新本地覆盖测试，以虚拟污水处理 Tileset 作为覆盖夹具。
 
-- [ ] **Step 5: Run focused and complete browser tests**
+- [ ] **步骤 5：运行聚焦测试和完整浏览器测试**
 
 ```bash
 npx playwright test tests/e2e/wastewater-plant.spec.ts \
@@ -813,9 +813,9 @@ npx playwright test --project=chromium --workers=1
 npx playwright test --project=webkit --workers=1
 ```
 
-Expected: PASS with zero page errors, failed requests or missing selection identities.
+预期：PASS，且没有页面错误、失败请求或缺失的选择身份。
 
-- [ ] **Step 6: Commit**
+- [ ] **步骤 6：提交**
 
 ```bash
 git add examples/m1/main.ts tests/e2e/m1.spec.ts \
@@ -825,42 +825,42 @@ git commit -m "feat(example): show the virtual wastewater plant"
 
 ---
 
-### Task 6: Final Verification and Documentation
+### 任务 6：最终验证和文档编写
 
-**Files:**
-- Modify: `ice3-toolchain/README.md`
-- Modify: `ice3-engine/examples/m1/index.html`
-- Modify: `ice3-engine/examples/m1/main.ts`
-- Test: existing generator, pipeline, unit and browser suites
+**文件：**
+- 修改：`ice3-toolchain/README.md`
+- 修改：`ice3-engine/examples/m1/index.html`
+- 修改：`ice3-engine/examples/m1/main.ts`
+- 测试：现有生成器、流水线、单元和浏览器测试套件
 
-**Interfaces:**
+**接口：**
 
-- Consumes all previous tasks.
-- Produces documented, reproducible and release-ready synthetic demo assets.
+- 消费所有先前的任务。
+- 产出有文档说明、可复现且可发布的合成演示资产。
 
-- [ ] **Step 1: Update visible demo copy**
+- [ ] **步骤 1：更新可见的演示文案**
 
-Change the example subtitle from the generic tiled asset text to:
+将示例副标题从通用分块资产文本改为：
 
 ```text
 虚拟市政污水处理厂
 ```
 
-Keep status, progress and selection panels unchanged.
+保持状态、进度和选择面板不变。
 
-- [ ] **Step 2: Document the rebuild command**
+- [ ] **步骤 2：记录重建命令**
 
-Add the exact command to the toolchain README:
+将准确命令添加到工具链 README 中：
 
 ```bash
 npm run build:wastewater-demo
 ```
 
-Document that it generates source, prepared, tiled, fine and coarse assets, and that the result is entirely synthetic.
+说明它会生成 source、prepared、tiled、细模和粗模资产，且结果完全为合成内容。
 
-- [ ] **Step 3: Run complete verification**
+- [ ] **步骤 3：运行完整验证**
 
-Toolchain:
+工具链：
 
 ```bash
 cd ../ice3-toolchain
@@ -868,7 +868,7 @@ source ~/.nvm/nvm.sh && nvm use 24
 npm run verify
 ```
 
-Engine:
+引擎：
 
 ```bash
 cd ../ice3-engine
@@ -876,11 +876,11 @@ source ~/.nvm/nvm.sh && nvm use 24
 npm run verify
 ```
 
-Expected: all type checks, unit tests and Chromium/WebKit tests pass.
+预期：所有类型检查、单元测试和 Chromium/WebKit 测试均通过。
 
-- [ ] **Step 4: Audit reproducibility and privacy**
+- [ ] **步骤 4：审计可复现性和隐私**
 
-Run twice:
+运行两次：
 
 ```bash
 npm run build:wastewater-demo
@@ -891,9 +891,9 @@ shasum -a 256 \
   ../ice3-engine/examples/m1/assets/wastewater-plant/source/wastewater-plant.glb
 ```
 
-Expected: identical SHA-256 values.
+预期：SHA-256 值相同。
 
-Run:
+运行：
 
 ```bash
 git status --short
@@ -901,18 +901,18 @@ git ls-files '*.local.*' '*.preview.*'
 git grep -I -n -i -E "$ICE3_FORBIDDEN_NAME_PATTERN" -- . || true
 ```
 
-Expected: no local preview files, customer assets, scratch directories, forbidden names, or generated logs in tracked content.
+预期：已跟踪内容中没有本地预览文件、客户资产、暂存目录、禁止名称或生成的日志。
 
-- [ ] **Step 5: Commit final documentation**
+- [ ] **步骤 5：提交最终文档**
 
-In the toolchain repository:
+在工具链仓库中：
 
 ```bash
 git add README.md
 git commit -m "docs(toolchain): document virtual wastewater generation"
 ```
 
-In the engine repository:
+在引擎仓库中：
 
 ```bash
 git add examples/m1/index.html examples/m1/main.ts
@@ -921,20 +921,20 @@ git commit -m "docs(example): describe virtual wastewater scene"
 
 ---
 
-## Final Acceptance
+## 最终验收
 
-The implementation is complete only when:
+仅当满足以下条件时，实施才算完成：
 
-1. `npm run build:wastewater-demo` rebuilds all synthetic artifacts from scratch.
-2. Source and prepared GLBs are deterministic and valid.
-3. Tiled output contains multiple fine partitions and multiple coarse chunks.
-4. Every expected equipment identity survives prepared, partition, LOD and static batching.
-5. The root example shows the complete virtual wastewater plant without any local customer asset.
-6. Local customer previews still override the synthetic asset only on the local machine.
-7. Chromium and WebKit browser tests report no page errors or failed requests.
-8. No customer asset or prohibited name enters source, generated assets, documentation, tests or commit history.
+1. `npm run build:wastewater-demo` 可以从头重建所有合成产物。
+2. Source 和 prepared GLB 具有确定性且有效。
+3. Tiled 输出包含多个细模分区和多个粗模分块。
+4. 每个预期设备身份都能在 prepared、分区、LOD 和静态合批后保留。
+5. 根示例显示完整的虚拟污水处理厂，且不包含任何本地客户资产。
+6. 本地客户预览仍仅在本地机器上覆盖合成资产。
+7. Chromium 和 WebKit 浏览器测试报告没有页面错误或失败请求。
+8. 没有客户资产或禁止名称进入源代码、生成资产、文档、测试或提交历史。
 
-## Related Documents
+## 相关文档
 
-- `ICE3-DOC-IDX-001` — [Documentation index](../README.md)
-- `ICE3-DOC-SPEC-010` — [Synthetic wastewater plant specification](../specs/2026-10-28-synthetic-wastewater-plant-asset-design.md)
+- `ICE3-DOC-IDX-001` — [文档索引](../README.md)
+- `ICE3-DOC-SPEC-010` — [合成污水处理厂规格](../specs/2026-10-28-synthetic-wastewater-plant-asset-design.md)

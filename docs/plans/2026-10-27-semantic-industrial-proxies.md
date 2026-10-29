@@ -1,74 +1,74 @@
-# Semantic Industrial Proxies Implementation Plan
+# 语义工业代理实施计划
 
 > Document ID: ICE3-DOC-PLAN-009
 >
 > Status: Implemented
 >
-> Owner: ICE3 architecture maintainers
+> Owner: ICE3 架构维护者
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **供代理执行者使用：** 必须使用子技能 superpowers:subagent-driven-development（推荐）或 superpowers:executing-plans，按任务逐步实施本计划。使用复选框（`- [ ]`）语法跟踪步骤。
 
-**Goal:** Add conservative offline OBB and cylinder proxies as optional adaptive-LOD samples while preserving the standard Tileset, Prepared GLB, selection identity, and runtime API.
+**目标：** 将保守的离线 OBB 和 cylinder 代理添加为可选的 adaptive-LOD 样本，同时保持标准 Tileset、Prepared GLB、选择标识和 runtime API 不变。
 
-**Architecture:** The toolchain fits a proxy from source mesh geometry, accepts it only when surface deviation, volume inflation, and triangle reduction all pass fixed thresholds, and stores the candidate in the bounded workspace. Adaptive LOD compares that mesh replacement with primitive QEM samples; the Prepared GLB builder swaps mesh geometry without changing nodes or selection IDs.
+**架构：** 工具链根据源 mesh 几何体拟合代理，仅当表面偏差、体积膨胀和三角形缩减量全部通过固定阈值时才接受该代理，并将候选代理存储在受限 workspace 中。Adaptive LOD 将该 mesh 替换与 primitive QEM 样本进行比较；Prepared GLB 构建器替换 mesh 几何体，但不改变 nodes 或 selection IDs。
 
-**Tech Stack:** Node.js 24.22.1 LTS, TypeScript 7, ESM, npm workspaces, Node.js built-in test runner, `expect`, `tsx`, Prepared GLB, OGC 3D Tiles 1.1
+**技术栈：** Node.js 24.22.1 LTS、TypeScript 7、ESM、npm workspaces、Node.js 内置 test runner、`expect`、`tsx`、Prepared GLB、OGC 3D Tiles 1.1
 
-**Spec:** `../specs/2026-10-27-semantic-industrial-proxy-design.md`
+**规范：** `../specs/2026-10-27-semantic-industrial-proxy-design.md`
 
-## Global Constraints
+## 全局约束
 
-- Use Node.js 24.22.1 LTS from `.nvmrc`; do not verify with Node 25.
-- Work on a feature branch and merge to `main` only after full verification.
-- Do not add runtime dependencies.
-- Proxy generation is offline toolchain work only.
-- `--semantic-proxy` defaults to `off`.
-- Semantic proxies require `--lod --lod-allocation adaptive`.
-- Do not add a private asset format, Tileset field, or proxy-specific runtime API.
-- Do not change node IDs, node matrices, or `selectionId`.
-- Do not merge or delete semantic devices.
-- Fixed acceptance thresholds are normalized surface deviation `<= 0.05`, volume inflation `<= 2.0`, and triangle reduction `>= 8`.
-- Devices below `64` source triangles do not receive proxies.
-- OBB and cylinder candidates only; no convex hull, part segmentation, voxelization, or manual override.
-- Mixed vertex-color rules are conservative: use averaged vertex color only when every contributing primitive has colors; otherwise use the dominant material.
-- Preserve deterministic candidate ordering, eigenvector signs, material choice, and output bytes.
-- Never write controlled customer assets or derived files into Git, tests, screenshots, logs, packages, or documentation.
-- Avoid competitor names and the prohibited generic 3D-library brand term in all artifacts.
+- 使用 `.nvmrc` 指定的 Node.js 24.22.1 LTS；不得使用 Node 25 进行验证。
+- 在功能分支上开发，仅在完整验证通过后合入 `main`。
+- 不得添加 runtime 依赖。
+- 代理生成仅属于离线工具链工作。
+- `--semantic-proxy` 默认为 `off`。
+- Semantic proxies 需要 `--lod --lod-allocation adaptive`。
+- 不得添加私有 asset format、Tileset 字段或代理专用 runtime API。
+- 不得更改 node IDs、node matrices 或 `selectionId`。
+- 不得合并或删除语义设备。
+- 固定接受阈值为：规范化表面偏差 `<= 0.05`、体积膨胀 `<= 2.0`，三角形缩减量 `>= 8`。
+- 源三角形少于 `64` 个的设备不会获得代理。
+- 仅支持 OBB 和 cylinder 候选；不得使用 convex hull、part segmentation、voxelization 或手动覆盖。
+- 混合顶点颜色规则采用保守策略：仅当每个参与计算的 primitive 都有颜色时，才使用平均顶点颜色；否则使用主导 material。
+- 保持确定性的候选排序、eigenvector 符号、material 选择和输出字节。
+- 严禁将受控客户 asset 或派生文件写入 Git、测试、截图、日志、软件包或文档。
+- 在所有 artifacts 中避免出现竞品名称以及被禁止的通用 3D-library 品牌词。
 
-## Review Focus
+## 审查重点
 
-- Thin, flat, or zero-volume source bounds can make volume and deviation ratios divide by zero; they must produce a deterministic rejection rather than `NaN` or a huge proxy.
-- A mesh can be instanced by multiple nodes; proxy geometry must remain in mesh-local coordinates while world error uses the maximum node scale.
-- A device can contain mixed materials or partially missing vertex colors; the proxy must use the deterministic dominant material rather than inventing blended material semantics.
-- A selected proxy and QEM samples can coexist in one Tile; mesh replacement must take precedence only for its source mesh and must not duplicate remaining primitive geometry.
-- Candidate fitting or proxy GLB reconstruction can fail on degenerate triangles; single-device proxy failures must fall back to QEM unless a selected proxy later becomes invalid during output construction.
+- 细薄、平坦或体积为零的源边界可能导致体积和偏差比率除以零；这类情况必须产生确定性的拒绝结果，不得产生 `NaN` 或超大代理。
+- 一个 mesh 可能被多个 nodes 实例化；代理几何体必须保持 mesh-local 坐标，而 world error 使用最大 node 缩放比例。
+- 一个设备可能包含混合 materials 或部分缺失顶点颜色；代理必须使用确定性的主导 material，不得自行引入混合 material 语义。
+- 选定的代理和 QEM 样本可以在同一个 Tile 中共存；mesh 替换必须仅对其源 mesh 优先，且不得重复保留剩余的 primitive 几何体。
+- 候选拟合或代理 GLB 重建可能因退化三角形而失败；单设备代理失败时必须回退到 QEM，除非选定的代理在后续输出构建期间变为无效。
 
-## File Structure
+## 文件结构
 
-- `packages/toolchain-core/src/lod/semanticProxy/types.ts` owns proxy candidates, fit samples, quality metrics, and rejection reasons.
-- `packages/toolchain-core/src/lod/semanticProxy/collectFitSamples.ts` owns deterministic vertex, centroid, area, and bounds collection.
-- `packages/toolchain-core/src/lod/semanticProxy/fitProxyGeometry.ts` owns principal axes, OBB geometry, and cylinder geometry.
-- `packages/toolchain-core/src/lod/semanticProxy/evaluateProxy.ts` owns surface deviation, volume, and acceptance rules.
-- `packages/toolchain-core/src/lod/semanticProxy/createSemanticProxy.ts` owns material/color selection and workspace storage.
-- `packages/toolchain-core/src/output/buildPreparedGLB.ts` owns source-mesh geometry replacement.
-- `packages/toolchain-core/src/lod/createLodUnitCurve.ts` owns adding an accepted proxy as a curve sample.
-- `packages/toolchain-core/src/partition/partitionAsset.ts` owns candidate caching, adaptive integration, and proxy report stats.
-- `packages/cli/src/commands.ts` owns `--semantic-proxy`.
+- `packages/toolchain-core/src/lod/semanticProxy/types.ts` 负责代理候选、拟合样本、质量指标和拒绝原因。
+- `packages/toolchain-core/src/lod/semanticProxy/collectFitSamples.ts` 负责确定性的顶点、质心、面积和边界收集。
+- `packages/toolchain-core/src/lod/semanticProxy/fitProxyGeometry.ts` 负责主轴、OBB 几何体和 cylinder 几何体。
+- `packages/toolchain-core/src/lod/semanticProxy/evaluateProxy.ts` 负责表面偏差、体积和接受规则。
+- `packages/toolchain-core/src/lod/semanticProxy/createSemanticProxy.ts` 负责 material/颜色选择及 workspace 存储。
+- `packages/toolchain-core/src/output/buildPreparedGLB.ts` 负责源 mesh 几何体替换。
+- `packages/toolchain-core/src/lod/createLodUnitCurve.ts` 负责将已接受的代理添加为 curve 样本。
+- `packages/toolchain-core/src/partition/partitionAsset.ts` 负责候选缓存、adaptive 集成和代理报告统计。
+- `packages/cli/src/commands.ts` 负责 `--semantic-proxy`。
 
 ---
 
-### Task 1: Collect Deterministic Fit Samples
+### 任务 1：收集确定性拟合样本
 
-**Files:**
-- Create: `ice3-toolchain/packages/toolchain-core/src/lod/semanticProxy/types.ts`
-- Create: `ice3-toolchain/packages/toolchain-core/src/lod/semanticProxy/collectFitSamples.ts`
-- Create: `ice3-toolchain/tests/lod/semanticProxy/collectFitSamples.test.ts`
-- Modify: `ice3-toolchain/packages/toolchain-core/src/partition/types.ts`
-- Modify: `ice3-toolchain/packages/toolchain-core/src/index.ts`
+**文件：**
+- 创建：`ice3-toolchain/packages/toolchain-core/src/lod/semanticProxy/types.ts`
+- 创建：`ice3-toolchain/packages/toolchain-core/src/lod/semanticProxy/collectFitSamples.ts`
+- 创建：`ice3-toolchain/tests/lod/semanticProxy/collectFitSamples.test.ts`
+- 修改：`ice3-toolchain/packages/toolchain-core/src/partition/types.ts`
+- 修改：`ice3-toolchain/packages/toolchain-core/src/index.ts`
 
-**Interfaces:**
-- Consumes: `ICEWorkspaceGeometry[]`.
-- Produces:
+**接口：**
+- 消费：`ICEWorkspaceGeometry[]`。
+- 产生：
 
 ```ts
 interface ICESemanticProxyFitSamples {
@@ -85,7 +85,7 @@ function collectFitSamples(
 ): ICESemanticProxyFitSamples;
 ```
 
-- [ ] **Step 1: Write the failing sample test**
+- [ ] **步骤 1：编写失败的样本测试**
 
 ```ts
 import { test } from 'node:test';
@@ -132,9 +132,9 @@ test('deduplicates coincident vertices and centroids deterministically', () => {
 });
 ```
 
-- [ ] **Step 2: Run the test to verify it fails**
+- [ ] **步骤 2：运行测试并验证其失败**
 
-Run:
+运行：
 
 ```bash
 cd ../ice3-toolchain
@@ -143,11 +143,11 @@ nvm use 24
 npm test -- tests/lod/semanticProxy/collectFitSamples.test.ts
 ```
 
-Expected: FAIL because the proxy modules do not exist.
+预期：FAIL，因为代理模块尚不存在。
 
-- [ ] **Step 3: Define proxy sample types**
+- [ ] **步骤 3：定义代理样本类型**
 
-In `semanticProxy/types.ts`, add the fit sample interface and the proxy type from the spec:
+在 `semanticProxy/types.ts` 中，添加规范定义的拟合样本接口和代理类型：
 
 ```ts
 export type ICESemanticProxyKind = 'obb' | 'cylinder';
@@ -173,9 +173,9 @@ export interface ICESemanticProxyFitSamples {
 }
 ```
 
-- [ ] **Step 4: Implement deterministic collection**
+- [ ] **步骤 4：实现确定性收集**
 
-In `collectFitSamples.ts`, process every triangle:
+在 `collectFitSamples.ts` 中，处理每个三角形：
 
 ```ts
 for (let offset = 0; offset < input.indices.length; offset += 3) {
@@ -196,11 +196,11 @@ for (let offset = 0; offset < input.indices.length; offset += 3) {
 }
 ```
 
-Use `Math.round(value * 100_000)` for duplicate keys. Compute bounds from every original vertex before triangle filtering. If no positive-area triangle exists, throw `ICE3_TOOL_PROXY_FIT_INVALID`.
+使用 `Math.round(value * 100_000)` 生成重复项 key。在筛选三角形之前，根据每个原始顶点计算边界。如果不存在正面积三角形，则抛出 `ICE3_TOOL_PROXY_FIT_INVALID`。
 
-- [ ] **Step 5: Export public types**
+- [ ] **步骤 5：导出 public types**
 
-In `packages/toolchain-core/src/index.ts`:
+在 `packages/toolchain-core/src/index.ts` 中：
 
 ```ts
 export {
@@ -213,8 +213,8 @@ export type {
 } from './lod/semanticProxy/types.js';
 ```
 
-In `packages/toolchain-core/src/partition/types.ts`, add `semanticProxy` to
-`ICELodBuildOptions`:
+在 `packages/toolchain-core/src/partition/types.ts` 中，将 `semanticProxy` 添加到
+`ICELodBuildOptions`：
 
 ```ts
 export type ICESemanticProxyMode = 'off' | 'auto';
@@ -225,21 +225,20 @@ export interface ICELodBuildOptions {
 }
 ```
 
-Add `ICESemanticProxyMode` to the partition-type export list in the core
-index.
+将 `ICESemanticProxyMode` 添加到 core index 的 partition-type 导出列表。
 
-- [ ] **Step 6: Run the focused test and typecheck**
+- [ ] **步骤 6：运行聚焦测试和 typecheck**
 
-Run:
+运行：
 
 ```bash
 npm test -- tests/lod/semanticProxy/collectFitSamples.test.ts
 npm run typecheck
 ```
 
-Expected: PASS.
+预期：PASS。
 
-- [ ] **Step 7: Commit**
+- [ ] **步骤 7：提交**
 
 ```bash
 git add packages/toolchain-core/src/lod/semanticProxy/types.ts \
@@ -252,17 +251,17 @@ git commit -m "feat(toolchain): collect semantic proxy samples"
 
 ---
 
-### Task 2: Fit Deterministic OBB and Cylinder Geometry
+### 任务 2：拟合确定性 OBB 和 Cylinder 几何体
 
-**Files:**
-- Create: `ice3-toolchain/packages/toolchain-core/src/lod/semanticProxy/fitProxyGeometry.ts`
-- Create: `ice3-toolchain/tests/lod/semanticProxy/fitProxyGeometry.test.ts`
-- Modify: `ice3-toolchain/packages/toolchain-core/src/lod/semanticProxy/types.ts`
-- Modify: `ice3-toolchain/packages/toolchain-core/src/index.ts`
+**文件：**
+- 创建：`ice3-toolchain/packages/toolchain-core/src/lod/semanticProxy/fitProxyGeometry.ts`
+- 创建：`ice3-toolchain/tests/lod/semanticProxy/fitProxyGeometry.test.ts`
+- 修改：`ice3-toolchain/packages/toolchain-core/src/lod/semanticProxy/types.ts`
+- 修改：`ice3-toolchain/packages/toolchain-core/src/index.ts`
 
-**Interfaces:**
-- Consumes: `ICESemanticProxyFitSamples`.
-- Produces:
+**接口：**
+- 消费：`ICESemanticProxyFitSamples`。
+- 产生：
 
 ```ts
 interface ICESemanticProxyGeometryCandidate {
@@ -285,7 +284,7 @@ function fitProxyGeometry(
 ): ICESemanticProxyFitResult;
 ```
 
-- [ ] **Step 1: Write failing OBB and cylinder tests**
+- [ ] **步骤 1：编写失败的 OBB 和 cylinder 测试**
 
 ```ts
 import { test } from 'node:test';
@@ -356,19 +355,19 @@ test('rejects an isotropic or zero covariance fit', () => {
 });
 ```
 
-- [ ] **Step 2: Run the test to verify it fails**
+- [ ] **步骤 2：运行测试并验证其失败**
 
-Run:
+运行：
 
 ```bash
 npm test -- tests/lod/semanticProxy/fitProxyGeometry.test.ts
 ```
 
-Expected: FAIL because the fitting module does not exist.
+预期：FAIL，因为拟合模块尚不存在。
 
-- [ ] **Step 3: Implement area-weighted covariance and principal axes**
+- [ ] **步骤 3：实现面积加权协方差和主轴**
 
-Use a deterministic Jacobi eigensolver for the symmetric 3x3 matrix:
+对对称 3x3 矩阵使用确定性的 Jacobi eigensolver：
 
 ```ts
 function symmetricEigen(
@@ -394,20 +393,20 @@ function symmetricEigen(
 }
 ```
 
-Normalize every eigenvector. For each vector, make the component with largest absolute value positive; ties use `x`, then `y`, then `z`.
+规范化每个 eigenvector。对于每个 vector，使绝对值最大的分量为正；若存在并列，则依次使用 `x`、`y`、`z`。
 
-Reject covariance when:
+出现以下情况时拒绝该 covariance：
 
 ```ts
 lambda1 <= 1e-12
 || (lambda2 / lambda1 > 0.9 && lambda3 / lambda1 > 0.8)
 ```
 
-- [ ] **Step 4: Generate OBB geometry**
+- [ ] **步骤 4：生成 OBB 几何体**
 
-Project every source vertex and centroid onto the 3 principal axes. Compute min/max per axis and add a safety margin of `max(1e-6, diagonal * 1e-6)`. Emit exactly 8 vertices and 12 triangles.
+将每个源顶点和质心投影到 3 个主轴上。计算每个轴的 min/max，并添加 `max(1e-6, diagonal * 1e-6)` 的安全边距。准确输出 8 个 vertices 和 12 个三角形。
 
-Set:
+设置：
 
 ```ts
 id: 'obb'
@@ -416,9 +415,9 @@ triangleCount: 12
 volume: extentA * extentB * extentC
 ```
 
-- [ ] **Step 5: Generate cylinder geometry**
+- [ ] **步骤 5：生成 Cylinder 几何体**
 
-Use the first principal axis. Project all fit points onto that axis and its orthogonal plane.
+使用第一个主轴。将所有拟合点投影到该轴及其正交平面。
 
 ```ts
 const halfHeight = (maxAlongAxis - minAlongAxis) / 2;
@@ -428,9 +427,9 @@ const radius = Math.max(
 );
 ```
 
-Generate 16 segments with deterministic winding and two cap centers. Emit 64 triangles.
+生成 16 个 segment，使用确定性的 winding 和两个 cap center。输出 64 个三角形。
 
-Reject when:
+出现以下情况时拒绝：
 
 ```ts
 halfHeight <= 0
@@ -438,9 +437,9 @@ halfHeight <= 0
 || (2 * halfHeight) / (2 * radius) < 1.25
 ```
 
-- [ ] **Step 6: Export fitting interfaces**
+- [ ] **步骤 6：导出拟合接口**
 
-In `packages/toolchain-core/src/index.ts`:
+在 `packages/toolchain-core/src/index.ts` 中：
 
 ```ts
 export {
@@ -450,18 +449,18 @@ export {
 } from './lod/semanticProxy/fitProxyGeometry.js';
 ```
 
-- [ ] **Step 7: Run fitting tests and typecheck**
+- [ ] **步骤 7：运行拟合测试和 typecheck**
 
-Run:
+运行：
 
 ```bash
 npm test -- tests/lod/semanticProxy/fitProxyGeometry.test.ts
 npm run typecheck
 ```
 
-Expected: PASS.
+预期：PASS。
 
-- [ ] **Step 8: Commit**
+- [ ] **步骤 8：提交**
 
 ```bash
 git add packages/toolchain-core/src/lod/semanticProxy/types.ts \
@@ -473,17 +472,17 @@ git commit -m "feat(toolchain): fit obb and cylinder proxies"
 
 ---
 
-### Task 3: Evaluate Proxy Quality, Material, and Color
+### 任务 3：评估代理质量、Material 和颜色
 
-**Files:**
-- Create: `ice3-toolchain/packages/toolchain-core/src/lod/semanticProxy/evaluateProxy.ts`
-- Create: `ice3-toolchain/packages/toolchain-core/src/lod/semanticProxy/createSemanticProxy.ts`
-- Create: `ice3-toolchain/tests/lod/semanticProxy/createSemanticProxy.test.ts`
-- Modify: `ice3-toolchain/packages/toolchain-core/src/lod/types.ts`
-- Modify: `ice3-toolchain/packages/toolchain-core/src/index.ts`
+**文件：**
+- 创建：`ice3-toolchain/packages/toolchain-core/src/lod/semanticProxy/evaluateProxy.ts`
+- 创建：`ice3-toolchain/packages/toolchain-core/src/lod/semanticProxy/createSemanticProxy.ts`
+- 创建：`ice3-toolchain/tests/lod/semanticProxy/createSemanticProxy.test.ts`
+- 修改：`ice3-toolchain/packages/toolchain-core/src/lod/types.ts`
+- 修改：`ice3-toolchain/packages/toolchain-core/src/index.ts`
 
-**Interfaces:**
-- Consumes:
+**接口：**
+- 消费：
 
 ```ts
 interface ICESemanticProxyCreateOptions {
@@ -495,7 +494,7 @@ interface ICESemanticProxyCreateOptions {
 }
 ```
 
-- Produces:
+- 产生：
 
 ```ts
 interface ICESemanticProxyCreateResult {
@@ -508,13 +507,13 @@ function createSemanticProxy(
 ): Promise<ICESemanticProxyCreateResult>;
 ```
 
-Extend `ICELodUnitPrimitive`:
+扩展 `ICELodUnitPrimitive`：
 
 ```ts
 readonly materialIndex?: number;
 ```
 
-- [ ] **Step 1: Write failing acceptance and fallback tests**
+- [ ] **步骤 1：编写失败的接受和回退测试**
 
 ```ts
 import { test } from 'node:test';
@@ -735,19 +734,19 @@ test('retains an averaged color when every primitive has vertex colors', async (
 });
 ```
 
-- [ ] **Step 2: Run the tests to verify they fail**
+- [ ] **步骤 2：运行测试并验证其失败**
 
-Run:
+运行：
 
 ```bash
 npm test -- tests/lod/semanticProxy/createSemanticProxy.test.ts
 ```
 
-Expected: FAIL because the proxy evaluation modules do not exist.
+预期：FAIL，因为代理评估模块尚不存在。
 
-- [ ] **Step 3: Implement surface and volume metrics**
+- [ ] **步骤 3：实现表面和体积指标**
 
-In `evaluateProxy.ts`, implement point-to-triangle distance and evaluate each candidate:
+在 `evaluateProxy.ts` 中，实现点到三角形距离并评估每个候选：
 
 ```ts
 const localDiagonal = diagonal(samples.bounds);
@@ -766,7 +765,7 @@ const normalizedMaximumDeviation = maximumDeviation / localDiagonal;
 const volumeInflation = candidate.volume / aabbVolume;
 ```
 
-Accept only when all conditions hold:
+仅当所有条件都满足时才接受：
 
 ```ts
 sourceTriangles >= 64
@@ -775,9 +774,9 @@ sourceTriangles >= 64
 && sourceTriangles / candidate.triangleCount >= 8
 ```
 
-- [ ] **Step 4: Select deterministic material and color**
+- [ ] **步骤 4：选择确定性的 Material 和颜色**
 
-In `createSemanticProxy.ts`:
+在 `createSemanticProxy.ts` 中：
 
 ```ts
 const materialIndex = [...primitives]
@@ -787,7 +786,7 @@ const materialIndex = [...primitives]
   ))[0]!.materialIndex;
 ```
 
-Read every primitive geometry. If any lacks colors, omit proxy colors. Otherwise:
+读取每个 primitive 几何体。如果任一 primitive 缺少颜色，则省略代理颜色。否则：
 
 ```ts
 const averaged = averagePrimitiveColors(primitives, geometries);
@@ -797,34 +796,34 @@ for (let vertex = 0; vertex < colors.length / 3; vertex += 1) {
 }
 ```
 
-Use triangle count as primitive weight.
+使用三角形数量作为 primitive 权重。
 
-- [ ] **Step 5: Select between candidates**
+- [ ] **步骤 5：在候选之间进行选择**
 
-Sort accepted candidates by:
+按以下顺序对已接受的候选排序：
 
 1. `normalizedMaximumDeviation`
 2. `volumeInflation`
 3. `triangleCount`
-4. OBB before cylinder
-5. stable candidate ID
+4. OBB 优先于 cylinder
+5. 稳定的 candidate ID
 
-Store the selected geometry under:
+将选定的几何体存储在：
 
 ```ts
 `proxy:${meshIndex}:${candidate.kind}`
 ```
 
-Set `errorMeters = normalizedMaximumDeviation * localDiagonal * worldScale`.
+设置 `errorMeters = normalizedMaximumDeviation * localDiagonal * worldScale`。
 
-Wrap only sample fitting and quality evaluation in a try/catch for
-`ICE3_TOOL_PROXY_FIT_INVALID`; convert that into
-`{ rejectionReason }`. Workspace read, write, spill, and cleanup failures
-must propagate as build errors.
+仅将样本拟合和质量评估包装在对
+`ICE3_TOOL_PROXY_FIT_INVALID` 的 try/catch 中；将其转换为
+`{ rejectionReason }`。Workspace 的读取、写入、spill 和清理失败
+必须作为构建错误传播。
 
-- [ ] **Step 6: Run focused tests and typecheck**
+- [ ] **步骤 6：运行聚焦测试和 typecheck**
 
-Before running tests, export the public creation interfaces:
+运行测试之前，导出 public creation 接口：
 
 ```ts
 export {
@@ -834,9 +833,9 @@ export {
 } from './lod/semanticProxy/createSemanticProxy.js';
 ```
 
-Also export the quality result type from `evaluateProxy.ts`.
+还要从 `evaluateProxy.ts` 导出 quality result 类型。
 
-Run:
+运行：
 
 ```bash
 npm test -- tests/lod/semanticProxy/createSemanticProxy.test.ts \
@@ -844,9 +843,9 @@ npm test -- tests/lod/semanticProxy/createSemanticProxy.test.ts \
 npm run typecheck
 ```
 
-Expected: PASS.
+预期：PASS。
 
-- [ ] **Step 7: Commit**
+- [ ] **步骤 7：提交**
 
 ```bash
 git add packages/toolchain-core/src/lod/semanticProxy/evaluateProxy.ts \
@@ -859,15 +858,15 @@ git commit -m "feat(toolchain): qualify semantic proxies"
 
 ---
 
-### Task 4: Replace Source Mesh Geometry in Prepared GLB
+### 任务 4：在 Prepared GLB 中替换源 Mesh 几何体
 
-**Files:**
-- Modify: `ice3-toolchain/packages/toolchain-core/src/output/buildPreparedGLB.ts`
-- Modify: `ice3-toolchain/packages/toolchain-core/src/index.ts`
-- Modify: `ice3-toolchain/tests/output/buildPreparedGLB.test.ts`
+**文件：**
+- 修改：`ice3-toolchain/packages/toolchain-core/src/output/buildPreparedGLB.ts`
+- 修改：`ice3-toolchain/packages/toolchain-core/src/index.ts`
+- 修改：`ice3-toolchain/tests/output/buildPreparedGLB.test.ts`
 
-**Interfaces:**
-- Consumes:
+**接口：**
+- 消费：
 
 ```ts
 interface ICEPreparedMeshOverride {
@@ -878,7 +877,7 @@ interface ICEPreparedMeshOverride {
 }
 ```
 
-- Extends:
+- 扩展：
 
 ```ts
 interface ICEBuildOptions {
@@ -886,9 +885,9 @@ interface ICEBuildOptions {
 }
 ```
 
-- [ ] **Step 1: Write the failing mesh replacement test**
+- [ ] **步骤 1：编写失败的 Mesh 替换测试**
 
-Build the existing prepared-cube fixture with:
+使用以下内容构建现有的 prepared-cube fixture：
 
 ```ts
 const triangle = {
@@ -906,27 +905,27 @@ const built = buildPreparedGLB(source, {
 });
 ```
 
-Assert:
+断言：
 
-- The output mesh has one triangle and no original cube triangles.
-- The output node still has its original `selectionId`.
-- The material is the chosen source material.
-- Edges match the replacement geometry.
-- Output JSON still has one mesh and no new extension.
+- 输出 mesh 有一个三角形，且不包含原 cube 的三角形。
+- 输出 node 仍具有其原始 `selectionId`。
+- Material 是选定的源 material。
+- Edges 与替换几何体匹配。
+- 输出 JSON 仍只有一个 mesh，且没有新增 extension。
 
-- [ ] **Step 2: Run the test to verify it fails**
+- [ ] **步骤 2：运行测试并验证其失败**
 
-Run:
+运行：
 
 ```bash
 npm test -- tests/output/buildPreparedGLB.test.ts -t "mesh override"
 ```
 
-Expected: FAIL because the option is unknown.
+预期：FAIL，因为该选项未知。
 
-- [ ] **Step 3: Apply mesh overrides before source primitives**
+- [ ] **步骤 3：在源 Primitives 之前应用 Mesh 覆盖**
 
-Inside the source-mesh loop:
+在 source-mesh 循环内部：
 
 ```ts
 const meshOverride = options.meshOverrides?.get(meshIndex);
@@ -942,35 +941,34 @@ if (meshOverride) {
 }
 ```
 
-Extract the existing prepare/append block into `appendPreparedPrimitive` so QEM overrides and mesh replacements share the same GLB encoding path.
+将现有的 prepare/append 代码块提取到 `appendPreparedPrimitive` 中，使 QEM 覆盖和 mesh 替换共用同一条 GLB 编码路径。
 
-- [ ] **Step 4: Preserve node and selection identity**
+- [ ] **步骤 4：保持 Node 和选择标识**
 
-Do not change the node construction, `worldMatrices`, `sourceMeshToOutputMesh`, or `selectionId` path. Mesh replacement only changes the output mesh linked from those nodes.
+不得更改 node 构建、`worldMatrices`、`sourceMeshToOutputMesh` 或 `selectionId` 路径。Mesh 替换仅更改这些 nodes 所链接的输出 mesh。
 
-- [ ] **Step 5: Validate mixed Tile behavior**
+- [ ] **步骤 5：验证混合 Tile 行为**
 
-Add an integration-level assertion in `tests/output/buildPreparedGLB.test.ts` with two source meshes:
+在 `tests/output/buildPreparedGLB.test.ts` 中添加一个包含两个源 meshes 的集成级断言：
 
-- Mesh `0` uses `meshOverrides`.
-- Mesh `1` uses the normal primitive path.
-- Both output nodes keep source IDs.
+- Mesh `0` 使用 `meshOverrides`。
+- Mesh `1` 使用正常的 primitive 路径。
+- 两个输出 nodes 都保留源 IDs。
 
-- [ ] **Step 6: Export the mesh override type**
+- [ ] **步骤 6：导出 Mesh 覆盖类型**
 
-In `packages/toolchain-core/src/index.ts`, add `ICEPreparedMeshOverride`
-to the existing `buildPreparedGLB` export list.
+在 `packages/toolchain-core/src/index.ts` 中，将 `ICEPreparedMeshOverride`
+添加到现有的 `buildPreparedGLB` 导出列表。
 
-- [ ] **Step 7: Reject invalid selected mesh geometry**
+- [ ] **步骤 7：拒绝无效的选定 Mesh 几何体**
 
-Add a test where `meshOverrides` refers to vertex index `9` in a proxy
-with 3 vertices. Assert `buildPreparedGLB` throws
-`ICE3_TOOL_INVALID_GEOMETRY` so an invalid selected proxy fails the build
-instead of publishing a partial GLB.
+添加一个测试，其中 `meshOverrides` 引用具有 3 个 vertices 的代理中的 vertex index `9`。断言 `buildPreparedGLB` 抛出
+`ICE3_TOOL_INVALID_GEOMETRY`，从而使无效的选定代理导致构建失败，
+而不是发布不完整的 GLB。
 
-- [ ] **Step 8: Run focused tests and typecheck**
+- [ ] **步骤 8：运行聚焦测试和 typecheck**
 
-Run:
+运行：
 
 ```bash
 npm test -- tests/output/buildPreparedGLB.test.ts \
@@ -978,9 +976,9 @@ npm test -- tests/output/buildPreparedGLB.test.ts \
 npm run typecheck
 ```
 
-Expected: PASS.
+预期：PASS。
 
-- [ ] **Step 9: Commit**
+- [ ] **步骤 9：提交**
 
 ```bash
 git add packages/toolchain-core/src/output/buildPreparedGLB.ts \
@@ -991,19 +989,19 @@ git commit -m "feat(toolchain): replace prepared mesh geometry"
 
 ---
 
-### Task 5: Add Proxy Samples to Adaptive LOD
+### 任务 5：将代理样本添加到 Adaptive LOD
 
-**Files:**
-- Modify: `ice3-toolchain/packages/toolchain-core/src/lod/types.ts`
-- Modify: `ice3-toolchain/packages/toolchain-core/src/lod/allocateAdaptiveLod.ts`
-- Modify: `ice3-toolchain/packages/toolchain-core/src/lod/createLodUnitCurve.ts`
-- Modify: `ice3-toolchain/packages/toolchain-core/src/partition/partitionAsset.ts`
-- Modify: `ice3-toolchain/tests/lod/allocateAdaptiveLod.test.ts`
-- Modify: `ice3-toolchain/tests/partition/lodGeneration.test.ts`
+**文件：**
+- 修改：`ice3-toolchain/packages/toolchain-core/src/lod/types.ts`
+- 修改：`ice3-toolchain/packages/toolchain-core/src/lod/allocateAdaptiveLod.ts`
+- 修改：`ice3-toolchain/packages/toolchain-core/src/lod/createLodUnitCurve.ts`
+- 修改：`ice3-toolchain/packages/toolchain-core/src/partition/partitionAsset.ts`
+- 修改：`ice3-toolchain/tests/lod/allocateAdaptiveLod.test.ts`
+- 修改：`ice3-toolchain/tests/partition/lodGeneration.test.ts`
 
-**Interfaces:**
-- Consumes: `createSemanticProxy`, mesh overrides, and existing adaptive allocator.
-- Produces sample replacement union:
+**接口：**
+- 消费：`createSemanticProxy`、mesh overrides 和现有的 adaptive allocator。
+- 产生样本替换 union：
 
 ```ts
 interface ICELodPrimitiveReplacement {
@@ -1021,10 +1019,10 @@ type ICELodSampleReplacement =
   | ICELodMeshReplacement;
 ```
 
-- [ ] **Step 1: Write the failing proxy-selection test**
+- [ ] **步骤 1：编写失败的代理选择测试**
 
-Use the existing synthetic adaptive source and replace its simple flat mesh
-with a closed box; the second wavy grid remains the QEM device:
+使用现有的 synthetic adaptive source，并将其简单的 flat mesh 替换为
+封闭 box；第二个 wavy grid 仍作为 QEM 设备：
 
 ```ts
 const source = createAdaptiveLodPartitionSource();
@@ -1097,31 +1095,31 @@ expect(nodes.every((node) => (
 ))).toBe(true);
 ```
 
-- [ ] **Step 2: Run the test to verify it fails**
+- [ ] **步骤 2：运行测试并验证其失败**
 
-Run:
+运行：
 
 ```bash
 npm test -- tests/partition/lodGeneration.test.ts -t "semantic proxy"
 ```
 
-Expected: FAIL because proxy integration is absent.
+预期：FAIL，因为尚未集成代理。
 
-- [ ] **Step 3: Replace primitive-only sample payload**
+- [ ] **步骤 3：替换仅含 Primitive 的样本载荷**
 
-Change `ICELodCurveSample` and allocation selections from:
+将 `ICELodCurveSample` 和 allocation selections 从：
 
 ```ts
 readonly primitives: readonly ICELodCurvePrimitive[];
 ```
 
-to:
+改为：
 
 ```ts
 readonly replacement: ICELodSampleReplacement;
 ```
 
-Update existing QEM samples to:
+将现有 QEM 样本更新为：
 
 ```ts
 replacement: {
@@ -1130,11 +1128,11 @@ replacement: {
 }
 ```
 
-Update all tests and allocator references by name.
+按名称更新所有测试和 allocator 引用。
 
-- [ ] **Step 4: Insert the accepted proxy into the curve**
+- [ ] **步骤 4：将已接受的代理插入 Curve**
 
-Before QEM samples, create:
+在 QEM 样本之前，创建：
 
 ```ts
 if (options.proxy) {
@@ -1151,11 +1149,11 @@ if (options.proxy) {
 }
 ```
 
-Add optional `proxy` to `ICELodUnitCurveOptions`.
+将可选的 `proxy` 添加到 `ICELodUnitCurveOptions`。
 
-- [ ] **Step 5: Add proxy cache and stats**
+- [ ] **步骤 5：添加代理缓存和统计**
 
-Extend `ICBuildState`:
+扩展 `ICBuildState`：
 
 ```ts
 readonly semanticProxyCache: Map<string, Promise<ICESemanticProxyCreateResult>>;
@@ -1168,18 +1166,18 @@ semanticProxySavedTriangles: number;
 semanticProxyMaximumErrorMeters: number;
 ```
 
-`loadUnitCurve` resolves the proxy once via `createSemanticProxy` and passes it into `createLodUnitCurve`.
+`loadUnitCurve` 通过 `createSemanticProxy` 解析一次代理，并将其传入 `createLodUnitCurve`。
 
-- [ ] **Step 6: Build mixed mesh and primitive overrides**
+- [ ] **步骤 6：构建混合 Mesh 和 Primitive 覆盖**
 
-In `selectAdaptiveCoarseGeometry`, split selections:
+在 `selectAdaptiveCoarseGeometry` 中，拆分 selections：
 
 ```ts
 const meshOverrides = new Map<number, ICEPreparedMeshOverride>();
 const geometryOverrides = new Map<string, ICEGeometryOverride>();
 ```
 
-For `replacement.kind === 'mesh'`:
+对于 `replacement.kind === 'mesh'`：
 
 ```ts
 const geometry = await workspace.read(replacement.proxy.geometryKey);
@@ -1195,17 +1193,17 @@ meshOverrides.set(unit.meshIndices[0]!, {
 });
 ```
 
-For primitive replacements, populate `geometryOverrides` as today.
+对于 primitive replacements，像现在一样填充 `geometryOverrides`。
 
-Pass both sets to `buildPreparedGLB`.
+将两组参数都传给 `buildPreparedGLB`。
 
-- [ ] **Step 7: Record only final proxy placements**
+- [ ] **步骤 7：仅记录最终代理放置**
 
-Include proxy placements in `adaptiveMetrics` and apply proxy statistics only when the coarse node is final, not when an oversized parent candidate is discarded.
+将代理放置信息包含在 `adaptiveMetrics` 中，并且仅在 coarse node 为最终结果时应用代理统计；当超大的父级候选被丢弃时不得应用。
 
-- [ ] **Step 8: Run LOD tests and typecheck**
+- [ ] **步骤 8：运行 LOD 测试和 typecheck**
 
-Run:
+运行：
 
 ```bash
 npm test -- tests/lod/allocateAdaptiveLod.test.ts \
@@ -1214,9 +1212,9 @@ npm test -- tests/lod/allocateAdaptiveLod.test.ts \
 npm run typecheck
 ```
 
-Expected: PASS.
+预期：PASS。
 
-- [ ] **Step 9: Commit**
+- [ ] **步骤 9：提交**
 
 ```bash
 git add packages/toolchain-core/src/lod/types.ts \
@@ -1230,27 +1228,27 @@ git commit -m "feat(toolchain): allocate semantic proxies in lod"
 
 ---
 
-### Task 6: Add CLI Controls and Proxy Reporting
+### 任务 6：添加 CLI 控制和代理报告
 
-**Files:**
-- Modify: `ice3-toolchain/packages/toolchain-core/src/partition/partitionAsset.ts`
-- Modify: `ice3-toolchain/packages/cli/src/commands.ts`
-- Modify: `ice3-toolchain/tests/cli/commands.test.ts`
-- Modify: `ice3-toolchain/README.md`
+**文件：**
+- 修改：`ice3-toolchain/packages/toolchain-core/src/partition/partitionAsset.ts`
+- 修改：`ice3-toolchain/packages/cli/src/commands.ts`
+- 修改：`ice3-toolchain/tests/cli/commands.test.ts`
+- 修改：`ice3-toolchain/README.md`
 
-**Interfaces:**
-- Consumes `ICESemanticProxyMode` and proxy statistics produced by Task 5.
+**接口：**
+- 消费任务 5 产生的 `ICESemanticProxyMode` 和代理统计。
 
-- [ ] **Step 1: Write failing CLI tests**
+- [ ] **步骤 1：编写失败的 CLI 测试**
 
-Accept:
+接受：
 
 ```ts
 ['--lod', '--lod-allocation', 'adaptive', '--semantic-proxy', 'auto']
 ['--lod', '--lod-allocation', 'adaptive', '--semantic-proxy', 'off']
 ```
 
-Reject before output creation:
+在创建输出之前拒绝：
 
 ```ts
 ['--semantic-proxy', 'auto'] // without --lod
@@ -1258,21 +1256,21 @@ Reject before output creation:
 ['--lod', '--lod-allocation', 'adaptive', '--semantic-proxy', 'unknown']
 ```
 
-Invalid combinations must exit `1`, print the relevant option name, and leave no output directory.
+无效组合必须退出 `1`，打印相关选项名称，并且不留下输出目录。
 
-- [ ] **Step 2: Run tests to verify failure**
+- [ ] **步骤 2：运行测试并验证失败**
 
-Run:
+运行：
 
 ```bash
 npm test -- tests/cli/commands.test.ts -t "semantic-proxy"
 ```
 
-Expected: FAIL because the option is unknown.
+预期：FAIL，因为该选项未知。
 
-- [ ] **Step 3: Parse and validate the mode**
+- [ ] **步骤 3：解析并验证模式**
 
-In `partitionCommand`:
+在 `partitionCommand` 中：
 
 ```ts
 const semanticProxy = args.values.get('--semantic-proxy') ?? 'off';
@@ -1288,17 +1286,17 @@ if (semanticProxy === 'auto' && allocation !== 'adaptive') {
 }
 ```
 
-For `--semantic-proxy` with no `--lod`, reject with:
+对于 `--semantic-proxy` 且没有 `--lod` 的情况，按以下方式拒绝：
 
 ```text
 ICE3_TOOL_PARTITION_OPTIONS_INVALID: --semantic-proxy requires --lod
 ```
 
-Add the option to the valued-option set and include it in the LOD object.
+将该选项添加到 valued-option 集合，并将其包含在 LOD object 中。
 
-- [ ] **Step 4: Expose proxy stats**
+- [ ] **步骤 4：公开代理统计**
 
-Add all `ICESemanticProxyStats` fields to `ICEPartitionResult['stats']`.
+将所有 `ICESemanticProxyStats` 字段添加到 `ICEPartitionResult['stats']`。
 
 ```ts
 interface ICESemanticProxyStats {
@@ -1313,7 +1311,7 @@ interface ICESemanticProxyStats {
 }
 ```
 
-For `off`:
+对于 `off`：
 
 ```ts
 semanticProxyAcceptedUnits: 0
@@ -1326,9 +1324,9 @@ semanticProxySavedTriangles: 0
 semanticProxyMaximumErrorMeters: 0
 ```
 
-- [ ] **Step 5: Document usage**
+- [ ] **步骤 5：记录用法**
 
-In `README.md`:
+在 `README.md` 中：
 
 ```text
 --semantic-proxy off|auto
@@ -1336,20 +1334,20 @@ In `README.md`:
   Default: off. auto requires adaptive allocation.
 ```
 
-Describe the fixed quality thresholds and QEM fallback.
+说明固定质量阈值和 QEM 回退机制。
 
-- [ ] **Step 6: Run CLI and typecheck**
+- [ ] **步骤 6：运行 CLI 和 typecheck**
 
-Run:
+运行：
 
 ```bash
 npm test -- tests/cli/commands.test.ts
 npm run typecheck
 ```
 
-Expected: PASS.
+预期：PASS。
 
-- [ ] **Step 7: Commit**
+- [ ] **步骤 7：提交**
 
 ```bash
 git add packages/toolchain-core/src/partition/partitionAsset.ts \
@@ -1361,14 +1359,14 @@ git commit -m "feat(cli): expose semantic proxy generation"
 
 ---
 
-### Task 7: Real-Asset Validation and Final Integration
+### 任务 7：真实 Asset 验证和最终集成
 
-**Files:**
-- Modify: `ice3-doc/docs/contracts/asset-preparation-contract-v1.md`
-- Modify: `ice3-doc/docs/specs/2026-10-27-semantic-industrial-proxy-design.md`
-- Modify: `ice3-toolchain/README.md`
+**文件：**
+- 修改：`ice3-doc/docs/contracts/asset-preparation-contract-v1.md`
+- 修改：`ice3-doc/docs/specs/2026-10-27-semantic-industrial-proxy-design.md`
+- 修改：`ice3-toolchain/README.md`
 
-- [ ] **Step 1: Run both full suites before the controlled comparison**
+- [ ] **步骤 1：在受控比较之前运行两个完整测试套件**
 
 ```bash
 cd ../ice3-toolchain
@@ -1380,18 +1378,18 @@ cd ../ice3-engine
 npm run verify
 ```
 
-Expected: zero failures.
+预期：零失败。
 
-- [ ] **Step 2: Generate off and auto outputs outside Git**
+- [ ] **步骤 2：在 Git 之外生成 off 和 auto 输出**
 
-Use:
+使用：
 
 ```bash
 test -n "$ICE3_CONTROLLED_GLB"
 output_root=$(mktemp -d /tmp/ice3-semantic-proxy.XXXXXX)
 ```
 
-Use identical parameters for both:
+两者使用相同的参数：
 
 ```text
 --max-triangles 500000
@@ -1406,11 +1404,11 @@ Use identical parameters for both:
 --skip-edges
 ```
 
-First run uses `--semantic-proxy off`, second uses `--semantic-proxy auto`.
+第一次运行使用 `--semantic-proxy off`，第二次使用 `--semantic-proxy auto`。
 
-- [ ] **Step 3: Evaluate the acceptance gate**
+- [ ] **步骤 3：评估接受门禁**
 
-Record aggregate values:
+记录聚合值：
 
 ```text
 acceptedUnits
@@ -1424,37 +1422,37 @@ overBudgetNodes
 buildWallClockMs
 ```
 
-Require:
+要求：
 
-- Every accepted proxy passed the fixed quality thresholds.
-- Coarse triangle and byte budgets do not exceed configured limits beyond existing soft rules.
-- `overBudgetCoarseNodes` does not increase with proxies.
-- If accepted units are zero, document that the asset has no conservative proxy candidates and keep default `off`.
-- Any selected proxy preserves semantic IDs.
+- 每个已接受的代理都通过了固定质量阈值。
+- Coarse 三角形和字节预算不超过配置限制及现有软规则允许的范围。
+- `overBudgetCoarseNodes` 不会因代理而增加。
+- 如果已接受单元为零，则记录该 asset 没有保守代理候选，并保留默认值 `off`。
+- 任何选定的代理都保持语义 IDs。
 
-- [ ] **Step 4: Validate generated content**
+- [ ] **步骤 4：验证生成的内容**
 
-- Run Prepared GLB validation over every generated GLB.
-- Load both outputs in Chromium and WebKit through the existing example harness.
-- Record resident nodes/bytes and page failures.
-- Require no page errors and no failed requests.
+- 对每个生成的 GLB 运行 Prepared GLB validation。
+- 通过现有 example harness 在 Chromium 和 WebKit 中加载两个输出。
+- 记录 resident nodes/bytes 和页面失败。
+- 要求没有页面错误和失败请求。
 
-- [ ] **Step 5: Update shared contracts**
+- [ ] **步骤 5：更新共享 Contract**
 
-Add to `asset-preparation-contract-v1.md`:
+向 `asset-preparation-contract-v1.md` 添加：
 
-- `semanticProxy` CLI mode.
-- Fixed proxy thresholds.
-- Proxy/QEM competition.
-- Mesh replacement identity guarantees.
-- Proxy report fields.
-- Default-off compatibility guarantee.
+- `semanticProxy` CLI 模式。
+- 固定代理阈值。
+- 代理/QEM 竞争。
+- Mesh 替换的标识保证。
+- 代理报告字段。
+- 默认关闭的兼容性保证。
 
-Add the measured aggregate results to the proxy spec. Do not include asset names or paths.
+将测得的总计结果添加到代理规范。不得包含 asset 名称或路径。
 
-- [ ] **Step 6: Audit and clean**
+- [ ] **步骤 6：审计并清理**
 
-Run:
+运行：
 
 ```bash
 git status --porcelain=v1
@@ -1462,9 +1460,9 @@ git grep -I -n 'CONTROLLED_ASSET_NAME' -- . ':!package-lock.json' || true
 git ls-files '*.glb' '*.gltf' '*.bin' | wc -l
 ```
 
-Delete the exact temporary output directory after recording results.
+记录结果后删除确切的临时输出目录。
 
-- [ ] **Step 7: Final verification**
+- [ ] **步骤 7：最终验证**
 
 ```bash
 cd ../ice3-toolchain
@@ -1478,9 +1476,9 @@ npm run verify
 npm pack --workspaces --dry-run --json
 ```
 
-Expected: all green, zero model-like files in packages.
+预期：全部通过，packages 中没有类似模型的文件。
 
-- [ ] **Step 8: Commit final documentation**
+- [ ] **步骤 8：提交最终文档**
 
 ```bash
 cd ../ice3-doc
@@ -1493,7 +1491,7 @@ git add README.md
 git commit -m "docs: finalize semantic proxy guidance"
 ```
 
-## Related Documents
+## 相关文档
 
-- `ICE3-DOC-IDX-001` — [Documentation index](../README.md)
-- `ICE3-DOC-SPEC-006` — [Semantic industrial proxy specification](../specs/2026-10-27-semantic-industrial-proxy-design.md)
+- `ICE3-DOC-IDX-001` — [文档索引](../README.md)
+- `ICE3-DOC-SPEC-006` — [语义工业代理规范](../specs/2026-10-27-semantic-industrial-proxy-design.md)

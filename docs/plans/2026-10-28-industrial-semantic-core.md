@@ -1,65 +1,65 @@
-# Industrial Semantic Core Implementation Plan
+# 工业语义核心实施计划
 
 > Document ID: ICE3-DOC-PLAN-013
 >
 > Status: Implemented
 >
-> Owner: ICE3 architecture maintainers
+> Owner: ICE3 架构维护者
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **供智能代理工作者使用：** 需要使用子技能：`superpowers:subagent-driven-development`（推荐）或逐项执行本计划的 `superpowers:executing-plans`。步骤使用复选框（`- [ ]`）跟踪。
 
-**Goal:** Build the browser-independent `@ice3/industrial-core` package with a validated industrial manifest, entity/type registries, relation graph, query engine, batched state updates, events, operations, workspace context, serialization, and native ICE JSON adapters.
+**目标：** 构建不依赖浏览器的 `@ice3/industrial-core` 包，包含经过验证的工业清单、实体/类型注册表、关系图、查询引擎、批量状态更新、事件、操作、工作区上下文、序列化以及原生 ICE JSON 适配器。
 
-**Architecture:** A pure TypeScript workspace core owns immutable domain models and mutable runtime stores. Registries provide indexed lookup, a relation graph handles typed edges, and `ICEIndustrialWorkspace` coordinates context changes, batched state notifications, events, operations, and manifest serialization without DOM, WebGL, HTTP, or AI-specific concepts.
+**架构：** 纯 TypeScript 工作区核心负责不可变领域模型和可变运行时存储。注册表提供索引查询，关系图处理类型化边，`ICEIndustrialWorkspace` 协调上下文变更、批量状态通知、事件、操作和清单序列化，且不引入 DOM、WebGL、HTTP 或 AI 专用概念。
 
-**Tech Stack:** Node.js 24.22.1 LTS, TypeScript 7, ESM, npm workspaces, Node.js built-in test runner, `expect`, `tsx`, JSON Schema-compatible TypeScript validation
+**技术栈：** Node.js 24.22.1 LTS、TypeScript 7、ESM、npm workspaces、Node.js 内置测试运行器、`expect`、`tsx`、兼容 JSON Schema 的 TypeScript 验证
 
-**Spec:** `../specs/2026-10-28-industrial-semantic-layer-design.md`
+**规格：** `../specs/2026-10-28-industrial-semantic-layer-design.md`
 
-## Global Constraints
+## 全局约束
 
-- Use Node.js 24.22.1 LTS from `.nvmrc`; run verification with the same version.
-- Use TypeScript strict mode and ESM.
-- `@ice3/industrial-core` has zero runtime dependencies.
-- No DOM, browser, WebGL, engine, protocol, file-system, network, or AI dependencies in the core package.
-- No customer assets, derived assets, screenshots, logs, full business data, or customer paths in the repository.
-- No competitor, vendor, or prohibited third-party product names in code, docs, comments, examples, or commit messages.
-- Preserve public ICE-style explicit factories/constructors, immutable snapshots, stable IDs, events, and deterministic behavior.
-- Standard mappings remain outside this plan; this plan delivers only the canonical core and native ICE JSON.
-- Browser integration, 2D/3D adapters, Studio, protocol connectors, and Agent tooling are separate follow-on plans.
-- All behavioral changes follow RED-GREEN-REFACTOR.
+- 使用 `.nvmrc` 指定的 Node.js 24.22.1 LTS；并使用同一版本运行验证。
+- 使用 TypeScript 严格模式和 ESM。
+- `@ice3/industrial-core` 的运行时依赖数为零。
+- 核心包不得依赖 DOM、浏览器、WebGL、引擎、协议、文件系统、网络或 AI。
+- 仓库中不得包含客户资产、派生资产、截图、日志、完整业务数据或客户路径。
+- 代码、文档、注释、示例或提交消息中不得出现竞品、厂商或禁止的第三方产品名称。
+- 保留公开的 ICE 风格显式工厂/构造函数、不可变快照、稳定 ID、事件和确定性行为。
+- 标准映射不属于本计划；本计划只交付规范核心和原生 ICE JSON。
+- 浏览器集成、2D/3D 适配器、Studio、协议连接器和 Agent 工具属于独立的后续计划。
+- 所有行为变更均遵循 RED-GREEN-REFACTOR。
 
-## Review Focus
+## 审查重点
 
-- A manifest with a dangling parent or relation endpoint must fail before any registry becomes usable.
-- Duplicate external identities across different entities must be rejected even when their display names differ.
-- Relation traversal with cycles must terminate deterministically at the configured depth and direction.
-- State patches with equal or older source timestamps must not overwrite a newer valid value.
-- High-frequency state writes must coalesce notifications without losing the latest value or event ordering.
+- 当清单中存在悬空父级或关系端点时，必须在任何注册表可用之前失败。
+- 即使不同实体的显示名称不同，只要外部身份重复，也必须拒绝。
+- 存在循环的关系遍历必须在配置的深度和方向上确定性地终止。
+- 源时间戳相同或更早的状态补丁不得覆盖更新的有效值。
+- 高频状态写入必须合并通知，同时不得丢失最新值或事件顺序。
 
 ---
 
-### Task 1: Scaffold the Industrial Core and Validate Manifests
+### 任务 1：搭建工业核心脚手架并验证清单
 
-**Files:**
-- Create: `ice3-industrial/.gitignore`
-- Create: `ice3-industrial/.nvmrc`
-- Create: `ice3-industrial/package.json`
-- Create: `ice3-industrial/package-lock.json`
-- Create: `ice3-industrial/tsconfig.base.json`
-- Create: `ice3-industrial/tsconfig.json`
-- Create: `ice3-industrial/scripts/run-tests.mjs`
-- Create: `ice3-industrial/scripts/clean.mjs`
-- Create: `ice3-industrial/tests/architecture/package-boundaries.test.mjs`
-- Create: `ice3-industrial/packages/industrial-core/package.json`
-- Create: `ice3-industrial/packages/industrial-core/tsconfig.json`
-- Create: `ice3-industrial/packages/industrial-core/src/index.ts`
-- Create: `ice3-industrial/packages/industrial-core/src/manifest/ICEIndustrialManifest.ts`
-- Create: `ice3-industrial/packages/industrial-core/src/manifest/parseIndustrialManifest.ts`
-- Test: `ice3-industrial/tests/core/Manifest.test.ts`
-- Create: `ice3-industrial/tests/core/manifestFixture.ts`
+**文件：**
+- 创建：`ice3-industrial/.gitignore`
+- 创建：`ice3-industrial/.nvmrc`
+- 创建：`ice3-industrial/package.json`
+- 创建：`ice3-industrial/package-lock.json`
+- 创建：`ice3-industrial/tsconfig.base.json`
+- 创建：`ice3-industrial/tsconfig.json`
+- 创建：`ice3-industrial/scripts/run-tests.mjs`
+- 创建：`ice3-industrial/scripts/clean.mjs`
+- 创建：`ice3-industrial/tests/architecture/package-boundaries.test.mjs`
+- 创建：`ice3-industrial/packages/industrial-core/package.json`
+- 创建：`ice3-industrial/packages/industrial-core/tsconfig.json`
+- 创建：`ice3-industrial/packages/industrial-core/src/index.ts`
+- 创建：`ice3-industrial/packages/industrial-core/src/manifest/ICEIndustrialManifest.ts`
+- 创建：`ice3-industrial/packages/industrial-core/src/manifest/parseIndustrialManifest.ts`
+- 测试：`ice3-industrial/tests/core/Manifest.test.ts`
+- 创建：`ice3-industrial/tests/core/manifestFixture.ts`
 
-**Interfaces:**
+**接口：**
 
 ```ts
 type ICEIndustrialValue =
@@ -148,10 +148,10 @@ function parseIndustrialManifest(
 ): Readonly<ICEIndustrialWorkspaceManifest>;
 ```
 
-- Consumes: an unknown decoded JSON value.
-- Produces: a deeply immutable validated manifest or `ICE3_INDUSTRIAL_MANIFEST_INVALID`.
+- 消费：未知的已解码 JSON 值。
+- 产出：经过验证的深度不可变清单，或 `ICE3_INDUSTRIAL_MANIFEST_INVALID`。
 
-- [ ] **Step 1: Write the failing valid-manifest test**
+- [ ] **步骤 1：编写失败的合法清单测试**
 
 ```ts
 import { test } from 'node:test';
@@ -173,11 +173,11 @@ test('parses and freezes a valid workspace manifest', () => {
 });
 ```
 
-Create `manifestFixture.ts` with one `pump` type, `pump-01`, `valve-01`, and one `ice:connectedTo` relation.
+创建 `manifestFixture.ts`，其中包含一个 `pump` 类型、`pump-01`、`valve-01`，以及一个 `ice:connectedTo` 关系。
 
-- [ ] **Step 2: Run test and verify RED**
+- [ ] **步骤 2：运行测试并验证 RED**
 
-Run:
+运行：
 
 ```bash
 cd ../ice3-industrial
@@ -185,11 +185,11 @@ source ~/.nvm/nvm.sh && nvm use 24
 npm test -- tests/core/Manifest.test.ts
 ```
 
-Expected: FAIL because the workspace/package does not exist.
+预期：FAIL，因为工作区/包不存在。
 
-- [ ] **Step 3: Scaffold the workspace**
+- [ ] **步骤 3：搭建工作区**
 
-Create the root workspace and core package using the shared scripts:
+使用共享脚本创建根工作区和核心包：
 
 ```json
 {
@@ -204,7 +204,7 @@ Create the root workspace and core package using the shared scripts:
 }
 ```
 
-Root dev dependencies:
+根开发依赖：
 
 ```json
 {
@@ -216,10 +216,9 @@ Root dev dependencies:
 }
 ```
 
-Run `npm install` once after creating the package manifests and commit the
-generated `package-lock.json`.
+创建包清单后运行一次 `npm install`，并提交生成的 `package-lock.json`。
 
-`industrial-core` package:
+`industrial-core` 包：
 
 ```json
 {
@@ -239,36 +238,35 @@ generated `package-lock.json`.
 }
 ```
 
-Use the established strict compiler flags with `lib: ["ES2024"]`; do not include DOM.
+使用既有的严格编译器选项，并设置 `lib: ["ES2024"]`；不得包含 DOM。
 
-The architecture test reads both package manifests and asserts that
-`@ice3/industrial-core` has no dependencies.
+架构测试会读取两个包清单，并断言 `@ice3/industrial-core` 没有依赖。
 
-- [ ] **Step 4: Implement strict manifest parsing**
+- [ ] **步骤 4：实现严格的清单解析**
 
-Reject:
+拒绝：
 
-- Unsupported or missing `version`.
-- Empty workspace/type/entity/relation/property/operation IDs.
-- Duplicate entity, type, relation, property-in-type, or operation-in-type IDs.
-- Missing entity type.
-- Missing entity parent.
-- Missing relation endpoint.
-- Same external ID (`scheme + scope + value`) on two entities.
-- Non-serializable values, `NaN`, and infinities.
-- Invalid bounds, anchors, units, enum definitions, and schema records.
+- 不支持或缺失的 `version`。
+- 空的工作区/类型/实体/关系/属性/操作 ID。
+- 重复的实体、类型、关系、类型内属性或类型内操作 ID。
+- 缺失的实体类型。
+- 缺失的实体父级。
+- 缺失的关系端点。
+- 两个实体具有相同的外部 ID（`scheme + scope + value`）。
+- 不可序列化的值、`NaN` 和无穷大。
+- 无效的边界、锚点、单位、枚举定义和 schema 记录。
 
-All failures throw:
+所有失败均抛出：
 
 ```ts
 new Error(`ICE3_INDUSTRIAL_MANIFEST_INVALID: ${detail}`);
 ```
 
-Deep-freeze arrays, records, entity/type objects, relation metadata, and schemas before return.
+返回前深度冻结数组、记录、实体/类型对象、关系元数据和 schema。
 
-- [ ] **Step 5: Add negative manifest tests**
+- [ ] **步骤 5：添加负向清单测试**
 
-Add table-driven cases:
+添加表驱动用例：
 
 ```ts
 it.each([
@@ -287,7 +285,7 @@ it.each([
 });
 ```
 
-- [ ] **Step 6: Run focused tests, typecheck, and full suite**
+- [ ] **步骤 6：运行聚焦测试、类型检查和完整测试套件**
 
 ```bash
 npm test -- tests/core/Manifest.test.ts
@@ -295,9 +293,9 @@ npm run typecheck
 npm test
 ```
 
-Expected: PASS.
+预期：PASS。
 
-- [ ] **Step 7: Commit**
+- [ ] **步骤 7：提交**
 
 ```bash
 git add .
@@ -306,15 +304,15 @@ git commit -m "feat(core): scaffold industrial semantic manifests"
 
 ---
 
-### Task 2: Build Entity, Type, and External Identity Registries
+### 任务 2：构建实体、类型和外部身份注册表
 
-**Files:**
-- Create: `ice3-industrial/packages/industrial-core/src/registry/ICEIndustrialTypeRegistry.ts`
-- Create: `ice3-industrial/packages/industrial-core/src/registry/ICEIndustrialEntityRegistry.ts`
-- Modify: `ice3-industrial/packages/industrial-core/src/index.ts`
-- Test: `ice3-industrial/tests/core/Registries.test.ts`
+**文件：**
+- 创建：`ice3-industrial/packages/industrial-core/src/registry/ICEIndustrialTypeRegistry.ts`
+- 创建：`ice3-industrial/packages/industrial-core/src/registry/ICEIndustrialEntityRegistry.ts`
+- 修改：`ice3-industrial/packages/industrial-core/src/index.ts`
+- 测试：`ice3-industrial/tests/core/Registries.test.ts`
 
-**Interfaces:**
+**接口：**
 
 ```ts
 class ICEIndustrialTypeRegistry {
@@ -342,10 +340,10 @@ class ICEIndustrialEntityRegistry {
 }
 ```
 
-- Consumes: validated manifest entities and types.
-- Produces: O(1) primary/type/external indexes and stable sorted lists.
+- 消费：经过验证的清单实体和类型。
+- 产出：O(1) 的主键/类型/外部索引以及稳定的排序列表。
 
-- [ ] **Step 1: Write failing registry tests**
+- [ ] **步骤 1：编写失败的注册表测试**
 
 ```ts
 const types = new ICEIndustrialTypeRegistry(manifest.entityTypes);
@@ -362,28 +360,28 @@ expect(() => entities.require('missing'))
   .toThrow(/ICE3_INDUSTRIAL_UNKNOWN_ENTITY/);
 ```
 
-- [ ] **Step 2: Verify RED**
+- [ ] **步骤 2：验证 RED**
 
 ```bash
 npm test -- tests/core/Registries.test.ts
 ```
 
-Expected: FAIL because classes do not exist.
+预期：FAIL，因为相关类不存在。
 
-- [ ] **Step 3: Implement immutable indexes**
+- [ ] **步骤 3：实现不可变索引**
 
-Build maps once in constructors; do not rescan arrays for lookups. Return frozen list snapshots sorted by ID. `require()` errors use:
+在构造函数中一次性构建映射；查询时不得重新扫描数组。返回按 ID 排序的冻结列表快照。`require()` 错误使用：
 
 ```text
 ICE3_INDUSTRIAL_UNKNOWN_TYPE
 ICE3_INDUSTRIAL_UNKNOWN_ENTITY
 ```
 
-- [ ] **Step 4: Add conflict and ordering tests**
+- [ ] **步骤 4：添加冲突和排序测试**
 
-Verify duplicate IDs and external identity conflicts throw during construction even if the caller bypassed manifest parsing. Verify insertion order does not affect list ordering.
+验证重复 ID 和外部身份冲突在构造期间抛出，即使调用方绕过了清单解析。验证插入顺序不影响列表排序。
 
-- [ ] **Step 5: Run focused tests, typecheck, and full suite**
+- [ ] **步骤 5：运行聚焦测试、类型检查和完整测试套件**
 
 ```bash
 npm test -- tests/core/Registries.test.ts
@@ -391,9 +389,9 @@ npm run typecheck
 npm test
 ```
 
-Expected: PASS.
+预期：PASS。
 
-- [ ] **Step 6: Commit**
+- [ ] **步骤 6：提交**
 
 ```bash
 git add packages/industrial-core/src/registry packages/industrial-core/src/index.ts tests/core/Registries.test.ts
@@ -402,16 +400,16 @@ git commit -m "feat(core): index industrial entities and identities"
 
 ---
 
-### Task 3: Add Relation Traversal and Entity Queries
+### 任务 3：添加关系遍历和实体查询
 
-**Files:**
-- Create: `ice3-industrial/packages/industrial-core/src/relation/ICEIndustrialRelationGraph.ts`
-- Create: `ice3-industrial/packages/industrial-core/src/query/ICEIndustrialQuery.ts`
-- Modify: `ice3-industrial/packages/industrial-core/src/index.ts`
-- Test: `ice3-industrial/tests/core/Relations.test.ts`
-- Test: `ice3-industrial/tests/core/Queries.test.ts`
+**文件：**
+- 创建：`ice3-industrial/packages/industrial-core/src/relation/ICEIndustrialRelationGraph.ts`
+- 创建：`ice3-industrial/packages/industrial-core/src/query/ICEIndustrialQuery.ts`
+- 修改：`ice3-industrial/packages/industrial-core/src/index.ts`
+- 测试：`ice3-industrial/tests/core/Relations.test.ts`
+- 测试：`ice3-industrial/tests/core/Queries.test.ts`
 
-**Interfaces:**
+**接口：**
 
 ```ts
 interface ICEIndustrialRelationQuery {
@@ -459,10 +457,10 @@ class ICEIndustrialQuery {
 }
 ```
 
-- Consumes: relation/entity registries and state lookup.
-- Produces: deterministic relation traversal and query filtering.
+- 消费：关系/实体注册表和状态查询。
+- 产出：确定性的关系遍历和查询过滤。
 
-- [ ] **Step 1: Write failing relation tests**
+- [ ] **步骤 1：编写失败的关系测试**
 
 ```ts
 expect(graph.related('pump-01').map((relation) => relation.id))
@@ -475,19 +473,19 @@ expect(graph.reachable('pump-01', {
 })).toEqual(['pump-01', 'valve-01']);
 ```
 
-- [ ] **Step 2: Verify RED**
+- [ ] **步骤 2：验证 RED**
 
 ```bash
 npm test -- tests/core/Relations.test.ts
 ```
 
-Expected: FAIL because the graph does not exist.
+预期：FAIL，因为关系图不存在。
 
-- [ ] **Step 3: Implement bounded graph traversal**
+- [ ] **步骤 3：实现有界图遍历**
 
-Maintain outgoing/incoming indexes. Deduplicate relations by ID. Traversal keeps a visited set, rejects negative/non-integer depth, and returns stable ID-sorted results.
+维护出站/入站索引。按 ID 对关系去重。遍历保留已访问集合，拒绝负数/非整数深度，并返回按 ID 稳定排序的结果。
 
-- [ ] **Step 4: Write failing query tests**
+- [ ] **步骤 4：编写失败的查询测试**
 
 ```ts
 expect(query.queryEntities({
@@ -500,21 +498,21 @@ expect(query.queryEntities({
 })).toEqual(['pump-01']);
 ```
 
-Cover no query, ID/type/parent filters, external identity, property quality, unknown properties, and deterministic sorting.
+覆盖无查询、ID/类型/父级过滤、外部身份、属性质量、未知属性以及确定性排序。
 
-- [ ] **Step 5: Verify query RED**
+- [ ] **步骤 5：验证查询 RED**
 
 ```bash
 npm test -- tests/core/Queries.test.ts
 ```
 
-Expected: FAIL because query filtering is absent.
+预期：FAIL，因为查询过滤尚不存在。
 
-- [ ] **Step 6: Implement deterministic query filtering**
+- [ ] **步骤 6：实现确定性查询过滤**
 
-The query layer uses registry indexes and only reads state through a supplied lookup callback. Unknown property filters throw `ICE3_INDUSTRIAL_UNKNOWN_PROPERTY`.
+查询层使用注册表索引，并且仅通过提供的查询回调读取状态。未知属性过滤会抛出 `ICE3_INDUSTRIAL_UNKNOWN_PROPERTY`。
 
-- [ ] **Step 7: Run focused tests, typecheck, and full suite**
+- [ ] **步骤 7：运行聚焦测试、类型检查和完整测试套件**
 
 ```bash
 npm test -- tests/core/Relations.test.ts tests/core/Queries.test.ts
@@ -522,9 +520,9 @@ npm run typecheck
 npm test
 ```
 
-Expected: PASS.
+预期：PASS。
 
-- [ ] **Step 8: Commit**
+- [ ] **步骤 8：提交**
 
 ```bash
 git add packages/industrial-core/src/relation packages/industrial-core/src/query packages/industrial-core/src/index.ts tests/core/Relations.test.ts tests/core/Queries.test.ts
@@ -533,14 +531,14 @@ git commit -m "feat(core): traverse relations and query entities"
 
 ---
 
-### Task 4: Implement Transactional State Updates and Coalesced Notifications
+### 任务 4：实现事务性状态更新和合并通知
 
-**Files:**
-- Create: `ice3-industrial/packages/industrial-core/src/state/ICEIndustrialStateStore.ts`
-- Modify: `ice3-industrial/packages/industrial-core/src/index.ts`
-- Test: `ice3-industrial/tests/core/StateStore.test.ts`
+**文件：**
+- 创建：`ice3-industrial/packages/industrial-core/src/state/ICEIndustrialStateStore.ts`
+- 修改：`ice3-industrial/packages/industrial-core/src/index.ts`
+- 测试：`ice3-industrial/tests/core/StateStore.test.ts`
 
-**Interfaces:**
+**接口：**
 
 ```ts
 interface ICEIndustrialPropertyValue {
@@ -609,10 +607,10 @@ class ICEIndustrialOperationRegistry {
 }
 ```
 
-- Consumes: validated patches from UI, adapters, or tests.
-- Produces: latest-wins transactional state and one coalesced notification.
+- 消费：来自 UI、适配器或测试的经过验证的补丁。
+- 产出：最新值优先的事务性状态，以及一个合并后的通知。
 
-- [ ] **Step 1: Write failing state tests**
+- [ ] **步骤 1：编写失败的状态测试**
 
 ```ts
 const scheduled: Array<() => void> = [];
@@ -631,49 +629,49 @@ expect(changes).toHaveLength(1);
 expect(changes[0]).toHaveLength(1);
 ```
 
-- [ ] **Step 2: Verify RED**
+- [ ] **步骤 2：验证 RED**
 
 ```bash
 npm test -- tests/core/StateStore.test.ts
 ```
 
-Expected: FAIL because the state store does not exist.
+预期：FAIL，因为状态存储不存在。
 
-- [ ] **Step 3: Implement transactional validation**
+- [ ] **步骤 3：实现事务性验证**
 
-Before applying, validate:
+应用之前验证：
 
-- Entity and property exist.
-- Property is readable.
-- Runtime value matches the declared data type and enum list.
-- Quality, timestamps, and source are valid.
+- 实体和属性存在。
+- 属性可读。
+- 运行时值与声明的数据类型和枚举列表匹配。
+- 质量、时间戳和来源有效。
 
-If any patch is invalid, apply none and throw `ICE3_INDUSTRIAL_STATE_INVALID`.
+如果有任一补丁无效，则不应用任何补丁，并抛出 `ICE3_INDUSTRIAL_STATE_INVALID`。
 
-- [ ] **Step 4: Implement latest-wins ordering**
+- [ ] **步骤 4：实现最新值优先的顺序**
 
-Track per-property source versions:
+跟踪每个属性的来源版本：
 
-- Higher `sourceTimestamp` wins.
-- Equal timestamp uses later arrival only if source is equal; otherwise reject as stale.
-- Missing timestamps use arrival order.
-- Stale patches are ignored and counted by a public diagnostic snapshot.
+- 更高的 `sourceTimestamp` 获胜。
+- 时间戳相同时，只有来源相同才使用较晚到达的值；否则按过期拒绝。
+- 缺失时间戳时使用到达顺序。
+- 过期补丁会被忽略，并由公开的诊断快照计数。
 
-Notifications are merged by `entityId/propertyId`, scheduled once, and delivered in stable key order.
+通知按 `entityId/propertyId` 合并，只调度一次，并按稳定的键顺序投递。
 
-- [ ] **Step 5: Add stale, quality, unknown, and type tests**
+- [ ] **步骤 5：添加过期、质量、未知和类型测试**
 
-Cover:
+覆盖：
 
-- Older timestamp does not overwrite.
-- Equal timestamp from another source is stale.
-- Invalid type rejects the entire batch.
-- Unknown entity/property rejects.
-- Bad quality remains queryable.
-- Unsubscribe stops delivery.
-- `dispose()` clears subscriptions and rejects later update.
+- 较早的时间戳不会覆盖。
+- 来自另一来源的相同时间戳视为过期。
+- 无效类型会拒绝整个批次。
+- 未知实体/属性会拒绝。
+- 质量不良的状态仍可查询。
+- 取消订阅会停止投递。
+- `dispose()` 会清除订阅，并拒绝后续更新。
 
-- [ ] **Step 6: Run focused tests, typecheck, and full suite**
+- [ ] **步骤 6：运行聚焦测试、类型检查和完整测试套件**
 
 ```bash
 npm test -- tests/core/StateStore.test.ts
@@ -681,9 +679,9 @@ npm run typecheck
 npm test
 ```
 
-Expected: PASS.
+预期：PASS。
 
-- [ ] **Step 7: Commit**
+- [ ] **步骤 7：提交**
 
 ```bash
 git add packages/industrial-core/src/state packages/industrial-core/src/index.ts tests/core/StateStore.test.ts
@@ -692,16 +690,16 @@ git commit -m "feat(core): batch industrial state updates"
 
 ---
 
-### Task 5: Add Event Ordering and Operation Registration
+### 任务 5：添加事件排序和操作注册
 
-**Files:**
-- Create: `ice3-industrial/packages/industrial-core/src/event/ICEIndustrialEventStore.ts`
-- Create: `ice3-industrial/packages/industrial-core/src/operation/ICEIndustrialOperationRegistry.ts`
-- Modify: `ice3-industrial/packages/industrial-core/src/index.ts`
-- Test: `ice3-industrial/tests/core/Events.test.ts`
-- Test: `ice3-industrial/tests/core/Operations.test.ts`
+**文件：**
+- 创建：`ice3-industrial/packages/industrial-core/src/event/ICEIndustrialEventStore.ts`
+- 创建：`ice3-industrial/packages/industrial-core/src/operation/ICEIndustrialOperationRegistry.ts`
+- 修改：`ice3-industrial/packages/industrial-core/src/index.ts`
+- 测试：`ice3-industrial/tests/core/Events.test.ts`
+- 测试：`ice3-industrial/tests/core/Operations.test.ts`
 
-**Interfaces:**
+**接口：**
 
 ```ts
 interface ICEIndustrialEventInput {
@@ -728,10 +726,10 @@ type ICEIndustrialOperationHandler = (
 ) => Promise<Readonly<Record<string, ICEIndustrialValue>> | void>;
 ```
 
-- Consumes: normalized events and registered handlers.
-- Produces: monotonic event sequence and validated operation execution.
+- 消费：规范化事件和已注册的处理程序。
+- 产出：单调递增的事件序列和经过验证的操作执行。
 
-- [ ] **Step 1: Write failing event tests**
+- [ ] **步骤 1：编写失败的事件测试**
 
 ```ts
 const first = store.insert({
@@ -753,19 +751,19 @@ expect(store.list().map((event) => event.type))
   .toEqual(['ice:alarmRaised', 'ice:alarmCleared']);
 ```
 
-- [ ] **Step 2: Verify event RED**
+- [ ] **步骤 2：验证事件 RED**
 
 ```bash
 npm test -- tests/core/Events.test.ts
 ```
 
-Expected: FAIL because event storage is absent.
+预期：FAIL，因为事件存储尚不存在。
 
-- [ ] **Step 3: Implement event normalization**
+- [ ] **步骤 3：实现事件规范化**
 
-Validate entity IDs, severity, timestamp, payload, and non-empty type. Generate an event ID when omitted. Maintain a monotonic sequence and bounded history supplied as a constructor option.
+验证实体 ID、严重级别、时间戳、载荷和非空类型。未提供事件 ID 时生成一个。维护单调递增序列，以及由构造函数选项提供的有界历史记录。
 
-- [ ] **Step 4: Write failing operation tests**
+- [ ] **步骤 4：编写失败的操作测试**
 
 ```ts
 registry.register('pump-01', 'ice:start', async () => ({ accepted: true }));
@@ -776,27 +774,26 @@ await expect(registry.execute('pump-01', 'ice:start', {}, {
 })).resolves.toEqual({ accepted: true });
 ```
 
-- [ ] **Step 5: Verify operation RED**
+- [ ] **步骤 5：验证操作 RED**
 
 ```bash
 npm test -- tests/core/Operations.test.ts
 ```
 
-Expected: FAIL because operation registration is absent.
+预期：FAIL，因为操作注册尚不存在。
 
-- [ ] **Step 6: Implement operation registration**
+- [ ] **步骤 6：实现操作注册**
 
-Require:
+要求：
 
-- Entity type declares the operation.
-- Input satisfies the declared schema.
-- Handler exists and is unique per entity/operation.
-- `requiresConfirmation` is exposed as capability metadata. Confirmation,
-  authorization, and audit happen in the caller before `execute()`.
+- 实体类型声明该操作。
+- 输入满足声明的 schema。
+- 处理程序存在，且每个实体/操作组合唯一。
+- `requiresConfirmation` 作为能力元数据公开。确认、授权和审计由调用方在 `execute()` 之前完成。
 
-Wrap handler failure as `ICE3_INDUSTRIAL_OPERATION_FAILED`; preserve `AbortError` as `ICE3_INDUSTRIAL_OPERATION_CANCELLED`.
+将处理程序失败包装为 `ICE3_INDUSTRIAL_OPERATION_FAILED`；将 `AbortError` 保留为 `ICE3_INDUSTRIAL_OPERATION_CANCELLED`。
 
-- [ ] **Step 7: Run focused tests, typecheck, and full suite**
+- [ ] **步骤 7：运行聚焦测试、类型检查和完整测试套件**
 
 ```bash
 npm test -- tests/core/Events.test.ts tests/core/Operations.test.ts
@@ -804,9 +801,9 @@ npm run typecheck
 npm test
 ```
 
-Expected: PASS.
+预期：PASS。
 
-- [ ] **Step 8: Commit**
+- [ ] **步骤 8：提交**
 
 ```bash
 git add packages/industrial-core/src/event packages/industrial-core/src/operation packages/industrial-core/src/index.ts tests/core/Events.test.ts tests/core/Operations.test.ts
@@ -815,17 +812,17 @@ git commit -m "feat(core): order events and register operations"
 
 ---
 
-### Task 6: Build Workspace Context, Facade, and Serialization
+### 任务 6：构建工作区上下文、门面和序列化
 
-**Files:**
-- Create: `ice3-industrial/packages/industrial-core/src/workspace/ICEIndustrialWorkspaceContext.ts`
-- Create: `ice3-industrial/packages/industrial-core/src/workspace/ICEIndustrialWorkspace.ts`
-- Create: `ice3-industrial/packages/industrial-core/src/workspace/serializeIndustrialWorkspace.ts`
-- Modify: `ice3-industrial/packages/industrial-core/src/index.ts`
-- Test: `ice3-industrial/tests/core/Workspace.test.ts`
-- Test: `ice3-industrial/tests/core/Serialization.test.ts`
+**文件：**
+- 创建：`ice3-industrial/packages/industrial-core/src/workspace/ICEIndustrialWorkspaceContext.ts`
+- 创建：`ice3-industrial/packages/industrial-core/src/workspace/ICEIndustrialWorkspace.ts`
+- 创建：`ice3-industrial/packages/industrial-core/src/workspace/serializeIndustrialWorkspace.ts`
+- 修改：`ice3-industrial/packages/industrial-core/src/index.ts`
+- 测试：`ice3-industrial/tests/core/Workspace.test.ts`
+- 测试：`ice3-industrial/tests/core/Serialization.test.ts`
 
-**Interfaces:**
+**接口：**
 
 ```ts
 interface ICEIndustrialFilter {
@@ -878,10 +875,10 @@ class ICEIndustrialWorkspace {
 }
 ```
 
-- Consumes: Tasks 1-5.
-- Produces: one public workspace facade with stable context events.
+- 消费：任务 1-5。
+- 产出：一个公开的工作区门面，具有稳定的上下文事件。
 
-- [ ] **Step 1: Write failing workspace tests**
+- [ ] **步骤 1：编写失败的工作区测试**
 
 ```ts
 const workspace = new ICEIndustrialWorkspace({ manifest });
@@ -898,19 +895,19 @@ workspace.setSelection(['pump-01'], { source: 'scene' });
 expect(contexts).toHaveLength(1);
 ```
 
-- [ ] **Step 2: Verify workspace RED**
+- [ ] **步骤 2：验证工作区 RED**
 
 ```bash
 npm test -- tests/core/Workspace.test.ts
 ```
 
-Expected: FAIL because the facade does not exist.
+预期：FAIL，因为门面不存在。
 
-- [ ] **Step 3: Implement immutable context updates**
+- [ ] **步骤 3：实现不可变上下文更新**
 
-Validate entity IDs, deduplicate and sort, emit only when context materially changes, and deep-freeze every emitted context. Exposures for registries, state, events, and operations are read-only.
+验证实体 ID，去重并排序，仅在上下文发生实质变化时发出事件，并深度冻结每个发出的上下文。注册表、状态、事件和操作的对外暴露均为只读。
 
-- [ ] **Step 4: Write failing serialization tests**
+- [ ] **步骤 4：编写失败的序列化测试**
 
 ```ts
 const first = serializeIndustrialWorkspace(manifest);
@@ -920,21 +917,21 @@ expect(first).toBe(second);
 expect(parseIndustrialManifest(JSON.parse(first))).toEqual(manifest);
 ```
 
-Verify object-key insertion order does not affect output and that dynamic state/context are absent.
+验证对象键插入顺序不影响输出，且动态状态/上下文不包含在输出中。
 
-- [ ] **Step 5: Verify serialization RED**
+- [ ] **步骤 5：验证序列化 RED**
 
 ```bash
 npm test -- tests/core/Serialization.test.ts
 ```
 
-Expected: FAIL because deterministic serialization is absent.
+预期：FAIL，因为确定性序列化尚不存在。
 
-- [ ] **Step 6: Implement deterministic serialization**
+- [ ] **步骤 6：实现确定性序列化**
 
-Sort object keys recursively while preserving array order unless the manifest defines an order-independent collection; use the contract-defined stable collection order. Serialize with two-space indentation and a trailing newline.
+递归排序对象键，同时保留数组顺序，除非清单定义了与顺序无关的集合；使用契约定义的稳定集合顺序。序列化时使用两空格缩进和末尾换行。
 
-- [ ] **Step 7: Run focused tests, typecheck, and full suite**
+- [ ] **步骤 7：运行聚焦测试、类型检查和完整测试套件**
 
 ```bash
 npm test -- tests/core/Workspace.test.ts tests/core/Serialization.test.ts
@@ -942,9 +939,9 @@ npm run typecheck
 npm test
 ```
 
-Expected: PASS.
+预期：PASS。
 
-- [ ] **Step 8: Commit**
+- [ ] **步骤 8：提交**
 
 ```bash
 git add packages/industrial-core/src/workspace packages/industrial-core/src/index.ts tests/core/Workspace.test.ts tests/core/Serialization.test.ts
@@ -953,18 +950,18 @@ git commit -m "feat(core): expose industrial workspace context"
 
 ---
 
-### Task 7: Add Native ICE JSON Adapters and Finalize Core Verification
+### 任务 7：添加原生 ICE JSON 适配器并完成核心验证
 
-**Files:**
-- Create: `ice3-industrial/packages/industrial-core/src/adapter/ICEIndustrialAssetAdapter.ts`
-- Create: `ice3-industrial/packages/industrial-core/src/adapter/ICEIndustrialAdapterRegistry.ts`
-- Create: `ice3-industrial/packages/industrial-core/src/adapter/ICEJsonAdapter.ts`
-- Create: `ice3-industrial/README.md`
-- Modify: `ice3-industrial/packages/industrial-core/src/index.ts`
-- Test: `ice3-industrial/tests/core/Adapters.test.ts`
-- Test: `ice3-industrial/tests/core/Performance.test.ts`
+**文件：**
+- 创建：`ice3-industrial/packages/industrial-core/src/adapter/ICEIndustrialAssetAdapter.ts`
+- 创建：`ice3-industrial/packages/industrial-core/src/adapter/ICEIndustrialAdapterRegistry.ts`
+- 创建：`ice3-industrial/packages/industrial-core/src/adapter/ICEJsonAdapter.ts`
+- 创建：`ice3-industrial/README.md`
+- 修改：`ice3-industrial/packages/industrial-core/src/index.ts`
+- 测试：`ice3-industrial/tests/core/Adapters.test.ts`
+- 测试：`ice3-industrial/tests/core/Performance.test.ts`
 
-**Interfaces:**
+**接口：**
 
 ```ts
 interface ICEIndustrialAssetAdapter {
@@ -989,10 +986,10 @@ class ICEIndustrialAdapterRegistry {
 const iceJsonAdapter: ICEIndustrialAssetAdapter;
 ```
 
-- Consumes: Task 1 parser and Task 6 serializer.
-- Produces: deterministic native import/export and adapter lifecycle.
+- 消费：任务 1 的解析器和任务 6 的序列化器。
+- 产出：确定性的原生导入/导出和适配器生命周期。
 
-- [ ] **Step 1: Write failing adapter tests**
+- [ ] **步骤 1：编写失败的适配器测试**
 
 ```ts
 const imported = await iceJsonAdapter.import(JSON.stringify(manifest));
@@ -1002,36 +999,36 @@ const exported = await iceJsonAdapter.export(manifest);
 expect(await iceJsonAdapter.import(exported)).toEqual(manifest);
 ```
 
-Verify duplicate adapter IDs, unknown adapter IDs, malformed import, and adapter failure diagnostics.
+验证重复适配器 ID、未知适配器 ID、格式错误的导入和适配器失败诊断。
 
-- [ ] **Step 2: Verify RED**
+- [ ] **步骤 2：验证 RED**
 
 ```bash
 npm test -- tests/core/Adapters.test.ts
 ```
 
-Expected: FAIL because adapters do not exist.
+预期：FAIL，因为适配器不存在。
 
-- [ ] **Step 3: Implement adapter registry and native adapter**
+- [ ] **步骤 3：实现适配器注册表和原生适配器**
 
-Use stable diagnostics:
+使用稳定的诊断信息：
 
 - `ICE3_INDUSTRIAL_ADAPTER_FAILED`
-- duplicate adapter IDs throw the same code with a specific detail.
-- import/export never partially mutate a workspace.
+- 重复适配器 ID 抛出相同代码，并附带具体细节。
+- 导入/导出绝不对工作区进行部分修改。
 
-- [ ] **Step 4: Add the large synthetic performance fixture**
+- [ ] **步骤 4：添加大型合成性能测试夹具**
 
-Generate, entirely in memory:
+完全在内存中生成：
 
-- 10,000 entities across 20 types.
-- 50,000 property definitions.
-- 100,000 state patches.
-- deterministic relationships with a bounded graph.
+- 20 种类型下的 10,000 个实体。
+- 50,000 个属性定义。
+- 100,000 个状态补丁。
+- 有界图中的确定性关系。
 
-Test lookup, query, traversal, state coalescing, and serialization complete without excessive memory growth. Use a generous deterministic timeout suitable for CI; do not assert machine-specific milliseconds.
+测试查找、查询、遍历、状态合并和序列化能够在没有过度内存增长的情况下完成。使用适合 CI 的宽松确定性超时；不要断言机器相关的毫秒数。
 
-- [ ] **Step 5: Run complete core verification**
+- [ ] **步骤 5：运行完整核心验证**
 
 ```bash
 cd ../ice3-industrial
@@ -1040,15 +1037,15 @@ npm run verify
 npm pack --workspaces --dry-run --json
 ```
 
-Expected:
+预期：
 
-- Architecture test proves zero core dependencies.
-- All unit/integration tests pass.
-- Package dry-run contains no assets, customer data, or logs.
+- 架构测试证明核心依赖数为零。
+- 所有单元/集成测试通过。
+- 包试运行内容不包含资产、客户数据或日志。
 
-- [ ] **Step 6: Audit naming and privacy**
+- [ ] **步骤 6：审计命名和隐私**
 
-Run:
+运行：
 
 ```bash
 git status --porcelain=v1
@@ -1056,17 +1053,17 @@ git ls-files '*.glb' '*.gltf' '*.bin' '*.png' '*.jpg'
 git grep -I -n -i -E "$ICE3_FORBIDDEN_NAME_PATTERN" -- . || true
 ```
 
-Set `ICE3_FORBIDDEN_NAME_PATTERN` from the approved local review list.
-Expected: no generated assets and no prohibited names.
+从经批准的本地审查列表设置 `ICE3_FORBIDDEN_NAME_PATTERN`。
+预期：没有生成的资产，也没有禁止名称。
 
-- [ ] **Step 7: Commit**
+- [ ] **步骤 7：提交**
 
 ```bash
 git add README.md packages/industrial-core/src/adapter packages/industrial-core/src/index.ts tests/core/Adapters.test.ts tests/core/Performance.test.ts
 git commit -m "feat(core): add native industrial json adapters"
 ```
 
-## Related Documents
+## 相关文档
 
-- `ICE3-DOC-IDX-001` — [Documentation index](../README.md)
-- `ICE3-DOC-SPEC-009` — [Industrial semantic layer specification](../specs/2026-10-28-industrial-semantic-layer-design.md)
+- `ICE3-DOC-IDX-001` — [文档索引](../README.md)
+- `ICE3-DOC-SPEC-009` — [工业语义层规格](../specs/2026-10-28-industrial-semantic-layer-design.md)
