@@ -1,0 +1,14 @@
+{
+  "name": "ice3-doc",
+  "private": true,
+  "license": "MIT",
+  "type": "module",
+  "engines": {
+    "node": "^24.0.0 || >=26.0.0"
+  },
+  "scripts": {
+    "docs:check": "node scripts/check-docs.mjs",
+    "docs:check:workspace": "node scripts/check-docs.mjs --workspace-root ..",
+    "test": "node --test scripts/check-docs.test.mjs"
+  }
+}
