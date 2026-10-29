@@ -12,13 +12,13 @@
 
 **Architecture:** 纯选择器从完整 Tileset 树计算目标切面和最近粗模回退。句柄保留当前覆盖切面，分帧准备候选内容，必要替代内容齐备后再移除父粗模。现有视锥、预算、缓存和场景容器继续复用。
 
-**Tech Stack:** TypeScript 7, Node.js 24 LTS, WebGL2, Node.js test runner, Playwright, OGC 3D Tiles 1.1, ICE3 core/assets/runtime
+**Tech Stack:** TypeScript 7, Node.js 24.22.1 LTS, WebGL2, Node.js test runner, Playwright, OGC 3D Tiles 1.1, ICE3 core/assets/runtime
 
 **Spec:** `../specs/2026-10-27-hierarchical-lod-design.md`
 
 ## Global Constraints
 
-- Use Node.js 24 LTS from `.nvmrc`.
+- Use Node.js 24.22.1 LTS from `.nvmrc`.
 - Develop on `feature/hierarchical-lod`; merge to `main` only after the complete gate passes.
 - Follow RED-GREEN-REFACTOR for every behavior change.
 - Add no runtime dependency.

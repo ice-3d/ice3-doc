@@ -12,13 +12,13 @@
 
 **Architecture:** 通用查询器遍历当前统一场景，按语义选择身份去重并选择最精细代表节点。引擎暴露只读查询快照；拾取和射线返回同一快照格式；相机控制器只接收查询结果的世界包围盒。
 
-**Tech Stack:** TypeScript 7, Node.js 24 LTS, WebGL2, Node.js test runner, Playwright, ICE3 core/runtime
+**Tech Stack:** TypeScript 7, Node.js 24.22.1 LTS, WebGL2, Node.js test runner, Playwright, ICE3 core/runtime
 
 **Spec:** `../specs/2026-10-27-lod-refinement-and-scene-api-design.md`
 
 ## Global Constraints
 
-- Use Node.js 24 LTS from `.nvmrc`.
+- Use Node.js 24.22.1 LTS from `.nvmrc`.
 - Develop on `feature/lod-refinement`.
 - Follow RED-GREEN-REFACTOR.
 - Add no runtime dependency.

@@ -12,13 +12,13 @@
 
 **Architecture:** A pure core frustum and runtime work-set planner decide which tiles are visible, useful for prefetch, or safe to evict. The Tileset handle owns bounded network and commit queues, keeps every partition under a removable container, and recalculates the work set after camera or viewport changes.
 
-**Tech Stack:** TypeScript 7, Node.js 24 LTS, WebGL2, Node.js test runner, Playwright, OGC 3D Tiles 1.1, ICE3 core/runtime packages.
+**Tech Stack:** TypeScript 7, Node.js 24.22.1 LTS, WebGL2, Node.js test runner, Playwright, OGC 3D Tiles 1.1, ICE3 core/runtime packages.
 
 **Spec:** `../specs/2026-10-27-adaptive-tileset-scheduler-design.md`
 
 ## Global Constraints
 
-- Use Node.js 24 LTS from `.nvmrc`.
+- Use Node.js 24.22.1 LTS from `.nvmrc`.
 - Develop on `feature/adaptive-tileset-scheduler`; merge to `main` only after the full gate passes.
 - Follow RED-GREEN-REFACTOR for every behavior change.
 - Do not use competitor, vendor, or third-party product names in code, comments, documentation, tests, diagnostics, or commit messages.

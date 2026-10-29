@@ -12,13 +12,13 @@
 
 **Architecture:** 工具链继续从单一规范化几何流水线生成粗模，但把内部 Tile 的粗模拆成稳定设备分片；运行时把所有分片组合成一个逻辑 Tile。预取使用独立低优先级集合，不参与当前切面的 ready/idle 判定。
 
-**Tech Stack:** TypeScript 7, Node.js 24 LTS, Node.js test runner, Playwright, OGC 3D Tiles 1.1, ICE3 core/assets/runtime/toolchain
+**Tech Stack:** TypeScript 7, Node.js 24.22.1 LTS, Node.js test runner, Playwright, OGC 3D Tiles 1.1, ICE3 core/assets/runtime/toolchain
 
 **Spec:** `../specs/2026-10-27-lod-refinement-and-scene-api-design.md`
 
 ## Global Constraints
 
-- Use Node.js 24 LTS from `.nvmrc`.
+- Use Node.js 24.22.1 LTS from `.nvmrc`.
 - Develop on `feature/lod-refinement`; merge to `main` only after the full gate passes.
 - Follow RED-GREEN-REFACTOR for every behavior change.
 - Add no browser runtime dependency.

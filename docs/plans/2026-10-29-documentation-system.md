@@ -12,7 +12,7 @@
 
 **Architecture:** Add one zero-dependency Markdown validator and copy it unchanged into every repository. Migrate existing design records into public documentation directories, assign permanent IDs, then add a README, index, architecture document, decisions, and usage documentation according to each repository's maturity.
 
-**Tech Stack:** Markdown, Node.js 24 LTS, Node.js built-in test runner, Git
+**Tech Stack:** Markdown, Node.js 24.22.1 LTS, Node.js built-in test runner, Git
 
 **Spec:** [ICE3-DOC-SPEC-011](../specs/2026-10-29-documentation-system-design.md)
 

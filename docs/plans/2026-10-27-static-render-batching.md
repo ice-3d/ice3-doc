@@ -12,14 +12,14 @@
 
 **Architecture:** The toolchain bakes static node transforms into material-specific batches and emits standard GLB geometry with a compact semantic index. The runtime builds query-only semantic nodes plus render batches, submits one draw per compatible batch, and maps per-vertex semantic indices back to stable selection IDs for picking and highlighting.
 
-**Tech Stack:** Node.js 24 LTS, TypeScript 7, ESM, npm workspaces, Node.js built-in test runner, `expect`, `tsx`, WebGL2, OGC 3D Tiles 1.1, Prepared GLB
+**Tech Stack:** Node.js 24.22.1 LTS, TypeScript 7, ESM, npm workspaces, Node.js built-in test runner, `expect`, `tsx`, WebGL2, OGC 3D Tiles 1.1, Prepared GLB
 
 **Spec:** `../specs/2026-10-27-industrial-render-batching-design.md`
 
 ## Global Constraints
 
 - Work on feature branches and merge to `main` only after full verification.
-- Use Node 24 from `.nvmrc`; do not verify with another runtime.
+- Use Node.js 24.22.1 LTS from `.nvmrc`; do not verify with another runtime.
 - Do not add runtime dependencies.
 - Keep the standard single-JSON/single-BIN Prepared GLB and OGC 3D Tiles 1.1 output.
 - Existing assets without batch metadata must keep their current render path and bytes.

@@ -12,13 +12,13 @@
 
 **Architecture:** The toolchain generates a bounded simplification curve for each semantic unit, stores sampled geometry in the existing temporary workspace, and greedily allocates a Tile's triangle budget to the highest marginal error reduction. Adaptive mode is opt-in in this phase; the existing proportional allocator remains byte-for-byte compatible.
 
-**Tech Stack:** Node.js 24 LTS, TypeScript 7, ESM, npm workspaces, Node.js built-in test runner, `expect`, `tsx`, Prepared GLB, OGC 3D Tiles 1.1, `meshoptimizer` simplifier
+**Tech Stack:** Node.js 24.22.1 LTS, TypeScript 7, ESM, npm workspaces, Node.js built-in test runner, `expect`, `tsx`, Prepared GLB, OGC 3D Tiles 1.1, `meshoptimizer` simplifier
 
 **Spec:** `../specs/2026-10-27-adaptive-industrial-lod-design.md`
 
 ## Global Constraints
 
-- Use Node 24 from `.nvmrc`; do not verify with Node 25.
+- Use Node.js 24.22.1 LTS from `.nvmrc`; do not verify with Node 25.
 - Work on a feature branch and merge to `main` only after full verification.
 - Do not add runtime dependencies.
 - Do not add a private asset or Tileset format; output remains Prepared GLB and OGC 3D Tiles 1.1.
