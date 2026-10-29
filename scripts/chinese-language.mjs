@@ -23,6 +23,7 @@ const CONTROLLED_HEADING_TERMS = new Set([
   'm1',
   'model',
   'ogc',
+  'protocol',
   'runtime',
   'report',
   'scene',

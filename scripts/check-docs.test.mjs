@@ -188,7 +188,7 @@ test('rejects an English-only heading', () => {
 test('accepts a heading made only from controlled technical terms', () => {
   assert.deepEqual(
     findLanguageViolations(
-      '# ICE3 Industrial Semantic Core\n\n当前 package 提供语义能力。\n',
+      '# ICE3 Agent Console Protocol\n\n当前 package 提供协议能力。\n',
       'README.md',
     ),
     [],
