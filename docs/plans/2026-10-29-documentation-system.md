@@ -2,7 +2,7 @@
 
 > Document ID: ICE3-DOC-PLAN-015
 >
-> Status: Draft
+> Status: Implemented
 >
 > Owner: ICE3 documentation maintainers
 
@@ -163,7 +163,7 @@ git switch -c docs/foundation
 - Produces: `node scripts/check-docs.mjs [--workspace-root <path>] [--json]`,
   which exits `0` only when all documentation checks pass.
 
-- [ ] **Step 1: Write failing metadata tests**
+- [x] **Step 1: Write failing metadata tests**
 
 ```js
 test('accepts one titled document with valid metadata', async () => {
@@ -178,7 +178,7 @@ test('rejects duplicate IDs and missing metadata', async () => {
 });
 ```
 
-- [ ] **Step 2: Run the tests to verify they fail**
+- [x] **Step 2: Run the tests to verify they fail**
 
 ```bash
 cd ice3-doc
@@ -187,7 +187,7 @@ node --test scripts/check-docs.test.mjs
 
 Expected: FAIL because `checkRepository` does not exist.
 
-- [ ] **Step 3: Implement the zero-dependency validator**
+- [x] **Step 3: Implement the zero-dependency validator**
 
 Use fenced-block-aware Markdown parsing so example headings and links do not
 count as document structure. Export `checkRepository(root, options)` and a CLI
@@ -207,14 +207,14 @@ anchors by lowercasing, removing punctuation, and replacing spaces with hyphens.
 Accept cross-repository links only when they start with
 `https://github.com/ice-3d/ice3-`.
 
-- [ ] **Step 4: Add one failing fixture for every required rule**
+- [x] **Step 4: Add one failing fixture for every required rule**
 
 Fixtures cover missing IDs, duplicate IDs, unsupported statuses, missing
 indexes, broken relative files, broken anchors, local absolute paths, malformed
 cross-repository URLs, and placeholder claims containing shell commands or API
 declarations.
 
-- [ ] **Step 5: Run the validator tests**
+- [x] **Step 5: Run the validator tests**
 
 ```bash
 cd ice3-doc
@@ -223,7 +223,7 @@ node --test scripts/check-docs.test.mjs
 
 Expected: PASS with one test per failure class.
 
-- [ ] **Step 6: Add package scripts**
+- [x] **Step 6: Add package scripts**
 
 ```json
 {
@@ -240,7 +240,7 @@ Expected: PASS with one test per failure class.
 }
 ```
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```bash
 cd ice3-doc
@@ -263,7 +263,7 @@ git commit -m "docs: add documentation validator"
 - Produces: a flat public document layout with stable IDs and no
   `docs/superpowers` directory.
 
-- [ ] **Step 1: Move the directories without changing content**
+- [x] **Step 1: Move the directories without changing content**
 
 ```bash
 cd ice3-doc
@@ -271,7 +271,7 @@ git mv docs/superpowers/specs docs/specs
 git mv docs/superpowers/plans docs/plans
 ```
 
-- [ ] **Step 2: Add the specification metadata**
+- [x] **Step 2: Add the specification metadata**
 
 Use these mappings:
 
@@ -295,7 +295,7 @@ Add an `English summary:` line to every Chinese specification immediately below
 its metadata block; the summary is one sentence describing the implemented
 scope.
 
-- [ ] **Step 3: Add the plan metadata**
+- [x] **Step 3: Add the plan metadata**
 
 Use these mappings:
 
@@ -320,7 +320,7 @@ Use these mappings:
 Set completed plans to `Implemented`. Keep this documentation plan as `Draft`
 until all tasks and final verification are complete.
 
-- [ ] **Step 4: Add the contract metadata**
+- [x] **Step 4: Add the contract metadata**
 
 Add this immediately after the existing H1:
 
@@ -332,7 +332,7 @@ Add this immediately after the existing H1:
 > Owner: ICE3 architecture maintainers
 ```
 
-- [ ] **Step 5: Repair moved-document links**
+- [x] **Step 5: Repair moved-document links**
 
 ```bash
 cd ice3-doc
@@ -341,13 +341,13 @@ rg -n 'docs/superpowers|\.\./\.\./superpowers' docs README.md
 
 Expected after repair: no output.
 
-- [ ] **Step 6: Create the initial complete index and README metadata**
+- [x] **Step 6: Create the initial complete index and README metadata**
 
 Add `ICE3-DOC-RM-001` to `README.md` and create `docs/README.md` with
 `ICE3-DOC-IDX-001`. The initial index lists every moved document once under its
 ownership section. Task 3 expands the navigation prose and adds new documents.
 
-- [ ] **Step 7: Run focused validation**
+- [x] **Step 7: Run focused validation**
 
 ```bash
 cd ice3-doc
@@ -356,7 +356,7 @@ node scripts/check-docs.mjs
 
 Expected: PASS for metadata, index completeness, and file links.
 
-- [ ] **Step 8: Commit**
+- [x] **Step 8: Commit**
 
 ```bash
 cd ice3-doc
@@ -378,7 +378,7 @@ git commit -m "docs: assign shared document identifiers"
 - Produces: `ICE3-DOC-RM-001`, `ICE3-DOC-IDX-001`, `ICE3-DOC-ARC-001`, and
   `ICE3-DOC-IDX-002`, `ICE3-DOC-ADR-001..004`.
 
-- [ ] **Step 1: Write the family index**
+- [x] **Step 1: Write the family index**
 
 The index groups links by ID under:
 
@@ -393,13 +393,13 @@ Implementation Plans
 
 Every row uses `ID | Title | Status | Purpose`.
 
-- [ ] **Step 2: Write the family architecture**
+- [x] **Step 2: Write the family architecture**
 
 Document the seven repository responsibilities, allowed dependency direction,
 the asset lifecycle from source model to runtime tiles, the 2D/3D composition
 boundary, the industrial semantic boundary, and the Agent integration boundary.
 
-- [ ] **Step 3: Write the four shared decisions**
+- [x] **Step 3: Write the four shared decisions**
 
 Each ADR records the selected decision and rejected alternatives:
 
@@ -412,12 +412,12 @@ Each ADR records the selected decision and rejected alternatives:
 - Generic semantic interfaces: expose interfaces usable by people, tools, and
   Agents without AI-specific engine concepts.
 
-- [ ] **Step 4: Rewrite the root README**
+- [x] **Step 4: Rewrite the root README**
 
 Link directly to the index, architecture, decisions, canonical contract, and the
 other six repository READMEs. Include the AI disclosure and MIT license.
 
-- [ ] **Step 5: Run validation**
+- [x] **Step 5: Run validation**
 
 ```bash
 cd ice3-doc
@@ -427,7 +427,7 @@ node scripts/check-docs.mjs --workspace-root ..
 
 Expected: both commands PASS.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 cd ice3-doc
@@ -451,7 +451,7 @@ git commit -m "docs: add ICE3 documentation portal"
 - Consumes: validator from Task 1.
 - Produces: engine document IDs and public directory layout.
 
-- [ ] **Step 1: Move specification and plan directories**
+- [x] **Step 1: Move specification and plan directories**
 
 ```bash
 cd ice3-engine
@@ -460,7 +460,7 @@ git mv docs/superpowers/specs docs/specs
 git mv docs/superpowers/plans docs/plans
 ```
 
-- [ ] **Step 2: Assign IDs**
+- [x] **Step 2: Assign IDs**
 
 | ID | File |
 |---|---|
@@ -475,13 +475,13 @@ git mv docs/superpowers/plans docs/plans
 | `ICE3-ENG-PLAN-002` | `docs/plans/2026-10-27-engine-m1-asset-runtime.md` |
 | `ICE3-ENG-PLAN-003` | `docs/plans/2026-10-27-equipment-selection.md` |
 
-- [ ] **Step 3: Add initial README and documentation index metadata**
+- [x] **Step 3: Add initial README and documentation index metadata**
 
 Add `ICE3-ENG-RM-001` to the existing README and `ICE3-ENG-IDX-001` to a new
 index that lists every migrated API, reference, specification, plan, and policy
 document. Task 5 expands this material.
 
-- [ ] **Step 4: Rewrite moved links and verify**
+- [x] **Step 4: Rewrite moved links and verify**
 
 ```bash
 cd ice3-engine
@@ -490,7 +490,7 @@ rg -n 'docs/superpowers|\.\./\.\./superpowers' README.md docs
 
 Expected after repair: no output.
 
-- [ ] **Step 5: Run focused validation**
+- [x] **Step 5: Run focused validation**
 
 ```bash
 cd ice3-engine
@@ -499,7 +499,7 @@ node scripts/check-docs.mjs
 
 Expected: PASS.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 cd ice3-engine
@@ -525,13 +525,13 @@ git commit -m "docs: assign engine document identifiers"
   `ICE3-ENG-IDX-002`, `ICE3-ENG-GUIDE-001..003`, and
   `ICE3-ENG-ADR-001..003`.
 
-- [ ] **Step 1: Rewrite the README**
+- [x] **Step 1: Rewrite the README**
 
 Preserve the current commands and ports. Add a five-minute example using only
 the public `ice3` package, a capability table, explicit M0/M1 boundaries, the
 asset-policy summary, verification commands, and the complete document map.
 
-- [ ] **Step 2: Write the architecture and ADRs**
+- [x] **Step 2: Write the architecture and ADRs**
 
 Architecture must identify `@ice3/core`, `@ice3/assets`, `@ice3/renderer`,
 `@ice3/runtime`, and `ice3`, and explain data flow from Prepared GLB to scene,
@@ -543,12 +543,12 @@ The three ADRs must document:
 - geometry-first industrial rendering with basic material and light support;
 - camera-driven Tileset/LOD behavior and stable selection identity.
 
-- [ ] **Step 3: Write the three guides**
+- [x] **Step 3: Write the three guides**
 
 Each guide includes prerequisites, runnable commands, expected output, common
 failures, and links to its exact API/reference IDs.
 
-- [ ] **Step 4: Add validator and verification script**
+- [x] **Step 4: Add validator and verification script**
 
 Copy `ice3-doc/scripts/check-docs.mjs` unchanged to
 `ice3-engine/scripts/check-docs.mjs`, then add:
@@ -563,7 +563,7 @@ Change the existing verification script to begin with the documentation gate:
 "verify": "npm run docs:check && npm run test:architecture && npm run typecheck && npm run typecheck:example && npm test && npm run test:e2e"
 ```
 
-- [ ] **Step 5: Run documentation and repository verification**
+- [x] **Step 5: Run documentation and repository verification**
 
 ```bash
 cd ice3-engine
@@ -573,7 +573,7 @@ npm run verify
 
 Expected: both commands PASS.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 cd ice3-engine
@@ -597,7 +597,7 @@ git commit -m "docs: complete engine developer documentation"
 - Produces: `ICE3-TOOL-POL-001`, `ICE3-TOOL-NOTICE-001`,
   `ICE3-TOOL-REF-002`, and `ICE3-TOOL-PLAN-001`.
 
-- [ ] **Step 1: Move and assign metadata**
+- [x] **Step 1: Move and assign metadata**
 
 ```bash
 cd ice3-toolchain
@@ -614,13 +614,13 @@ Add metadata:
 | `ICE3-TOOL-NOTICE-001` | `THIRD_PARTY_NOTICES.md` |
 | `ICE3-TOOL-REF-002` | `tests/fixtures/3d-tiles-1.1-schema/SOURCE.md` |
 
-- [ ] **Step 2: Add initial README and documentation index metadata**
+- [x] **Step 2: Add initial README and documentation index metadata**
 
 Add `ICE3-TOOL-RM-001` to the existing README and `ICE3-TOOL-IDX-001` to a new
 index that lists the policy, notice, fixture source, and migrated plan. Task 7
 expands this material.
 
-- [ ] **Step 3: Repair moved links**
+- [x] **Step 3: Repair moved links**
 
 ```bash
 cd ice3-toolchain
@@ -629,7 +629,7 @@ rg -n 'docs/superpowers|\.\./\.\./superpowers' README.md docs tests
 
 Expected after repair: no output.
 
-- [ ] **Step 4: Run focused validation**
+- [x] **Step 4: Run focused validation**
 
 ```bash
 cd ice3-toolchain
@@ -638,7 +638,7 @@ node scripts/check-docs.mjs
 
 Expected: PASS.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 cd ice3-toolchain
@@ -664,32 +664,32 @@ git commit -m "docs: assign toolchain document identifiers"
   `ICE3-TOOL-IDX-002`, `ICE3-TOOL-ARC-001`, `ICE3-TOOL-GUIDE-001..002`,
   `ICE3-TOOL-REF-001`, and `ICE3-TOOL-ADR-001..003`.
 
-- [ ] **Step 1: Rewrite the README**
+- [x] **Step 1: Rewrite the README**
 
 Keep it below 180 lines. The README contains purpose, requirements, quick start,
 the four primary commands, asset-safety rules, verification, documentation map,
 AI disclosure, and license. Move exhaustive option and format material to the
 reference documents.
 
-- [ ] **Step 2: Write architecture and guides**
+- [x] **Step 2: Write architecture and guides**
 
 Architecture describes the source adapter, normalization, prepared profile,
 partitioning, LOD, semantic proxies, static batching, atomic publication, and
 cache. Guides cover the exact build/validate/partition workflow and the measured
 large-model cache/performance behavior.
 
-- [ ] **Step 3: Write the CLI reference**
+- [x] **Step 3: Write the CLI reference**
 
 List every supported option from `parseArguments`, including defaults,
 constraints, and failure behavior. Include one complete large-model command and
 one validation command.
 
-- [ ] **Step 4: Write the three ADRs**
+- [x] **Step 4: Write the three ADRs**
 
 Record offline standard output, deterministic atomic publication, and the
 content-addressed Blender source cache with its invalidation inputs.
 
-- [ ] **Step 5: Run documentation and repository verification**
+- [x] **Step 5: Run documentation and repository verification**
 
 Copy `ice3-doc/scripts/check-docs.mjs` unchanged to
 `ice3-toolchain/scripts/check-docs.mjs`. Add and wire the package scripts:
@@ -707,7 +707,7 @@ npm run verify
 
 Expected: both commands PASS.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 cd ice3-toolchain
@@ -737,7 +737,7 @@ git commit -m "docs: complete toolchain developer documentation"
   `ICE3-IND-IDX-002`, `ICE3-IND-GUIDE-001`, `ICE3-IND-API-001`, and
   `ICE3-IND-ADR-001..003`.
 
-- [ ] **Step 1: Inspect the public exports**
+- [x] **Step 1: Inspect the public exports**
 
 ```bash
 cd ice3-industrial
@@ -747,20 +747,20 @@ rg -n '^export ' packages/industrial-core/src
 Use the output to ensure the reference documents every public export and no
 private source path.
 
-- [ ] **Step 2: Write the architecture and ADRs**
+- [x] **Step 2: Write the architecture and ADRs**
 
 Document the manifest parser, registries, relation graph, state store, query
 engine, context, event stream, operation registry, adapters, and workspace
 composition. Record zero dependencies, static/runtime separation, and stable
 identity decisions.
 
-- [ ] **Step 3: Write onboarding and API reference**
+- [x] **Step 3: Write onboarding and API reference**
 
 Retain the current manifest example, then add state updates, queries, relation
 traversal, context changes, serialization, and error behavior as separate
 copyable examples.
 
-- [ ] **Step 4: Run documentation and repository verification**
+- [x] **Step 4: Run documentation and repository verification**
 
 Add the validator and wire it into verification:
 
@@ -777,7 +777,7 @@ npm run verify
 
 Expected: both commands PASS.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 cd ice3-industrial
@@ -801,7 +801,7 @@ git commit -m "docs: complete industrial developer documentation"
 - Produces: `ICE3-AGENT-POL-001`, `ICE3-AGENT-SPEC-001`, and
   `ICE3-AGENT-PLAN-001`.
 
-- [ ] **Step 1: Move and assign metadata**
+- [x] **Step 1: Move and assign metadata**
 
 ```bash
 cd ice3-agent-console
@@ -816,13 +816,13 @@ git mv docs/superpowers/plans docs/plans
 | `ICE3-AGENT-SPEC-001` | `docs/specs/2026-10-28-ice3-agent-console-design.md` |
 | `ICE3-AGENT-PLAN-001` | `docs/plans/2026-10-28-ice3-agent-console.md` |
 
-- [ ] **Step 2: Add initial README and documentation index metadata**
+- [x] **Step 2: Add initial README and documentation index metadata**
 
 Add `ICE3-AGENT-RM-001` to the existing README and `ICE3-AGENT-IDX-001` to a new
 index that lists the policy, specification, and plan. Task 10 expands this
 material.
 
-- [ ] **Step 3: Repair moved links**
+- [x] **Step 3: Repair moved links**
 
 ```bash
 cd ice3-agent-console
@@ -831,7 +831,7 @@ rg -n 'docs/superpowers|\.\./\.\./superpowers' README.md docs
 
 Expected after repair: no output.
 
-- [ ] **Step 4: Run focused validation**
+- [x] **Step 4: Run focused validation**
 
 ```bash
 cd ice3-agent-console
@@ -840,7 +840,7 @@ node scripts/check-docs.mjs
 
 Expected: PASS.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 cd ice3-agent-console
@@ -866,26 +866,26 @@ git commit -m "docs: assign agent console document identifiers"
   `ICE3-AGENT-IDX-002`, `ICE3-AGENT-ARC-001`, `ICE3-AGENT-GUIDE-001..003`,
   `ICE3-AGENT-REF-001`, and `ICE3-AGENT-ADR-001..002`.
 
-- [ ] **Step 1: Rewrite the README**
+- [x] **Step 1: Rewrite the README**
 
 Keep the current ports and build modes. Add a capability/boundary table, a
 five-minute scripted mode, static build instructions, real-model configuration,
 the six scene tools, verification, and the document map.
 
-- [ ] **Step 2: Write the architecture and ADRs**
+- [x] **Step 2: Write the architecture and ADRs**
 
 Explain the event stream, shared protocol, scene controller, click and
 selection flow, autoplay cancellation, server/client transport split, and static
 demo marker. Record the Agent/scene boundary and the explicit scripted versus
 configured-model failure policy.
 
-- [ ] **Step 3: Write the guides and protocol reference**
+- [x] **Step 3: Write the guides and protocol reference**
 
 The protocol reference lists every event and every scene tool with payload
 shape and failure behavior. Guides cover local development, static deployment,
 and real-model configuration without exposing credentials.
 
-- [ ] **Step 4: Run documentation and repository verification**
+- [x] **Step 4: Run documentation and repository verification**
 
 Copy `ice3-doc/scripts/check-docs.mjs` unchanged to
 `ice3-agent-console/scripts/check-docs.mjs`. Add and wire the package scripts:
@@ -903,7 +903,7 @@ npm run verify
 
 Expected: both commands PASS.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 cd ice3-agent-console
@@ -921,18 +921,18 @@ git commit -m "docs: complete agent console developer documentation"
 - Consumes: placeholder status rules from `ICE3-DOC-SPEC-011`.
 - Produces: `ICE3-STUDIO-RM-001` and `ICE3-WATER-RM-001`.
 
-- [ ] **Step 1: Write the Studio placeholder**
+- [x] **Step 1: Write the Studio placeholder**
 
 The README contains only a title, metadata, a one-sentence repository purpose,
 an explicit statement that no public API, commands, or architecture exist yet,
 the AI disclosure, and the MIT license.
 
-- [ ] **Step 2: Write the Water Demo placeholder**
+- [x] **Step 2: Write the Water Demo placeholder**
 
 Use the same structure with the water-industry demonstration purpose. Do not add
 installation steps, commands, APIs, or architectural claims.
 
-- [ ] **Step 3: Validate standalone placeholder rules**
+- [x] **Step 3: Validate standalone placeholder rules**
 
 ```bash
 for repository in ice3-studio ice3-water-demo; do
@@ -942,7 +942,7 @@ done
 
 Expected: both commands PASS and report only placeholder-compatible documents.
 
-- [ ] **Step 4: Commit each repository**
+- [x] **Step 4: Commit each repository**
 
 ```bash
 cd ice3-studio
@@ -966,7 +966,7 @@ git commit -m "docs: add water demo placeholder"
 - Consumes: all previous tasks.
 - Produces: a passing family-wide documentation and code release gate.
 
-- [ ] **Step 1: Verify copied validators are identical**
+- [x] **Step 1: Verify copied validators are identical**
 
 ```bash
 shasum -a 256 \
@@ -979,7 +979,7 @@ shasum -a 256 \
 
 Expected: all five hashes are identical.
 
-- [ ] **Step 2: Verify the complete cross-repository catalog**
+- [x] **Step 2: Verify the complete cross-repository catalog**
 
 ```bash
 cd ice3-doc
@@ -988,7 +988,7 @@ npm run docs:check:workspace
 
 Expected: PASS with every owned Markdown file indexed exactly once.
 
-- [ ] **Step 3: Verify that no stale internal directory remains**
+- [x] **Step 3: Verify that no stale internal directory remains**
 
 ```bash
 find ice3-agent-console ice3-doc ice3-engine ice3-toolchain \
@@ -999,7 +999,7 @@ rg -n '\]\([^)]*docs/superpowers' ice3-agent-console ice3-doc ice3-engine \
 
 Expected: no output.
 
-- [ ] **Step 4: Verify absence of local paths**
+- [x] **Step 4: Verify absence of local paths**
 
 ```bash
 rg -n '/Users/[A-Za-z0-9._-]+/|/home/[A-Za-z0-9._-]+/|[A-Za-z]:\\Users\\' \
@@ -1009,7 +1009,7 @@ rg -n '/Users/[A-Za-z0-9._-]+/|/home/[A-Za-z0-9._-]+/|[A-Za-z]:\\Users\\' \
 
 Expected: no output.
 
-- [ ] **Step 5: Run all implemented repository verification**
+- [x] **Step 5: Run all implemented repository verification**
 
 ```bash
 cd ice3-agent-console && npm run verify
@@ -1020,7 +1020,7 @@ cd ../ice3-toolchain && npm run verify
 
 Expected: all commands exit `0`.
 
-- [ ] **Step 6: Manually walk the navigation graph**
+- [x] **Step 6: Manually walk the navigation graph**
 
 From each README, follow its index to:
 
@@ -1033,12 +1033,12 @@ From each README, follow its index to:
 
 Record every broken or misleading hop and fix it before committing.
 
-- [ ] **Step 7: Mark the specification and plan implemented**
+- [x] **Step 7: Mark the specification and plan implemented**
 
 Change `ICE3-DOC-SPEC-011` and `ICE3-DOC-PLAN-015` from `Approved`/`Draft` to
 `Implemented` only after every prior step passes.
 
-- [ ] **Step 8: Commit and merge each repository**
+- [x] **Step 8: Commit and merge each repository**
 
 ```bash
 cd ice3-doc

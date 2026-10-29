@@ -44,11 +44,34 @@ test('rejects broken files, anchors, and cross-repository URLs', async () => {
   assert.match(errors, /invalid cross-repository URL/);
 });
 
-test('rejects local absolute paths and placeholder claims', async () => {
+test('rejects placeholder claims', async () => {
   const report = await checkRepository(invalidFixtureRoot, { expectedArea: 'DOC' });
   const errors = report.errors.join('\n');
-  assert.match(errors, /local absolute path/);
   assert.match(errors, /Placeholder document contains executable content/);
+});
+
+test('rejects local absolute paths', async () => {
+  const root = await mkdtemp(join(tmpdir(), 'ice3-docs-'));
+  try {
+    const localPath = ['', 'Users', 'example', 'project', 'model.glb'].join('/');
+    await writeFile(join(root, 'README.md'), [
+      '# Invalid Local Path',
+      '',
+      '> Document ID: ICE3-DOC-RM-001',
+      '>',
+      '> Status: Active',
+      '>',
+      '> Owner: Documentation tests',
+      '',
+      `Local asset: ${localPath}`,
+      '',
+    ].join('\n'));
+
+    const report = await checkRepository(root, { expectedArea: 'DOC' });
+    assert.match(report.errors.join('\n'), /local absolute path/);
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
 });
 
 test('CLI reports JSON and a non-zero status for invalid documentation', () => {

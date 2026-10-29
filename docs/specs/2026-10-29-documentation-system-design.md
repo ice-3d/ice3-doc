@@ -2,7 +2,7 @@
 
 > Document ID: ICE3-DOC-SPEC-011
 >
-> Status: Approved
+> Status: Implemented
 >
 > Owner: ICE3 documentation maintainers
 

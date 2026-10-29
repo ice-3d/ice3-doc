@@ -38,7 +38,7 @@
 | `ICE3-DOC-SPEC-008` | [Credible Wastewater Blender Pipeline](specs/2026-10-28-credible-wastewater-blender-pipeline-design.md) | Implemented | Generate a credible synthetic industrial scene |
 | `ICE3-DOC-SPEC-009` | [Industrial Semantic Layer](specs/2026-10-28-industrial-semantic-layer-design.md) | Implemented | Define the industrial workspace core |
 | `ICE3-DOC-SPEC-010` | [Synthetic Wastewater Plant Asset](specs/2026-10-28-synthetic-wastewater-plant-asset-design.md) | Implemented | Define deterministic synthetic asset generation |
-| `ICE3-DOC-SPEC-011` | [Documentation System](specs/2026-10-29-documentation-system-design.md) | Approved | Define the public documentation contract |
+| `ICE3-DOC-SPEC-011` | [Documentation System](specs/2026-10-29-documentation-system-design.md) | Implemented | Define the public documentation contract |
 
 ## Implementation Plans
 
@@ -58,4 +58,4 @@
 | `ICE3-DOC-PLAN-012` | [Credible Wastewater Blender Pipeline](plans/2026-10-28-credible-wastewater-blender-pipeline.md) | Implemented | Implement authored synthetic asset generation |
 | `ICE3-DOC-PLAN-013` | [Industrial Semantic Core](plans/2026-10-28-industrial-semantic-core.md) | Implemented | Implement the semantic core |
 | `ICE3-DOC-PLAN-014` | [Synthetic Wastewater Plant Asset](plans/2026-10-28-synthetic-wastewater-plant-asset.md) | Implemented | Implement synthetic asset outputs |
-| `ICE3-DOC-PLAN-015` | [Documentation System](plans/2026-10-29-documentation-system.md) | Draft | Implement this documentation system |
+| `ICE3-DOC-PLAN-015` | [Documentation System](plans/2026-10-29-documentation-system.md) | Implemented | Implement this documentation system |
