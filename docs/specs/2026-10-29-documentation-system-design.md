@@ -50,6 +50,11 @@ decision records, guides, API references, contracts, specifications,
 implementation plans, repository policies, source notices, and third-party
 references.
 
+Root `AGENTS.md` files are repository governance inputs rather than product
+documentation. Each repository owns one and keeps it aligned with that
+repository's actual responsibilities. Governance files are excluded from the
+product-document index requirement and automated product-document validation.
+
 The `LICENSE` files use the unmodified MIT license text and are not subject to
 the Markdown document metadata rule.
 
@@ -116,8 +121,9 @@ run from a fresh clone must state its prerequisites and expected result.
 
 ## Document Identity
 
-Every Markdown document starts with exactly one level-one heading followed by a
-metadata block:
+Every product Markdown document starts with exactly one level-one heading
+followed by a metadata block. Repository `AGENTS.md` files retain the same
+header shape so readers can identify and reference the governing policy:
 
 ```md
 # Human-readable title
@@ -467,8 +473,8 @@ known-broken URL.
 - A decision that changes shared behavior must link to its replacement or
   affected contract.
 - A superseded document must link to its replacement.
-- Indexes must include every Markdown document owned by their repository, except
-  `LICENSE` and generated temporary files.
+- Indexes must include every product Markdown document owned by their
+  repository, except `LICENSE`, root `AGENTS.md`, and generated temporary files.
 
 ## File Layout
 
@@ -494,8 +500,8 @@ docs/
     YYYY-MM-DD-topic.md
 ```
 
-Repository-specific files such as `AGENTS.md` and third-party notices remain at
-their conventional locations.
+Each repository keeps its own `AGENTS.md` and third-party notices at their
+conventional locations. There is no shared workspace-level `AGENTS.md`.
 
 The former internal workflow directories move to `docs/specs` and `docs/plans`. Internal links
 are updated in the same change. The previous directory is removed after every
@@ -532,7 +538,8 @@ reference is migrated.
 
 ## Automated Validation
 
-The documentation gate checks all tracked Markdown files:
+The documentation gate checks all tracked product Markdown files. A root
+`AGENTS.md` is a repository governance input and is excluded from this scan:
 
 1. Exactly one level-one heading exists.
 2. The title is non-empty and unique within the repository.
@@ -540,7 +547,7 @@ The documentation gate checks all tracked Markdown files:
 4. IDs match the `ICE3-<AREA>-<TYPE>-<NNN>` format.
 5. IDs are unique across the local documentation set.
 6. The status value is supported.
-7. Repository indexes include every owned Markdown document.
+7. Repository indexes include every owned product Markdown document.
 8. Relative file links resolve to tracked files.
 9. Heading anchors resolve to headings in the target document.
 10. Cross-repository links use `https://github.com/ice-3d/...` and map to a known

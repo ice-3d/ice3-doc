@@ -13,6 +13,7 @@
 - Consumer repositories link to canonical contract documents instead of maintaining independent complete copies.
 - A contract change requires checking every consumer and passing all cross-repository documentation and conformance checks.
 - Every product Markdown document has a unique `ICE3-<AREA>-<TYPE>-<NNN>` ID, explicit title, status, owner, index entry, and valid relative references.
+- Root `AGENTS.md` files are repository governance inputs, not product documentation, and are excluded from product-document discovery.
 
 ## Delivery
 
@@ -36,10 +37,8 @@
 ## Customer asset protection
 
 - Real customer model assets remain in a controlled local directory outside every repository.
-- Original models and derived assets must not enter documentation, screenshots, examples, diagrams, logs, build output, or Git history.
-- Derived assets include converted models, simplified models, previews, thumbnails, extracted textures, and other identifiable content.
-- Do not stage, commit, push, or upload customer assets or derivative data to any remote service.
-- Public documentation uses synthetic, sanitized, or explicitly redistributable material.
+- Customer models or derived fragments must not enter documentation, screenshots, examples, diagrams, logs, or Git history.
+- Public documentation uses synthetic, sanitized, or explicitly redistributable material instead.
 - Before completing asset-related work, inspect Git status, tracked files, ignore rules, and staged content.
 
 ## Verification
