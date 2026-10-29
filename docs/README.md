@@ -39,6 +39,7 @@
 | `ICE3-DOC-SPEC-009` | [Industrial Semantic Layer](specs/2026-10-28-industrial-semantic-layer-design.md) | Implemented | Define the industrial workspace core |
 | `ICE3-DOC-SPEC-010` | [Synthetic Wastewater Plant Asset](specs/2026-10-28-synthetic-wastewater-plant-asset-design.md) | Implemented | Define deterministic synthetic asset generation |
 | `ICE3-DOC-SPEC-011` | [Documentation System](specs/2026-10-29-documentation-system-design.md) | Implemented | Define the public documentation contract |
+| `ICE3-DOC-SPEC-012` | [全中文文档改版](specs/2026-10-29-chinese-documentation-policy-design.md) | Draft | 定义中文叙述边界、迁移顺序与自动校验 |
 
 ## Implementation Plans
 
