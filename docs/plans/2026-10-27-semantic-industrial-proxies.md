@@ -12,13 +12,13 @@
 
 **Architecture:** The toolchain fits a proxy from source mesh geometry, accepts it only when surface deviation, volume inflation, and triangle reduction all pass fixed thresholds, and stores the candidate in the bounded workspace. Adaptive LOD compares that mesh replacement with primitive QEM samples; the Prepared GLB builder swaps mesh geometry without changing nodes or selection IDs.
 
-**Tech Stack:** Node.js 24 LTS, TypeScript 7, ESM, npm workspaces, Node.js built-in test runner, `expect`, `tsx`, Prepared GLB, OGC 3D Tiles 1.1
+**Tech Stack:** Node.js 24.22.1 LTS, TypeScript 7, ESM, npm workspaces, Node.js built-in test runner, `expect`, `tsx`, Prepared GLB, OGC 3D Tiles 1.1
 
 **Spec:** `../specs/2026-10-27-semantic-industrial-proxy-design.md`
 
 ## Global Constraints
 
-- Use Node 24 from `.nvmrc`; do not verify with Node 25.
+- Use Node.js 24.22.1 LTS from `.nvmrc`; do not verify with Node 25.
 - Work on a feature branch and merge to `main` only after full verification.
 - Do not add runtime dependencies.
 - Proxy generation is offline toolchain work only.

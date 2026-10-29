@@ -12,7 +12,7 @@
 
 **Architecture:** A main-thread planner selects a useful batch-building job only after the camera has settled. A bounded Worker pool produces transferable batch buffers, and a byte-budgeted uploader builds a candidate GPU generation. The generation is activated atomically; stale, failed, or over-budget work is discarded while the prior generation remains active.
 
-**Tech Stack:** Node.js 24 LTS, TypeScript 7, Web Workers, Transferable ArrayBuffer, WebGL2, Node.js built-in test runner, `expect`, `tsx`, Playwright
+**Tech Stack:** Node.js 24.22.1 LTS, TypeScript 7, Web Workers, Transferable ArrayBuffer, WebGL2, Node.js built-in test runner, `expect`, `tsx`, Playwright
 
 **Spec:** `../specs/2026-10-27-industrial-render-batching-design.md`
 
@@ -20,7 +20,7 @@
 
 - Complete static batching first; this plan consumes that batch model.
 - Work on feature branches and merge to `main` only after full verification.
-- Use Node 24 from `.nvmrc`.
+- Use Node.js 24.22.1 LTS from `.nvmrc`.
 - Do not add runtime dependencies.
 - Runtime adaptive batching is optional and defaults to idle-only operation.
 - No large geometry preparation or upload may run during active camera motion.

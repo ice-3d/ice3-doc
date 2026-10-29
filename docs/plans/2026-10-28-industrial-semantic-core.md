@@ -12,13 +12,13 @@
 
 **Architecture:** A pure TypeScript workspace core owns immutable domain models and mutable runtime stores. Registries provide indexed lookup, a relation graph handles typed edges, and `ICEIndustrialWorkspace` coordinates context changes, batched state notifications, events, operations, and manifest serialization without DOM, WebGL, HTTP, or AI-specific concepts.
 
-**Tech Stack:** Node.js 24 LTS, TypeScript 7, ESM, npm workspaces, Node.js built-in test runner, `expect`, `tsx`, JSON Schema-compatible TypeScript validation
+**Tech Stack:** Node.js 24.22.1 LTS, TypeScript 7, ESM, npm workspaces, Node.js built-in test runner, `expect`, `tsx`, JSON Schema-compatible TypeScript validation
 
 **Spec:** `../specs/2026-10-28-industrial-semantic-layer-design.md`
 
 ## Global Constraints
 
-- Use Node.js 24 from `.nvmrc`; run verification with Node 24.
+- Use Node.js 24.22.1 LTS from `.nvmrc`; run verification with the same version.
 - Use TypeScript strict mode and ESM.
 - `@ice3/industrial-core` has zero runtime dependencies.
 - No DOM, browser, WebGL, engine, protocol, file-system, network, or AI dependencies in the core package.

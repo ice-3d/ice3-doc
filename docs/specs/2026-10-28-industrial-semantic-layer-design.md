@@ -617,7 +617,7 @@ ICE3_INDUSTRIAL_ADAPTER_FAILED
 
 ## 13. 工程约束
 
-- Node.js 24 LTS。
+- Node.js 24.22.1 LTS。
 - TypeScript 严格模式。
 - 功能分支开发，完整验证后合入 `main`。
 - 核心包零运行时依赖。

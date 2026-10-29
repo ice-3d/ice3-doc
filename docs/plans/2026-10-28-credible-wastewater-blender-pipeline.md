@@ -12,7 +12,7 @@
 
 **Architecture:** TypeScript 继续维护设备、工艺、位置和区域数据，并导出稳定的构建 JSON。Blender 5.2.3 无界面 Python 脚本读取 JSON，生成分层几何、材质和语义属性，导出标准 GLB；现有预处理和 Tileset 流水线消费该 GLB。
 
-**Tech Stack:** Node.js 24、TypeScript 7、Blender 5.2.3 Python API、glTF 2.0、现有 ICE3 预处理 CLI、Node.js 测试运行器、Playwright、WebGL2
+**Tech Stack:** Node.js 24.22.1 LTS、TypeScript 7、Blender 5.2.3 Python API、glTF 2.0、现有 ICE3 预处理 CLI、Node.js 测试运行器、Playwright、WebGL2
 
 **Spec:** `../specs/2026-10-28-credible-wastewater-blender-pipeline-design.md`
 

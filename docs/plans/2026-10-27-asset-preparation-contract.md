@@ -12,7 +12,7 @@
 
 **Architecture:** Toolchain computes canonical metrics and embeds a small runtime contract in each prepared GLB, then optionally writes a deterministic sidecar report for CI and UI use. The engine validates and exposes the embedded contract while continuing to reject assets that require runtime conversion; the report is never required at runtime.
 
-**Tech Stack:** TypeScript, Node.js 24, ESM, npm workspaces, GLB, Node.js test runner, Playwright
+**Tech Stack:** TypeScript, Node.js 24.22.1 LTS, ESM, npm workspaces, GLB, Node.js test runner, Playwright
 
 **Spec:** `../../contracts/asset-preparation-contract-v1.md`
 
@@ -20,7 +20,7 @@
 
 ## Global Constraints
 
-- Use Node 24 LTS and npm 11 or newer.
+- Use Node.js 24.22.1 LTS and npm 11 or newer.
 - Toolchain output remains a standard single-JSON/single-BIN GLB.
 - Runtime conversion remains forbidden: `runtimeConversionRequired` must be `false`.
 - The GLB is the authoritative runtime artifact; the JSON report is optional.

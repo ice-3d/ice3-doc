@@ -12,7 +12,7 @@
 
 **Architecture:** 在预处理工具工程中增加独立的 TypeScript 生成器，使用 `@gltf-transform/core` 构建几何、材质、场景层级和设备身份。生成器只产出 source GLB；现有 CLI 负责 prepared GLB、空间拆分、LOD 粗模与粗模分块，浏览器示例只加载处理后的 Tileset。
 
-**Tech Stack:** Node.js 24、TypeScript 7、`@gltf-transform/core` 4.5.1、现有预处理 CLI、Node.js 测试运行器、Playwright、WebGL2
+**Tech Stack:** Node.js 24.22.1 LTS、TypeScript 7、`@gltf-transform/core` 4.5.1、现有预处理 CLI、Node.js 测试运行器、Playwright、WebGL2
 
 **Spec:** `../specs/2026-10-28-synthetic-wastewater-plant-asset-design.md`
 

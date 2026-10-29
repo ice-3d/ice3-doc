@@ -22,6 +22,21 @@ compatibility rules, shared metrics, and shared diagnostic identifiers.
 | [`ice3-studio`](https://github.com/ice-3d/ice3-studio/blob/main/README.md) | Reserved authoring workspace |
 | [`ice3-water-demo`](https://github.com/ice-3d/ice3-water-demo/blob/main/README.md) | Reserved water-industry demonstration workspace |
 
+## Development Requirements
+
+Use Node.js 24.22.1 LTS and npm 11 or newer for every ICE3 workspace. This is
+the exact Node.js patch version used by the full verification gate. Each active
+repository pins the same version in `.nvmrc`.
+
+```bash
+nvm install
+nvm use
+node --version
+```
+
+The last command must print `v24.22.1`. Run it before installing dependencies
+or invoking a repository build, test, or documentation command.
+
 ## Start Here
 
 - [Documentation index](docs/README.md)

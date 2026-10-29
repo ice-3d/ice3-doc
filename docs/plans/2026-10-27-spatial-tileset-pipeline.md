@@ -12,13 +12,13 @@
 
 **Architecture:** The toolchain analyzes mesh nodes as atomic semantic units, recursively partitions them by world-space bounds, emits a Prepared GLB per leaf, and writes an explicit 3D Tiles 1.1 tree. A minimal public Tileset runtime loader validates the supported standard subset, schedules partition downloads with bounded concurrency, and commits each completed scene fragment atomically.
 
-**Tech Stack:** TypeScript 7, Node.js 24 LTS, npm workspaces, Node.js test runner, Playwright, Webpack, glTF 2.0, OGC 3D Tiles 1.1, Ajv with the official 3D Tiles JSON Schema bundle.
+**Tech Stack:** TypeScript 7, Node.js 24.22.1 LTS, npm workspaces, Node.js test runner, Playwright, Webpack, glTF 2.0, OGC 3D Tiles 1.1, Ajv with the official 3D Tiles JSON Schema bundle.
 
 **Spec:** `../specs/2026-10-27-spatial-tileset-pipeline-design.md`
 
 ## Global Constraints
 
-- Use Node.js 24 LTS from each repository's `.nvmrc`.
+- Use Node.js 24.22.1 LTS from each repository's `.nvmrc`.
 - Develop on a feature branch; merge to `main` only after the full repository verification passes.
 - Every behavioral change follows RED-GREEN-REFACTOR and commits after a green focused test.
 - Do not use competitor, vendor, or third-party product names in code, identifiers, comments, documentation, tests, screenshots, fixtures, diagnostics, or commit messages.

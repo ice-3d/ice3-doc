@@ -12,13 +12,13 @@
 
 **Architecture:** 扩展 Prepared GLB 的节点身份，使视觉节点可以按 LOD 命名而选择身份保持稳定。工具链先规范化设备几何到受控工作区，再在同一空间树构建任务中生成细模叶子和粗模内部节点，最后原子发布标准 Tileset。
 
-**Tech Stack:** TypeScript 7, Node.js 24 LTS, Node.js test runner, `meshoptimizer@1.3.0`, OGC 3D Tiles 1.1, ICE3 Prepared GLB
+**Tech Stack:** TypeScript 7, Node.js 24.22.1 LTS, Node.js test runner, `meshoptimizer@1.3.0`, OGC 3D Tiles 1.1, ICE3 Prepared GLB
 
 **Spec:** `../specs/2026-10-27-hierarchical-lod-design.md`
 
 ## Global Constraints
 
-- Use Node.js 24 LTS from each repository's `.nvmrc`.
+- Use Node.js 24.22.1 LTS from each repository's `.nvmrc`.
 - Develop on `feature/hierarchical-lod`; merge to `main` only after the complete gate passes.
 - Follow RED-GREEN-REFACTOR for every behavior change.
 - Do not use competitor or vendor product names in artifacts.
