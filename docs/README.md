@@ -14,6 +14,7 @@
 | `ICE3-DOC-ARC-001` | [ICE3 家族架构](architecture.md) | Active | 跨仓库职责和数据流 |
 | `ICE3-DOC-IDX-002` | [架构决策](decisions/README.md) | Active | 共享决策索引 |
 | `ICE3-DOC-CTR-001` | [Asset Preparation Contract v1](contracts/asset-preparation-contract-v1.md) | Active | 权威共享 Asset contract |
+| `ICE3-DOC-CTR-002` | [Toolchain Sidecar Contract v1](contracts/toolchain-sidecar-contract-v1.md) | Active | Studio 与 Toolchain 的本地 Sidecar 协议 |
 
 ## 参考资料
 
