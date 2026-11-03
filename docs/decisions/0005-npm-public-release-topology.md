@@ -2,7 +2,7 @@
 
 > Document ID: ICE3-DOC-ADR-005
 >
-> Status: Active
+> Status: Historical
 >
 > Owner: ICE3 architecture maintainers
 
@@ -14,7 +14,7 @@ ICE3 的源码按职责拆成多个 workspace package，以约束依赖方向并
 
 ## 决策
 
-对 npm 公开发布三个 package：
+本决策记录 Toolchain 退役前的 npm 公开发布拓扑，当时发布三个 package：
 
 | Package | 来源 | 用途 |
 |---|---|---|
@@ -45,6 +45,10 @@ Toolchain 的 `@ice3/toolchain-core` 保持 `private`，不作为单独安装入
 - 以后如出现真实需求，可以增加新的公开 package，但不能把当前私有 package 自动视为
   稳定 API。
 
+Toolchain 仓库退役后，`@ice3/toolchain` 不再是现行产品依赖。当前 Studio Asset
+pipeline 通过 Studio Core、Server 和 `studio-cli` 提供，Source import、prepare、
+partition、LOD、Tileset export 和 validation 不调用独立 Toolchain package。
+
 ## 验证
 
 ```bash
@@ -56,7 +60,7 @@ npm run release:check
 ```bash
 npm install <ice3-tarball>
 npm install <industrial-core-tarball>
-npm install <toolchain-tarball>
+npm install <historical-toolchain-tarball> # 仅用于历史兼容验证
 npx ice3-tool --help
 ```
 

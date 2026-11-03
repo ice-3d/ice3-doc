@@ -1,0 +1,11 @@
+{
+  "jsonrpc": "2.0",
+  "id": 42,
+  "method": "asset.preview",
+  "params": {
+    "sourcePath": "cache/preview/00000002-source.glb",
+    "outputPath": "cache/toolchain/prepared-preview/asset.glb",
+    "assetId": "prepared-preview",
+    "budget": "unrestricted"
+  }
+}

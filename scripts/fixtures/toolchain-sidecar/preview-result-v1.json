@@ -1,0 +1,10 @@
+{
+  "assetId": "prepared-preview",
+  "contentHash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "profileVersion": "ice3-prepared-glb-v1",
+  "manifestPath": "cache/toolchain/prepared-preview/manifest.json",
+  "primaryPath": "cache/toolchain/prepared-preview/asset.glb",
+  "byteLength": 123456,
+  "diagnostics": [],
+  "warnings": []
+}

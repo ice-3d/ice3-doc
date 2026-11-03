@@ -1,0 +1,182 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ice3.dev/contracts/toolchain-sidecar-v1.schema.json",
+  "title": "ICE3 Toolchain Sidecar Contract v1",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "jsonrpc": { "const": "2.0" },
+    "id": { "type": ["integer", "string"] },
+    "method": { "type": "string" },
+    "params": { "type": "object" },
+    "result": true,
+    "error": { "$ref": "#/$defs/errorResult" }
+  },
+  "required": ["jsonrpc"],
+  "$defs": {
+    "capabilities": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "contractVersion",
+        "packageVersion",
+        "operations",
+        "inputFormats",
+        "features",
+        "limits"
+      ],
+      "properties": {
+        "contractVersion": { "const": "1.0.0" },
+        "packageVersion": { "type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+" },
+        "operations": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "toolchain.capabilities",
+              "asset.validate",
+              "asset.prepare",
+              "asset.preview",
+              "asset.partition",
+              "$/cancel"
+            ]
+          },
+          "minItems": 6,
+          "uniqueItems": true
+        },
+        "inputFormats": {
+          "type": "array",
+          "items": { "type": "string" },
+          "uniqueItems": true
+        },
+        "features": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["lod", "partition", "tileset", "renderBatching", "cancellation"],
+          "properties": {
+            "lod": { "type": "boolean" },
+            "partition": { "type": "boolean" },
+            "tileset": { "type": "boolean" },
+            "renderBatching": { "type": "boolean" },
+            "cancellation": { "type": "boolean" }
+          }
+        },
+        "limits": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["maxMessageBytes", "maxConcurrentJobs", "maxSourceBytes"],
+          "properties": {
+            "maxMessageBytes": { "type": "integer", "maximum": 8388608 },
+            "maxConcurrentJobs": { "type": "integer", "minimum": 1 },
+            "maxSourceBytes": { "type": "integer", "minimum": 1 }
+          }
+        }
+      }
+    },
+    "previewRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["jsonrpc", "id", "method", "params"],
+      "properties": {
+        "jsonrpc": { "const": "2.0" },
+        "id": { "type": "integer" },
+        "method": { "const": "asset.preview" },
+        "params": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["sourcePath", "outputPath", "assetId", "budget"],
+          "properties": {
+            "sourcePath": { "$ref": "#/$defs/relativePath" },
+            "outputPath": { "$ref": "#/$defs/relativePath" },
+            "assetId": { "type": "string", "minLength": 1 },
+            "budget": { "enum": ["unrestricted", "interactive-desktop-v1"] }
+          }
+        }
+      }
+    },
+    "assetResult": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "assetId",
+        "contentHash",
+        "profileVersion",
+        "manifestPath",
+        "primaryPath",
+        "byteLength",
+        "diagnostics",
+        "warnings"
+      ],
+      "properties": {
+        "assetId": { "type": "string", "minLength": 1 },
+        "contentHash": {
+          "type": "string",
+          "pattern": "^sha256:[a-f0-9]{64}$"
+        },
+        "profileVersion": { "type": "string", "minLength": 1 },
+        "manifestPath": { "$ref": "#/$defs/relativePath" },
+        "primaryPath": { "$ref": "#/$defs/relativePath" },
+        "byteLength": { "type": "integer", "minimum": 12 },
+        "diagnostics": { "$ref": "#/$defs/diagnostics" },
+        "warnings": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    },
+    "progressNotification": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["jsonrpc", "method", "params"],
+      "properties": {
+        "jsonrpc": { "const": "2.0" },
+        "method": { "const": "job.progress" },
+        "params": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["requestId", "phase", "completed", "total"],
+          "properties": {
+            "requestId": { "type": "integer" },
+            "phase": { "type": "string", "minLength": 1 },
+            "completed": { "type": "integer", "minimum": 0 },
+            "total": { "type": "integer", "minimum": 0 }
+          }
+        }
+      }
+    },
+    "errorResult": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["code", "message", "retryable"],
+      "properties": {
+        "code": { "type": "string", "pattern": "^ICE3_TOOL_" },
+        "message": { "type": "string", "minLength": 1 },
+        "retryable": { "type": "boolean" },
+        "data": true
+      }
+    },
+    "diagnostics": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["code", "message"],
+        "properties": {
+          "code": { "type": "string", "pattern": "^ICE3_TOOL_" },
+          "message": { "type": "string", "minLength": 1 },
+          "pointer": { "type": "string" }
+        }
+      }
+    },
+    "relativePath": {
+      "type": "string",
+      "minLength": 1,
+      "not": {
+        "anyOf": [
+          { "pattern": "^/" },
+          { "pattern": "^[A-Za-z]:" },
+          { "pattern": "(^|/)\\.\\.(/|$)" }
+        ]
+      }
+    }
+  }
+}

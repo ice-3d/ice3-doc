@@ -1,0 +1,25 @@
+{
+  "contractVersion": "1.0.0",
+  "packageVersion": "0.2.0",
+  "operations": [
+    "toolchain.capabilities",
+    "asset.validate",
+    "asset.prepare",
+    "asset.preview",
+    "asset.partition",
+    "$/cancel"
+  ],
+  "inputFormats": ["glb", "gltf"],
+  "features": {
+    "lod": true,
+    "partition": true,
+    "tileset": true,
+    "renderBatching": true,
+    "cancellation": true
+  },
+  "limits": {
+    "maxMessageBytes": 8388608,
+    "maxConcurrentJobs": 2,
+    "maxSourceBytes": 2147483648
+  }
+}

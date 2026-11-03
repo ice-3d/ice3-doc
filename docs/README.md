@@ -26,10 +26,11 @@
 | ID | Title | Status | Purpose |
 |---|---|---|---|
 | `ICE3-DOC-ADR-001` | [通用 Engine 与垂直应用](decisions/0001-universal-engine-and-vertical-applications.md) | Active | 分离可复用平台能力与行业解决方案 |
-| `ICE3-DOC-ADR-002` | [离线开放 Asset 流水线](decisions/0002-offline-open-asset-pipeline.md) | Active | conversion 留在离线阶段，runtime format 保持标准 |
+| `ICE3-DOC-ADR-002` | [离线开放 Asset 流水线](decisions/0002-offline-open-asset-pipeline.md) | Active | Studio 在 Runtime 外完成 preparation，runtime format 保持标准 |
 | `ICE3-DOC-ADR-003` | [共享 2D/3D 组合](decisions/0003-shared-2d-3d-composition.md) | Active | 使用统一的 engine layer 和 input model |
 | `ICE3-DOC-ADR-004` | [通用 Semantic 接口](decisions/0004-generic-semantic-interfaces.md) | Active | Agent integration 留在 core semantic API 之外 |
-| `ICE3-DOC-ADR-005` | [npm 公开发布拓扑](decisions/0005-npm-public-release-topology.md) | Active | 定义三个公开 package 和内部模块边界 |
+| `ICE3-DOC-ADR-005` | [npm 公开发布拓扑](decisions/0005-npm-public-release-topology.md) | Historical | 记录 Toolchain 退役前的公开 package 发布决策 |
+| `ICE3-DOC-ADR-006` | [Agent 主导的 Studio 工作台](decisions/0006-agent-led-studio-workbench.md) | Active | 定义 AI 主导、人类审阅与按需精细操作的产品分工 |
 
 ## Spec
 
@@ -69,3 +70,9 @@
 | `ICE3-DOC-PLAN-015` | [文档系统](plans/2026-10-29-documentation-system.md) | Implemented | 实现本文档系统 |
 | `ICE3-DOC-PLAN-016` | [全中文文档改版](plans/2026-10-29-chinese-documentation-policy.md) | Implemented | 迁移全部产品文档并启用中文叙述门禁 |
 | `ICE3-DOC-PLAN-017` | [npm 公开发布](plans/2026-10-29-npm-public-release.md) | Implemented | 实现三个公开 package 的构建、验证与发布 |
+
+## 历史文档
+
+| ID | Title | Status | Purpose |
+|---|---|---|---|
+| `ICE3-DOC-CTR-002` | [Toolchain Sidecar Contract v1](contracts/toolchain-sidecar-contract-v1.md) | Deprecated | 已退役 Sidecar 的历史契约；当前 Studio 原生 Asset pipeline 不启动该进程 |

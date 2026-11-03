@@ -30,6 +30,13 @@
 | GLB | 二进制 glTF 资产容器 | 不改成其他缩写或中文简称 |
 | WebGL | 浏览器 2D/3D 图形接口 | 保留官方大小写 |
 | OGC 3D Tiles | 开放空间数据流式加载规范 | 保留空格、数字和大小写 |
+| Studio | AI-native authoring application | 与 Engine 和垂直应用区分；也包含当前原生 Asset pipeline |
+| Agent | 理解目标、查询上下文并提交受控操作提案的外部智能体 | 不指 Studio 内置模型或策略 |
+| Agent Mission Control | Studio 默认的 Agent 工作入口 | 展示目标、上下文、计划、活动和人工接手 |
+| Document | Studio 持久化的权威建模文档 | 与派生 Geometry、GLB 和预览区分 |
+| Operation | 对 Document 的类型化原子修改意图 | 必须经过校验、diff、幂等和 revision 边界 |
+| ChangeSet | 等待求值、审阅和批准的候选变更集合 | 未批准时不得改变当前 revision |
+| Sidecar | 由主进程管理的版本化本地辅助进程 | Studio 当前不启动 Asset Sidecar；相关契约仅为历史记录 |
 
 ## 使用规则
 

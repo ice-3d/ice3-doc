@@ -14,11 +14,10 @@ rule、shared metric 和 shared Diagnostic ID 的唯一权威。
 | 仓库 | 职责 |
 |---|---|
 | [`ice3-engine`](https://github.com/ice-3d/ice3-engine/blob/main/README.md) | 可复用的工业 3D Runtime 和公开 API |
-| [`ice3-toolchain`](https://github.com/ice-3d/ice3-toolchain/blob/main/README.md) | 离线 Asset preparation、partitioning、LOD 和 validation |
 | [`ice3-industrial`](https://github.com/ice-3d/ice3-industrial/blob/main/README.md) | 浏览器独立的 industrial semantic core |
 | [`ice3-agent-console`](https://github.com/ice-3d/ice3-agent-console/blob/main/README.md) | Agent 驱动的工业 Scene 应用 |
 | [`ice3-doc`](https://github.com/ice-3d/ice3-doc/blob/main/README.md) | 共享架构和 contract 仓库 |
-| [`ice3-studio`](https://github.com/ice-3d/ice3-studio/blob/main/README.md) | 预留的 authoring workspace |
+| [`ice3-studio`](https://github.com/ice-3d/ice3-studio/blob/main/README.md) | AI-native industrial 3D authoring workspace，也是 Source import、prepare、partition、LOD 和 Tileset 导出的统一入口 |
 | [`ice3-water-demo`](https://github.com/ice-3d/ice3-water-demo/blob/main/README.md) | 预留的水务行业演示 workspace |
 
 ## 开发要求
@@ -41,6 +40,7 @@ command 前先运行该检查。
 - [ICE3 家族架构](docs/architecture.md)
 - [架构决策](docs/decisions/README.md)
 - [Asset Preparation Contract v1](docs/contracts/asset-preparation-contract-v1.md)
+- [Agent 主导的 Studio 工作台](docs/decisions/0006-agent-led-studio-workbench.md)
 
 ## 文档验证
 
