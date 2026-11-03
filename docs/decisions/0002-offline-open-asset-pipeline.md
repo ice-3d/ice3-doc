@@ -17,7 +17,7 @@ conversion code。
 ## 决策
 
 所有 source format parsing、Geometry preparation、simplification、partitioning 和
-LOD generation 都在 `ice3-toolchain` 中完成。Runtime content 是带文档化 ICE3
+LOD generation 都在 `ice3-studio` 的离线 Asset pipeline 中完成。Runtime content 是带文档化 ICE3
 Prepared GLB Profile 的标准 GLB；需要空间流式加载时，通过 OGC 3D Tiles 1.1 分发。
 
 公开 GLB 和 Tileset format 足以表达 Runtime artifact 时，ICE3 不引入私有单体容器。
@@ -34,7 +34,7 @@ Prepared GLB Profile 的标准 GLB；需要空间流式加载时，通过 OGC 3D
 
 - Runtime failure 与 source-conversion failure 分离。
 - 现有 GLB 和 Tileset tooling 可以检查或托管兼容 artifact。
-- Toolchain 负责 format evolution 和 migration。
+- Studio Asset pipeline 负责 format evolution 和 migration。
 - 浏览器只下载当前视图所需数据。
 
 ## 兼容性
@@ -45,7 +45,7 @@ required feature 会被拒绝，系统不会猜测处理。
 ## 验证
 
 - Engine test 拒绝要求 Runtime conversion 的 profile。
-- Toolchain test 验证生成的 GLB 和 Tileset artifact。
+- Studio test 验证生成的 GLB 和 Tileset artifact。
 - Example build 只有在全部输出通过 validation 后才原子发布。
 
 ## 关联文档

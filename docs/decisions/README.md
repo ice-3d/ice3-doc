@@ -14,7 +14,8 @@
 | `ICE3-DOC-ADR-002` | [离线开放 Asset pipeline](0002-offline-open-asset-pipeline.md) | Active | conversion 留在离线阶段并使用标准可分发格式 |
 | `ICE3-DOC-ADR-003` | [共享 2D/3D composition](0003-shared-2d-3d-composition.md) | Active | 使用统一的 engine-owned layer 和 input model |
 | `ICE3-DOC-ADR-004` | [通用 semantic interface](0004-generic-semantic-interfaces.md) | Active | semantic API 不依赖 Agent 实现 |
-| `ICE3-DOC-ADR-005` | [npm 公开发布拓扑](0005-npm-public-release-topology.md) | Active | 收敛为三个公开 package 并保持内部模块私有 |
+| `ICE3-DOC-ADR-005` | [npm 公开发布拓扑](0005-npm-public-release-topology.md) | Historical | 记录 Toolchain 退役前的公开 package 发布决策 |
+| `ICE3-DOC-ADR-006` | [Agent 主导的 Studio 工作台](0006-agent-led-studio-workbench.md) | Active | AI 负责建模动作，人类负责意图、审阅和批准 |
 
 ## 关联文档
 

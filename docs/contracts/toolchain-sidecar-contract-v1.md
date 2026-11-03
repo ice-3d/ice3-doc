@@ -1,23 +1,28 @@
-# ICE3 Toolchain Sidecar 协同契约 v1
+# [已退役] ICE3 Toolchain Sidecar 协同契约 v1
 
 > Document ID: ICE3-DOC-CTR-002
 >
-> Status: Active
+> Status: Deprecated
 >
 > Owner: ICE3 architecture maintainers
 
 | 项目 | 内容 |
 | --- | --- |
-| 状态 | 生效 |
+| 状态 | 已退役；仅保留历史契约 |
 | 契约版本 | 1.0.0 |
 | 日期 | 2026-10-30 |
-| 适用范围 | Studio Server、Toolchain Sidecar、测试与发布构建 |
+| 历史适用范围 | Studio Server、Toolchain Sidecar、测试与发布构建 |
 | 契约形式 | stdio 上的 JSON-RPC 2.0 NDJSON |
+
+> 当前 Studio 已原生实现 Source import、prepare、partition、LOD、semantic proxy、
+> render batch、Tileset export 和 validation，不再启动 Toolchain Sidecar，也没有现行
+> Toolchain 仓库或发布 package。本文仅记录退役前的进程协议，不能作为新实现的集成依据。
 
 ## 1. 目标
 
-定义 Studio 与 Toolchain 之间稳定、可验证且本地运行的进程契约。Studio 负责 Document、
-Operation、ChangeSet、审批和 revision；Toolchain 负责由这些输入派生的 Asset 准备结果。
+记录退役前 Studio 与 Toolchain 之间稳定、可验证且本地运行的进程契约。Studio 负责
+Document、Operation、ChangeSet、审批和 revision；当时的 Toolchain 负责由这些输入
+派生的 Asset 准备结果。
 
 本契约解决以下问题：
 
@@ -25,7 +30,7 @@ Operation、ChangeSet、审批和 revision；Toolchain 负责由这些输入派�
 - Toolchain 不通过命令行文本或 stderr 猜测成功状态。
 - 双方可以独立发布，并通过 contract major 与 capability 协商兼容性。
 - 请求、输出路径、取消和失败清理具有统一语义。
-- 生产安装使用固定的 Sidecar 包，不在请求时下载或选择任意命令。
+- 当时的发布构建使用固定的 Sidecar 包，不在请求时下载或选择任意命令。
 
 ## 2. 兼容窗口
 
@@ -35,7 +40,7 @@ Operation、ChangeSet、审批和 revision；Toolchain 负责由这些输入派�
 - 新增可选字段只能出现在相同 major 的次版本中；消费方必须忽略未知响应字段，但请求中的
   未知字段必须被拒绝。
 - major 不兼容时，Studio 保留文档编辑能力，只关闭 Toolchain-backed 功能，并报告
-  `ICE3_STUDIO_TOOLCHAIN_CONTRACT_INCOMPATIBLE`。
+  `ICE3_STUDIO_TOOLCHAIN_INCOMPATIBLE`。
 
 ## 3. 传输
 
@@ -196,7 +201,8 @@ JSON-RPC error 的 `data` 包含：
 - Studio 在启动前 canonicalize workspace；Sidecar 再次 canonicalize 每次读写路径。
 - Sidecar 接收最小环境，不接收审批 token 或 Agent 凭据。
 - 客户端限制并发、请求大小、响应大小和超时。
-- 进程崩溃时客户端最多重启两次；连续失败后进入 unavailable 状态。
+- 已发出的请求遇到进程崩溃时，客户端重启 Sidecar 并重试一次；重启或握手失败时进入
+  unavailable 状态，后续请求可再次尝试重新建立连接。
 - 空闲退出、重启和缓存命中不得改变 Studio Document 或 revision。
 
 ## 10. Schema 与验证
@@ -216,7 +222,5 @@ JSON-RPC error 的 `data` 包含：
 
 ## 11. 变更流程
 
-1. 在 `ice3-doc` 修改本契约、Schema 和冻结样例。
-2. 运行 `npm test` 与 `npm run docs:check`。
-3. 更新 Toolchain Sidecar 和 Studio client 的跨仓库测试。
-4. 两个消费仓库验证通过后，方可发布新 contract minor 或 major。
+本契约已经冻结，不再发布新版本。当前 Asset pipeline 的变更由 Studio 自身的
+`ICE3-STUDIO-SPEC-019`、公开 CLI 和 Engine consumption contract 管理。
