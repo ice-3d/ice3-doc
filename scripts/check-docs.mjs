@@ -83,6 +83,12 @@ export async function checkRepository(root, options = {}) {
 
   if (language) {
     for (const document of documents) {
+      if (
+        document.status === 'Historical'
+        || document.status === 'Deprecated'
+      ) {
+        continue;
+      }
       const displayPath = relative(repositoryRoot, document.path);
       for (const violation of findLanguageViolations(
         document.source,

@@ -37,6 +37,8 @@
 - `LICENSE` 及具有法律效力的原始许可文本。
 - `THIRD_PARTY_NOTICES.md`、测试夹具中的 `SOURCE.md` 等第三方声明或上游原文。
 - `scripts/fixtures/**/*.md` 等故意保持特定内容的测试输入。
+- `Historical` 和 `Deprecated` 文档中保留的原始实施记录正文。此类文档的标题、
+  Document ID、Status、Owner 和索引用途仍必须可检索，正文不得被描述成当前能力。
 
 例外文件仍受仓库命名、安全与资产规则约束，但不要求改写成中文。
 
@@ -130,6 +132,10 @@ The current Selection remains stable when the camera changes.
 - 技术结论、范围、预算、失败条件和验收标准
 - 历史决策与后续演进的先后关系
 
+已完成并被后续实现取代的 Spec、Plan 在迁移时优先标记为 `Historical`。这些文档保留
+原始技术记录，可以避免翻译过程中改写证据；当前入口、指南、架构和参考文档必须继续
+使用中文，并在历史文档顶部给出替代文档或退役原因。
+
 ## 6. 仓库与提交策略
 
 每个仓库使用独立的功能分支 `docs/chinese-localization`。
@@ -171,6 +177,8 @@ npm run docs:check:workspace
 - 忽略 fenced code block、inline code、URL、路径和元数据。
 - 标题必须包含中文，或完全由一个受控技术词构成。
 - 连续英文叙述超过可配置阈值且不含中文时报告错误。
+- `Historical` 和 `Deprecated` 文档跳过正文语言检查，但继续接受 ID、状态、链接和
+  索引检查。
 - `AGENTS.md` 参与语言检查，但不参与产品文档索引检查。
 - 例外文件通过明确、可审计的路径规则排除，不使用宽泛目录忽略。
 
@@ -182,6 +190,7 @@ npm run docs:check:workspace
 4. 代码块中的英文通过。
 5. 合法例外文件通过。
 6. `AGENTS.md` 接受语言检查但不要求进入文档索引。
+7. `Historical` 和 `Deprecated` 记录跳过正文语言检查。
 
 ## 9. 人工审查
 

@@ -111,4 +111,6 @@ Runtime 可以展示和查询 industrial meaning，但业务规则、审批 work
 - `ICE3-DOC-ADR-003` — [共享 2D/3D composition](decisions/0003-shared-2d-3d-composition.md)
 - `ICE3-DOC-ADR-004` — [通用 semantic interface](decisions/0004-generic-semantic-interfaces.md)
 - `ICE3-DOC-ADR-006` — [Agent 主导的 Studio 工作台](decisions/0006-agent-led-studio-workbench.md)
+- `ICE3-STUDIO-REF-005` — [Studio 资产流水线](https://github.com/ice-3d/ice3-studio/blob/main/docs/reference/asset-pipeline.md)
+- `ICE3-AGENT-REF-002` — [Agent Console Runtime Asset 交付](https://github.com/ice-3d/ice3-agent-console/blob/main/docs/reference/asset-delivery.md)
 - `ICE3-DOC-CTR-002` — [Toolchain Sidecar Contract v1](contracts/toolchain-sidecar-contract-v1.md)（Deprecated；仅供历史追溯）

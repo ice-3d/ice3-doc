@@ -8,7 +8,7 @@
 
 ## 从这里开始
 
-| ID | Title | Status | Purpose |
+| ID | 标题 | Status | 用途 |
 |---|---|---|---|
 | `ICE3-DOC-RM-001` | [ICE3 Documentation](../README.md) | Active | 家族入口和仓库地图 |
 | `ICE3-DOC-ARC-001` | [ICE3 家族架构](architecture.md) | Active | 跨仓库职责和数据流 |
@@ -17,13 +17,15 @@
 
 ## 参考资料
 
-| ID | Title | Status | Purpose |
+| ID | 标题 | Status | 用途 |
 |---|---|---|---|
 | `ICE3-DOC-REF-001` | [ICE3 技术词表](reference/terminology.md) | Active | 固定技术词汇写法并提供中文解释 |
+| `ICE3-DOC-REF-002` | [文档命名与编号规范](reference/documentation-conventions.md) | Active | 统一文件名、Document ID、状态、索引顺序和链接规则 |
+| `ICE3-DOC-REF-003` | [公开发布状态](reference/releases.md) | Active | 记录当前 npm 包、版本和发布验证边界 |
 
 ## 共享决策
 
-| ID | Title | Status | Purpose |
+| ID | 标题 | Status | 用途 |
 |---|---|---|---|
 | `ICE3-DOC-ADR-001` | [通用 Engine 与垂直应用](decisions/0001-universal-engine-and-vertical-applications.md) | Active | 分离可复用平台能力与行业解决方案 |
 | `ICE3-DOC-ADR-002` | [离线开放 Asset 流水线](decisions/0002-offline-open-asset-pipeline.md) | Active | Studio 在 Runtime 外完成 preparation，runtime format 保持标准 |
@@ -34,7 +36,7 @@
 
 ## Spec
 
-| ID | Title | Status | Purpose |
+| ID | 标题 | Status | 用途 |
 |---|---|---|---|
 | `ICE3-DOC-SPEC-001` | [Adaptive Industrial LOD](specs/2026-10-27-adaptive-industrial-lod-design.md) | Implemented | 按实测设备误差分配粗模 budget |
 | `ICE3-DOC-SPEC-002` | [Adaptive Tileset Scheduler](specs/2026-10-27-adaptive-tileset-scheduler-design.md) | Implemented | 调度相机驱动的 Tileset 工作 |
@@ -43,7 +45,7 @@
 | `ICE3-DOC-SPEC-005` | [LOD Refinement 与 Scene API](specs/2026-10-27-lod-refinement-and-scene-api-design.md) | Implemented | 细化 LOD cut 并提供通用 Scene query |
 | `ICE3-DOC-SPEC-006` | [Semantic Industrial Proxy](specs/2026-10-27-semantic-industrial-proxy-design.md) | Implemented | 增加保守的 OBB 和 cylinder LOD candidate |
 | `ICE3-DOC-SPEC-007` | [Spatial Tileset Pipeline](specs/2026-10-27-spatial-tileset-pipeline-design.md) | Implemented | 将大型模型拆分为开放 Tileset content |
-| `ICE3-DOC-SPEC-008` | [可信污水处理厂 Blender Pipeline](specs/2026-10-28-credible-wastewater-blender-pipeline-design.md) | Implemented | 生成可信的虚构工业 Scene |
+| `ICE3-DOC-SPEC-008` | [可信污水处理厂 Blender Pipeline](specs/2026-10-28-credible-wastewater-blender-pipeline-design.md) | Historical | 早期合成 Asset 生成方案；当前由 Studio 原生 Pipeline 取代 |
 | `ICE3-DOC-SPEC-009` | [Industrial Semantic Layer](specs/2026-10-28-industrial-semantic-layer-design.md) | Implemented | 定义 industrial workspace core |
 | `ICE3-DOC-SPEC-010` | [Synthetic Wastewater Plant Asset](specs/2026-10-28-synthetic-wastewater-plant-asset-design.md) | Implemented | 定义确定性的合成 Asset 生成 |
 | `ICE3-DOC-SPEC-011` | [文档系统](specs/2026-10-29-documentation-system-design.md) | Implemented | 定义公开文档 contract |
@@ -51,7 +53,7 @@
 
 ## 实施计划
 
-| ID | Title | Status | Purpose |
+| ID | 标题 | Status | 用途 |
 |---|---|---|---|
 | `ICE3-DOC-PLAN-001` | [Adaptive Industrial LOD](plans/2026-10-27-adaptive-industrial-lod.md) | Implemented | 实现 adaptive device budget |
 | `ICE3-DOC-PLAN-002` | [Adaptive Render Batching Worker](plans/2026-10-27-adaptive-render-batching-workers.md) | Implemented | 实现空闲时 Worker batching |
@@ -64,7 +66,7 @@
 | `ICE3-DOC-PLAN-009` | [Semantic Industrial Proxy](plans/2026-10-27-semantic-industrial-proxies.md) | Implemented | 实现 proxy candidate |
 | `ICE3-DOC-PLAN-010` | [Spatial Tileset Pipeline](plans/2026-10-27-spatial-tileset-pipeline.md) | Implemented | 实现空间 partitioning |
 | `ICE3-DOC-PLAN-011` | [静态 Render Batching](plans/2026-10-27-static-render-batching.md) | Implemented | 实现确定性 render batch |
-| `ICE3-DOC-PLAN-012` | [可信污水处理厂 Blender Pipeline](plans/2026-10-28-credible-wastewater-blender-pipeline.md) | Implemented | 实现人工设计的合成 Asset 生成 |
+| `ICE3-DOC-PLAN-012` | [可信污水处理厂 Blender Pipeline](plans/2026-10-28-credible-wastewater-blender-pipeline.md) | Historical | 早期人工设计 Asset 生成的交付记录 |
 | `ICE3-DOC-PLAN-013` | [Industrial Semantic Core](plans/2026-10-28-industrial-semantic-core.md) | Implemented | 实现 semantic core |
 | `ICE3-DOC-PLAN-014` | [Synthetic Wastewater Plant Asset](plans/2026-10-28-synthetic-wastewater-plant-asset.md) | Implemented | 实现合成 Asset 输出 |
 | `ICE3-DOC-PLAN-015` | [文档系统](plans/2026-10-29-documentation-system.md) | Implemented | 实现本文档系统 |
@@ -73,6 +75,12 @@
 
 ## 历史文档
 
-| ID | Title | Status | Purpose |
+| ID | 标题 | Status | 用途 |
 |---|---|---|---|
 | `ICE3-DOC-CTR-002` | [Toolchain Sidecar Contract v1](contracts/toolchain-sidecar-contract-v1.md) | Deprecated | 已退役 Sidecar 的历史契约；当前 Studio 原生 Asset pipeline 不启动该进程 |
+
+## 关联文档
+
+- `ICE3-STUDIO-REF-005` — [Studio 资产流水线](https://github.com/ice-3d/ice3-studio/blob/main/docs/reference/asset-pipeline.md)
+- `ICE3-AGENT-REF-002` — [Agent Console Runtime Asset 交付](https://github.com/ice-3d/ice3-agent-console/blob/main/docs/reference/asset-delivery.md)
+- `ICE3-WATER-IDX-001` — [Water Demo 文档索引](https://github.com/ice-3d/ice3-water-demo/blob/main/docs/README.md)

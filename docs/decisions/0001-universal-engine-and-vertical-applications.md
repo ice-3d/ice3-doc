@@ -13,8 +13,8 @@ ICE3 必须服务多个工业领域，而不为每个应用重复建设 renderin
 
 ## 决策
 
-可复用的 Engine、Toolchain 和 industrial semantic core 保持领域中立。行业专用
-Entity、workflow、术语、数据连接和呈现留在垂直应用中。
+可复用的 Engine、Studio Asset Pipeline 和 industrial semantic core 保持领域中立。
+行业专用 Entity、workflow、术语、数据连接和呈现留在垂直应用中。
 
 垂直应用组合使用公开 ICE3 API，不得把行业专用行为加入 Engine 的 core Scene、
 Renderer、input、Selection 或 Asset contract。

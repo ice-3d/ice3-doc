@@ -2,9 +2,13 @@
 
 > Document ID: ICE3-DOC-PLAN-012
 >
-> Status: Implemented
+> Status: Historical
 >
 > Owner: ICE3 架构维护者
+
+> **历史状态：** 本文保留早期合成污水处理厂生成方案的交付记录。当前 Studio 使用原生
+> 参数化组件和 Asset Pipeline，不依赖 Blender；当前链路见
+> [Studio Asset Pipeline](https://github.com/ice-3d/ice3-studio/blob/main/docs/reference/asset-pipeline.md)。
 
 > **供智能代理工作者使用：** 需要使用子技能：`superpowers:subagent-driven-development`（推荐）或逐项执行本计划的 `superpowers:executing-plans`。步骤使用复选框（`- [ ]`）跟踪。
 

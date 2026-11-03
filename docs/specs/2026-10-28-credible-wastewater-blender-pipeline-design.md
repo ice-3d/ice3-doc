@@ -2,9 +2,13 @@
 
 > Document ID: ICE3-DOC-SPEC-008
 >
-> Status: Implemented
+> Status: Historical
 >
 > Owner: ICE3 architecture maintainers
+
+> **历史状态：** 本文保留早期合成污水处理厂生成方案的设计记录。当前 Studio 使用原生
+> 参数化组件和 Asset Pipeline，不依赖 Blender；当前链路见
+> [Studio Asset Pipeline](https://github.com/ice-3d/ice3-studio/blob/main/docs/reference/asset-pipeline.md)。
 
 >
 

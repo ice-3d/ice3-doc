@@ -261,6 +261,71 @@ test('accepts technical table values without Chinese descriptions', () => {
   assert.deepEqual(findLanguageViolations(source, 'README.md'), []);
 });
 
+test('exempts Historical and Deprecated records from narrative language checks', async () => {
+  const root = await mkdtemp(join(tmpdir(), 'ice3-docs-'));
+  try {
+    await mkdir(join(root, 'docs'));
+    await writeFile(join(root, 'README.md'), [
+      '# 仓库',
+      '',
+      '> Document ID: ICE3-DOC-RM-001',
+      '>',
+      '> Status: Active',
+      '>',
+      '> Owner: Documentation tests',
+      '',
+      '[索引](docs/README.md)',
+      '',
+    ].join('\n'));
+    await writeFile(join(root, 'docs', 'README.md'), [
+      '# 文档索引',
+      '',
+      '> Document ID: ICE3-DOC-IDX-001',
+      '>',
+      '> Status: Active',
+      '>',
+      '> Owner: Documentation tests',
+      '',
+      '- [README](../README.md)',
+      '- [历史方案](historical-design.md)',
+      '- [退役方案](deprecated-design.md)',
+      '',
+    ].join('\n'));
+    await writeFile(join(root, 'docs', 'historical-design.md'), [
+      '# Historical Integration Design',
+      '',
+      '> Document ID: ICE3-DOC-SPEC-001',
+      '>',
+      '> Status: Historical',
+      '>',
+      '> Owner: Documentation tests',
+      '',
+      'This preserved implementation record describes the retired process contract.',
+      '',
+    ].join('\n'));
+    await writeFile(join(root, 'docs', 'deprecated-design.md'), [
+      '# Deprecated Integration Design',
+      '',
+      '> Document ID: ICE3-DOC-SPEC-002',
+      '>',
+      '> Status: Deprecated',
+      '>',
+      '> Owner: Documentation tests',
+      '',
+      'This preserved implementation record describes the replacement boundary.',
+      '',
+    ].join('\n'));
+
+    const report = await checkRepository(root, {
+      expectedArea: 'DOC',
+      language: true,
+    });
+    assert.deepEqual(report.errors, []);
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
 test('excludes legal notices and source fixtures by path', () => {
   const english = '# Third Party Notices\n\nUpstream license text remains unchanged.\n';
   assert.deepEqual(

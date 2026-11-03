@@ -41,6 +41,8 @@ command 前先运行该检查。
 - [架构决策](docs/decisions/README.md)
 - [Asset Preparation Contract v1](docs/contracts/asset-preparation-contract-v1.md)
 - [Agent 主导的 Studio 工作台](docs/decisions/0006-agent-led-studio-workbench.md)
+- [文档命名与编号规范](docs/reference/documentation-conventions.md)
+- [公开发布状态](docs/reference/releases.md)
 
 ## 文档验证
 

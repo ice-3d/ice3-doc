@@ -11,16 +11,17 @@
 | 状态 | 生效 |
 | 版本 | 1.0 |
 | 日期 | 2026-10-27 |
-| 适用范围 | ICE3 引擎、工具链、CLI、未来的资产工具 UI 和 CI |
+| 适用范围 | ICE3 Studio Asset Pipeline、Engine、CLI、Web Viewer 和 CI |
 | 契约形式 | GLB 内嵌运行时契约 + 可选 JSON 旁路报告 |
 
 ## 1. 目标
 
 建立一套“契约紧、实现松”的资产协同关系：
 
-- 源格式解析、坐标和单位规范化、几何准备、选择分组、空间索引和优化全部在工具侧完成。
+- 源格式解析、坐标和单位规范化、几何准备、选择分组、空间索引和优化全部在 Studio
+  离线 Asset Pipeline 中完成。
 - 运行时只校验并消费已经准备好的数据进行 GPU 上传、绘制、拾取和交互。
-- 工具链和引擎使用同一套资产指标、预算口径、稳定身份和诊断码。
+- Studio Asset Pipeline 和 Engine 使用同一套资产指标、预算口径、稳定身份和诊断码。
 - 单个 prepared GLB 可以独立部署，不依赖旁路文件。
 - CLI、未来 UI 和 CI 使用详细旁路报告进行质量检查，不把报告变成运行时依赖。
 
@@ -39,15 +40,16 @@
 
 | 工程 | 负责 | 禁止 |
 | --- | --- | --- |
-| 资产工具 UI | 选择配置、展示检查报告、预算和差异 | 进入浏览器运行时热路径 |
-| CLI / CI | 自动化构建、预算门禁、回归和发布 | 在页面运行时调用 |
-| toolchain-core | 源格式读取、规范化、几何准备、选择分组、契约生成 | 依赖引擎运行时 |
-| `@ice3/assets` | 读取并验证 prepared GLB 与内嵌契约 | 依赖工具链源码 |
+| Studio Viewer / CLI | 选择配置、展示检查报告、预算和差异，执行构建、预算门禁、回归和发布 | 在浏览器运行时调用 |
+| `studio-import` | 源格式读取并生成格式无关的 `SourceScene` | 依赖 Engine Runtime |
+| `studio-assets::prepare` | 规范化、几何准备、选择分组、指标、预算和契约生成 | 依赖 Engine Runtime |
+| `studio-pipeline` | partition、LOD、render batch 和 Tileset 发布 | 在浏览器运行时执行 |
+| `@ice3/assets` | 读取并验证 prepared GLB 与内嵌契约 | 依赖 Studio Rust 源码 |
 | `@ice3/runtime` | 下载、校验、实例化、资源生命周期和运行诊断 | 重做离线预处理 |
 | `@ice3/renderer` | 直接上传准备好的缓冲并执行绘制、拾取 | 了解源格式或业务资产 |
 | 应用业务层 | 设备业务信息、告警、点位和真实运行状态 | 修改引擎资产格式 |
 
-工具链和引擎不允许直接导入对方私有源码。双方通过本契约、冻结样例和契约测试协作。
+Studio 和 Engine 不允许直接导入对方私有源码。双方通过本契约、冻结样例和契约测试协作。
 
 ## 4. 两类交付物
 
@@ -152,7 +154,7 @@
   },
   "status": "pass",
   "tool": {
-    "name": "ice3-toolchain",
+    "name": "ice3-studio",
     "version": "0.0.0"
   },
   "source": {
@@ -262,12 +264,12 @@
 
 ## 9. 工具命令契约
 
-建议扩展：
+当前 CLI 契约：
 
 ```text
-ice3-tool inspect <source> [--json] [--budget <profile-or-file>]
-ice3-tool build <source> --output <file.glb> [--report <file.json>]
-ice3-tool validate <file.glb> [--report <file.json>]
+ice3-studio inspect <source> [--json] [--budget <profile-or-file>]
+ice3-studio build <source> --output <file.glb> [--report <file.json>]
+ice3-studio validate <file.glb>
 ```
 
 规则：
@@ -309,12 +311,12 @@ ice3-tool validate <file.glb> [--report <file.json>]
 - `ICE3_ASSET_CONTRACT_MISSING`
 - `ICE3_ASSET_CONTRACT_UNSUPPORTED`
 
-工具侧稳定诊断：
+当前 Studio Prepare 稳定诊断：
 
-- `ICE3_TOOL_BUDGET_WARNING`
-- `ICE3_TOOL_BUDGET_EXCEEDED`
+- `ICE3_STUDIO_ASSET_BUDGET_WARNING`
+- `ICE3_STUDIO_ASSET_BUDGET_EXCEEDED`
 - `ICE3_TOOL_RUNTIME_CONVERSION_REQUIRED`
-- `ICE3_TOOL_REPORT_WRITE_FAILED`
+- `ICE3_STUDIO_ASSET_REPORT_WRITE_FAILED`
 
 ## 12. 版本与兼容
 
@@ -344,7 +346,7 @@ ice3-tool validate <file.glb> [--report <file.json>]
 
 ### 14.1 契约测试
 
-- 工具链生成的冻结 GLB 与引擎读取结果一致。
+- Studio 生成的冻结 GLB 与 Engine 读取结果一致。
 - GLB 内嵌契约可被引擎验证。
 - 旁路报告与 GLB 指标一致。
 - 同输入、选项和版本生成相同字节与相同报告。
@@ -381,7 +383,7 @@ ice3-tool validate <file.glb> [--report <file.json>]
 
 ## 16. 实施阶段
 
-1. **契约落地**：在工具链与引擎分别增加契约类型、校验和冻结样例。
+1. **契约落地**：在 Studio Asset Pipeline 与 Engine 分别增加契约类型、校验和冻结样例。
 2. **指标闭环**：扩展共享统计口径和运行时渲染诊断。
 3. **旁路报告**：CLI 与未来 UI 支持报告生成、预算和差异展示。
 4. **预算校准**：使用合成基准和获授权的工业场景校准初始档位。
@@ -391,7 +393,7 @@ ice3-tool validate <file.glb> [--report <file.json>]
 
 契约首版完成时：
 
-1. 工具链能够生成符合本契约的 GLB 和可选报告。
+1. Studio 能够生成符合本契约的 GLB 和可选报告。
 2. 引擎能够验证并暴露内嵌契约。
 3. 工具与引擎使用同一套指标定义和诊断码。
 4. 超硬预算资产无法发布。
@@ -411,10 +413,9 @@ ice3-tool validate <file.glb> [--report <file.json>]
   content 和未声明的 required extension。
 - Partition 输出以目录为单位原子发布。
 - ICE3 自有 Tile metadata 位于标准 `extras.ice3`。
-- Tool Diagnostic 包括 `ICE3_TOOL_PARTITION_OPTIONS_INVALID`、
-  `ICE3_TOOL_PARTITION_EMPTY`, `ICE3_TOOL_PARTITION_UNSPLITTABLE`,
-  `ICE3_TOOL_PARTITION_OUTPUT_EXISTS`,
-  `ICE3_TOOL_TILESET_INVALID`, and `ICE3_TOOL_TILESET_WRITE_FAILED`.
+- 当前 Studio partition Diagnostic 包括 `ICE3_STUDIO_ASSET_INVALID_OPTIONS`、
+  `ICE3_STUDIO_ASSET_OUTPUT_EXISTS`、`ICE3_STUDIO_ASSET_INVALID_GEOMETRY`、
+  `ICE3_STUDIO_ASSET_INVALID_PROFILE` 和 `ICE3_STUDIO_ASSET_TILESET_INVALID`。
 - Runtime Diagnostic 包括 `ICE3_TILESET_INVALID`、`ICE3_TILESET_UNSUPPORTED`、
   `ICE3_TILESET_TILE_FAILED`, `ICE3_TILESET_DUPLICATE_ID`,
   `ICE3_TILESET_ABORTED`, `ICE3_TILESET_CAMERA_REQUIRED`, and
@@ -532,7 +533,8 @@ min(lodMaxTriangles, proportional target total for that node)
 
 这样 adaptive 和 proportional comparison 具有相同 nominal Node work。
 `lodMaxTriangles` 仍是上限。所有 device 在 minimum sample 下仍超过该 Node budget 时，
-adaptive generation 以 `ICE3_TOOL_LOD_BUDGET_INVALID` 失败，不输出部分结果。
+adaptive generation 以 `ICE3_STUDIO_ASSET_INVALID_OPTIONS` 或
+`ICE3_STUDIO_ASSET_INVALID_GEOMETRY` 失败，不输出部分结果。
 
 `lodCurveSamples` 必须是 `4` 到 `32` 的整数。Curve sample Geometry 与 normalized
 source Geometry 存放在同一个有界 temporary workspace。每个 semantic device 缓存一条
@@ -557,11 +559,9 @@ Source document 只解析一次。Normalized device Geometry 保存在有界 tem
 生成。每个 coarse proxy 都从原始 normalized Geometry 简化，而不是简化另一个 proxy。
 无论成功、失败或取消，都会删除 temporary data 和不完整 output directory。
 
-新增 tool Diagnostic 包括 `ICE3_TOOL_LOD_INVALID`、
-`ICE3_TOOL_LOD_UNSUPPORTED`, `ICE3_TOOL_LOD_BUDGET_INVALID`, and
-`ICE3_TOOL_LOD_CLEANUP_FAILED`.
-可选 LOD simplifier 是 toolchain dependency，不属于 browser Runtime 或公开 package
-dependency graph。
+旧 Tool Diagnostic 名称不是当前 Studio 公共契约；当前 CLI 使用
+`ICE3_STUDIO_ASSET_*` code。可选 LOD simplifier 是 Studio 离线 pipeline 的内部依赖，
+不属于 browser Runtime 或公开 package dependency graph。
 
 Partition report 保留现有 coarse statistic，并增加：
 
@@ -590,7 +590,7 @@ Runtime 将所有必需 chunk 作为一个 logical Tile 加载，只提交完整
 allocation，否则 `auto` 在 source processing 前被拒绝；`off` 对相同 input 和 option
 保持既有 adaptive output。
 
-Proxy generation 是作用于 semantic device unit 的离线 toolchain operation。它采样唯一
+Proxy generation 是作用于 semantic device unit 的 Studio 离线 pipeline operation。它采样唯一
 source Mesh vertex 和非退化 triangle centroid，在 mesh-local coordinate 中拟合 OBB 和
 cylinder candidate，并把合格 Geometry 存入有界 temporary workspace。Principal axis
 从去重 surface vertex 推导，避免非对称 tessellation 旋转原本对称设备的 axis。
@@ -649,7 +649,7 @@ conversion；生成内容是普通 Prepared GLB；每个 GLB 必须通过 valida
 
 ## 22. Static render batch 与重复 Geometry
 
-Static batching 是可选离线 preprocessing step。Toolchain command 默认
+Static batching 是可选离线 preprocessing step。Studio `partition` 默认
 `--render-batch off`；`--render-batch static` 在不改变 source parsing、不增加 runtime
 dependency 的情况下启用该功能。没有 batch metadata 的既有 Prepared GLB 继续走普通
 Mesh path，bytes 保持不变。
