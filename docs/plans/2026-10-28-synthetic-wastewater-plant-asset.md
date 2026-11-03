@@ -16,7 +16,7 @@
 
 **规格：** `../specs/2026-10-28-synthetic-wastewater-plant-asset-design.md`
 
-## 全局约束
+## 1. 全局约束
 
 - 生成器不得读取、引用、复制或派生任何真实客户模型。
 - 不实现 Agent、Prompt、工具调用或 AI 专用接口。
@@ -28,7 +28,7 @@
 - 代码、文档、测试、日志和提交信息不得包含禁止名称或客户信息。
 - 使用仓库现有的 Node.js 测试运行器；不得重新引入已移除的测试体系。
 
-## 审查重点
+## 2. 审查重点
 
 - 生成器意外读取本地客户资产：测试必须证明生成只使用仓库内常量与几何函数。
 - 设备在离屏合批或分区后丢失选择身份：测试必须比较 source、prepared 和 Tileset 的语义身份集合。
@@ -38,7 +38,7 @@
 
 ---
 
-### 任务 1：建立程序化几何基础
+### 2.1 任务 1：建立程序化几何基础
 
 **文件：**
 - 修改：`ice3-toolchain/package.json`
@@ -203,7 +203,7 @@ git commit -m "feat(toolchain): add wastewater geometry primitives"
 
 ---
 
-### 任务 2：构建完整厂区场景
+### 2.2 任务 2：构建完整厂区场景
 
 **文件：**
 - 创建：`ice3-toolchain/tools/wastewater-plant/equipment.ts`
@@ -415,7 +415,7 @@ git commit -m "feat(toolchain): build virtual wastewater facility"
 
 ---
 
-### 任务 3：导出 Source GLB 和 Prepared 预览
+### 2.3 任务 3：导出 Source GLB 和 Prepared 预览
 
 **文件：**
 - 创建：`ice3-toolchain/tools/wastewater-plant/generate.ts`
@@ -563,7 +563,7 @@ git commit -m "feat(example): add virtual wastewater models"
 
 ---
 
-### 任务 4：拆分资产并生成 LOD 内容
+### 2.4 任务 4：拆分资产并生成 LOD 内容
 
 **文件：**
 - 修改：`ice3-toolchain/tools/wastewater-plant/build-example.mjs`
@@ -701,7 +701,7 @@ git commit -m "feat(example): add virtual wastewater tileset"
 
 ---
 
-### 任务 5：将虚拟污水处理厂设为默认示例
+### 2.5 任务 5：将虚拟污水处理厂设为默认示例
 
 **文件：**
 - 修改：`ice3-engine/examples/m1/main.ts`
@@ -825,7 +825,7 @@ git commit -m "feat(example): show the virtual wastewater plant"
 
 ---
 
-### 任务 6：最终验证和文档编写
+### 2.6 任务 6：最终验证和文档编写
 
 **文件：**
 - 修改：`ice3-toolchain/README.md`
@@ -921,7 +921,7 @@ git commit -m "docs(example): describe virtual wastewater scene"
 
 ---
 
-## 最终验收
+## 3. 最终验收
 
 仅当满足以下条件时，实施才算完成：
 
@@ -934,7 +934,7 @@ git commit -m "docs(example): describe virtual wastewater scene"
 7. Chromium 和 WebKit 浏览器测试报告没有页面错误或失败请求。
 8. 没有客户资产或禁止名称进入源代码、生成资产、文档、测试或提交历史。
 
-## 相关文档
+## 4. 相关文档
 
 - `ICE3-DOC-IDX-001` — [文档索引](../README.md)
 - `ICE3-DOC-SPEC-010` — [合成污水处理厂规格](../specs/2026-10-28-synthetic-wastewater-plant-asset-design.md)

@@ -432,7 +432,7 @@ export class ICETilesetHandle extends ICEEventDispatcher {
 8. 所有仓库验证门禁与打包检查通过。
 9. 客户资产或派生内容未进入 Git、测试夹具、截图或发布包。
 
-## Related Documents
+## 16. Related Documents
 
 - `ICE3-DOC-IDX-001` — [Documentation index](../README.md)
 - `ICE3-DOC-PLAN-003` — [Adaptive Tileset Scheduler implementation](../plans/2026-10-27-adaptive-tileset-scheduler.md)

@@ -18,7 +18,7 @@
 
 **仓库：** `ice3-toolchain`、`ice3-engine`
 
-## 全局约束
+## 1. 全局约束
 
 - 使用 Node.js 24.22.1 LTS 和 npm 11 或更高版本。
 - 工具链输出仍为标准的单 JSON/单 BIN GLB。
@@ -34,7 +34,7 @@
 - 工具链和引擎的迁移必须保持兼容：没有契约的现有 Prepared Asset 通过 `ICE3_ASSET_CONTRACT_MISSING` 加载。
 - 引擎 TypeScript 已启用精确可选属性类型；条件式展开可选值。
 
-## 审查重点
+## 2. 审查重点
 
 - 恰好位于软限制或硬限制边界的已报告预算不得被归类为超过该边界。
 - 嵌入 `encodedBytes` 时必须收敛到稳定的最终 GLB，而不是基于临时文件报告预算状态。
@@ -42,9 +42,9 @@
 - 没有 `contractVersion` 的旧 Asset 必须带警告加载，而不受支持的主版本和运行时转换请求必须失败。
 - 运行时指标必须区分声明的 Asset 数量、实际实例化数量和渲染器绘制/GPU 指标。
 
-## 文件结构
+## 3. 文件结构
 
-### `ice3-toolchain`
+### 3.1 `ice3-toolchain`
 
 **新建**
 
@@ -65,7 +65,7 @@
 - `fixtures/prepared-cube.report.json`：重新生成的合成报告。
 - `README.md`：命令和预算文档。
 
-### `ice3-engine`
+### 3.2 `ice3-engine`
 
 **修改**
 
@@ -86,7 +86,7 @@
 
 ---
 
-### 任务 1：定义工具链契约类型和规范指标
+### 3.3 任务 1：定义工具链契约类型和规范指标
 
 **仓库：** `ice3-toolchain`
 
@@ -281,7 +281,7 @@ git commit -m "feat(toolchain): define asset contract metrics"
 
 ---
 
-### 任务 2：实现预算配置文件和边界评估
+### 3.4 任务 2：实现预算配置文件和边界评估
 
 **仓库：** `ice3-toolchain`
 
@@ -453,7 +453,7 @@ git commit -m "feat(toolchain): evaluate asset budgets"
 
 ---
 
-### 任务 3：将最终契约嵌入 Prepared GLB
+### 3.5 任务 3：将最终契约嵌入 Prepared GLB
 
 **仓库：** `ice3-toolchain`
 
@@ -726,7 +726,7 @@ git commit -m "feat(toolchain): embed asset preparation contract"
 
 ---
 
-### 任务 4：生成 sidecar 报告并执行 CLI 预算
+### 3.6 任务 4：生成 sidecar 报告并执行 CLI 预算
 
 **仓库：** `ice3-toolchain`
 
@@ -978,7 +978,7 @@ git commit -m "feat(cli): write asset reports and enforce budgets"
 
 ---
 
-### 任务 5：在引擎 Asset 中读取并验证契约
+### 3.7 任务 5：在引擎 Asset 中读取并验证契约
 
 **仓库：** `ice3-engine`
 
@@ -1128,7 +1128,7 @@ git commit -m "feat(assets): read asset preparation contract"
 
 ---
 
-### 任务 6：暴露契约和运行时指标
+### 3.8 任务 6：暴露契约和运行时指标
 
 **仓库：** `ice3-engine`
 
@@ -1293,7 +1293,7 @@ git commit -m "feat(runtime): expose asset contract diagnostics"
 
 ---
 
-### 任务 7：冻结并验证跨仓库契约
+### 3.9 任务 7：冻结并验证跨仓库契约
 
 **仓库：** `ice3-toolchain`、`ice3-engine`、`ice3-doc`
 
@@ -1478,7 +1478,7 @@ git merge --ff-only docs/asset-contract-implementation-plan
 
 所有仓库在 `main` 上均通过后，重启 M1 预览，并验证本地合成 fixture 和本地提供的模型，不得提交客户内容或对其截图。
 
-## 相关文档
+## 4. 相关文档
 
 - `ICE3-DOC-IDX-001` — [文档索引](../README.md)
 - `ICE3-DOC-CTR-001` — [Asset Preparation Contract v1](../contracts/asset-preparation-contract-v1.md)

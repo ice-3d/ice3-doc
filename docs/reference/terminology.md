@@ -6,7 +6,7 @@
 >
 > Owner: ICE3 documentation maintainers
 
-## 用途
+## 1. 用途
 
 本词表固定 ICE3 中文文档中技术词汇的英文写法、大小写和中文解释。技术词直接保留英文，不要求逐项翻译，也不要求在正文中重复添加中文括注。
 
@@ -38,7 +38,7 @@
 | ChangeSet | 等待求值、审阅和批准的候选变更集合 | 未批准时不得改变当前 revision |
 | Sidecar | 由主进程管理的版本化本地辅助进程 | Studio 当前不启动 Asset Sidecar；相关契约仅为历史记录 |
 
-## 使用规则
+## 2. 使用规则
 
 - 新术语先确认是否已有固定英文写法，再写入文档。
 - 同一术语不得在标题、表格和正文中出现不同大小写。
@@ -46,7 +46,7 @@
 - API、类型、字段和 Diagnostic ID 以代码或契约中的写作为准。
 - 项目特有术语由对应仓库维护；跨仓库含义发生变化时，先更新本词表。
 
-## 关联文档
+## 3. 关联文档
 
 - `ICE3-DOC-SPEC-011` — [文档系统设计规格](../specs/2026-10-29-documentation-system-design.md)
 - `ICE3-DOC-SPEC-012` — [全中文文档改版设计规格](../specs/2026-10-29-chinese-documentation-policy-design.md)

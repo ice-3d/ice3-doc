@@ -21,7 +21,7 @@
 
 **规格：** [npm 公开发布拓扑](../decisions/0005-npm-public-release-topology.md)。
 
-## 全局约束
+## 1. 全局约束
 
 - 公开 package 只有 `ice3`、`@ice3/industrial-core`、`@ice3/toolchain`。
 - 私有 workspace package 保持 `private: true`。
@@ -31,7 +31,7 @@
 - 发布前通过 `npm pack` 和空目录安装测试。
 - Git author 和 committer 必须为 `damoqiongqiu <damoqiongqiu@126.com>`。
 
-## 审查重点
+## 2. 审查重点
 
 - Engine 只打包 facade 却遗漏内部实现：tarball 安装后导入失败。
 - 工具链打包后仍 import `@ice3/toolchain-core`：用户无法安装。
@@ -41,7 +41,7 @@
 
 ---
 
-### Task 1：Engine 单包发布
+### 2.1 Task 1：Engine 单包发布
 
 **文件：**
 
@@ -78,7 +78,7 @@
 
 运行：`npm run release:package && npm run release:check && npm run verify`
 
-### Task 2：Industrial 单包发布
+### 2.2 Task 2：Industrial 单包发布
 
 **文件：**
 
@@ -107,7 +107,7 @@ runtime dependency。
 
 运行：`npm run verify && npm pack --workspace @ice3/industrial-core --dry-run`
 
-### Task 3：Toolchain 单包发布
+### 2.3 Task 3：Toolchain 单包发布
 
 **文件：**
 
@@ -145,7 +145,7 @@ runtime dependency。
 
 运行：`npm run release:package && npm run release:check && npm run verify`
 
-### Task 4：跨仓库 tarball 验收
+### 2.4 Task 4：跨仓库 tarball 验收
 
 **文件：**
 
@@ -161,7 +161,7 @@ runtime dependency。
 - [x] **步骤 3：执行最小 import 和 `ice3-tool` 入口**
 - [x] **步骤 4：记录 package 大小、文件和运行结果**
 
-### Task 5：发布与收尾
+### 2.5 Task 5：发布与收尾
 
 **文件：**
 

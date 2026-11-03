@@ -6,7 +6,7 @@
 >
 > Owner: ICE3 documentation maintainers
 
-## 目标
+## 1. 目标
 
 本规格定义所有 ICE3 仓库的文档系统，使没有项目背景的开发者也能理解、导航并验证每个
 仓库。
@@ -22,7 +22,7 @@
 lifecycle、migration 和 automated validation。它不定义 Runtime architecture 或
 Asset format；这些内容仍由各自的权威设计和 contract 管理。
 
-## 读者
+## 2. 读者
 
 - 需要可靠入门路径的新贡献者。
 - 使用公开 ICE3 package 的应用开发者。
@@ -30,7 +30,7 @@ Asset format；这些内容仍由各自的权威设计和 contract 管理。
 - 需要定位权威 contract 和决策的维护者。
 - 需要验证文档与实现一致的审查者。
 
-## 范围
+## 3. 范围
 
 本规格适用于以下仓库中的全部 Markdown 文档：
 
@@ -51,7 +51,7 @@ third-party reference。
 
 `LICENSE` 使用未修改的 MIT 许可证文本，不适用 Markdown document metadata 规则。
 
-## 目标清单
+## 4. 目标清单
 
 - 为每份 Markdown 提供清晰标题和永久内部 ID。
 - 从每个 repository README 提供完整导航路径。
@@ -62,7 +62,7 @@ third-party reference。
 - 阻止 local path、temporary link 和未说明 placeholder 进入公开文档。
 - 让文档完整性和链接完整性可以机械验证。
 
-## 非目标
+## 5. 非目标
 
 - 本阶段生成 documentation website。
 - 公开所有内部 implementation detail。
@@ -71,38 +71,38 @@ third-party reference。
 - 为未实现能力增加产品声明或使用说明。
 - 为每份文档维护多个翻译版本。
 
-## 文档原则
+## 6. 文档原则
 
-### 先入口后细节
+### 6.1 先入口后细节
 
 每个仓库以简洁 README 开始，说明目标、边界、快速开始、验证和文档导航。详细内容
 位于 README 链接的专题文档中。
 
-### 先决策后实现细节
+### 6.2 先决策后实现细节
 
 ADR 记录问题、选定方案、备选方案、影响和关联文档。实施指南再说明如何应用该决策。
 
-### 单一权威定义
+### 6.3 单一权威定义
 
 共享 format、Diagnostic、compatibility rule 和 metric 只在 `ice3-doc` 定义一次。
 其他仓库链接该定义，只描述自身实现。
 
-### 当前与历史分离
+### 6.4 当前与历史分离
 
 当前 API 和操作指南必须与已实现的设计和 Plan 清楚分开。历史文档继续保留，以支持
 追溯。
 
-### 稳定 Identity
+### 6.5 稳定 Identity
 
 Document ID 在文件移动和标题修改后保持不变。未来文档可以复用路径，但不得复用已有
 Document ID。
 
-### 默认验证
+### 6.6 默认验证
 
 每个文档化 command 都必须有验证路径。无法从全新 clone 运行的 command 必须说明前置
 条件和预期结果。
 
-## Document Identity
+## 7. Document Identity
 
 每份产品 Markdown 以一个一级标题开始，随后是 metadata block。仓库 `AGENTS.md`
 使用相同 header 形状，便于读者识别和引用治理规则：
@@ -135,7 +135,7 @@ ICE3-<AREA>-<TYPE>-<NNN>
 - 新编号使用 `AREA` 和 `TYPE` namespace 中下一个未使用值。
 - Identifier 存于文档正文，不根据 filename 推断。
 
-## Area Code
+## 8. Area Code
 
 | 领域 | Code | 仓库 |
 |---|---|---|
@@ -147,7 +147,7 @@ ICE3-<AREA>-<TYPE>-<NNN>
 | Toolchain | `TOOL` | `ice3-toolchain` |
 | Water demo | `WATER` | `ice3-water-demo` |
 
-## Document Type
+## 9. Document Type
 
 | 类型 | Code | 用途 |
 |---|---|---|
@@ -164,7 +164,7 @@ ICE3-<AREA>-<TYPE>-<NNN>
 | Reference | `REF` | Lookup material such as formats, diagnostics, CLI syntax, or sources |
 | Notice | `NOTICE` | Third-party copyright, attribution, or license notice |
 
-## Status 生命周期
+## 10. Status 生命周期
 
 允许的 lifecycle state 为：
 
@@ -186,9 +186,9 @@ ICE3-<AREA>-<TYPE>-<NNN>
 - 被替代内容改为 `Historical` 或 `Deprecated`。
 - 空仓库在实施开始前使用 `Placeholder`。
 
-## 必需 Heading 结构
+## 11. 必需 Heading 结构
 
-### Repository README
+### 11.1 Repository README
 
 每个已实现 repository README 包含：
 
@@ -206,7 +206,7 @@ ICE3-<AREA>-<TYPE>-<NNN>
 Command 仅在 working directory 不是 repository root 时说明该目录。跨仓库 command
 从本 repository root 开始，并使用已发布的 cross-repository URL 规范。
 
-### 架构文档
+### 11.2 架构文档
 
 每份 architecture document 包含：
 
@@ -219,7 +219,7 @@ Command 仅在 working directory 不是 repository root 时说明该目录。跨
 7. 关联决策。
 8. 关联 Spec 和 reference。
 
-### 架构决策记录（ADR）
+### 11.3 架构决策记录（ADR）
 
 每份 decision record 包含：
 
@@ -231,7 +231,7 @@ Command 仅在 working directory 不是 repository root 时说明该目录。跨
 6. Verification approach。
 7. Supersession link。
 
-### 使用指南
+### 11.4 使用指南
 
 每份 usage guide 包含：
 
@@ -243,7 +243,7 @@ Command 仅在 working directory 不是 repository root 时说明该目录。跨
 6. Failure diagnosis。
 7. 关联 API 和 reference 文档。
 
-### API 或 Reference 文档
+### 11.5 API 或 Reference 文档
 
 每份 API 或 reference 文档包含：
 
@@ -256,12 +256,12 @@ Command 仅在 working directory 不是 repository root 时说明该目录。跨
 7. Versioning 或 compatibility policy。
 8. 关联 contract Identifier。
 
-### Spec 与 Implementation Plan
+### 11.6 Spec 与 Implementation Plan
 
 现有技术内容保持不变。每份文档包含标准 metadata block 和关联文档章节。Plan 指出
 其实现的 Spec；Spec 指出治理该设计的决策和 contract。
 
-### Placeholder README
+### 11.7 Placeholder README
 
 空仓库只包含：
 
@@ -274,7 +274,7 @@ Command 仅在 working directory 不是 repository root 时说明该目录。跨
 
 Placeholder 不得暗示功能已经存在。
 
-## 权威 Source-of-Truth 模型
+## 12. 权威 Source-of-Truth 模型
 
 以下内容以 `ice3-doc` 为权威：
 
@@ -296,9 +296,9 @@ Placeholder 不得暗示功能已经存在。
 
 所属仓库可以摘要权威 contract 来解释本地用法，但必须链接权威文档，不得建立竞争定义。
 
-## Repository 文档矩阵
+## 13. Repository 文档矩阵
 
-### `ice3-doc`
+### 13.1 `ice3-doc`
 
 | ID | 文档 | Status 目标 |
 |---|---|---|
@@ -315,7 +315,7 @@ Placeholder 不得暗示功能已经存在。
 | `ICE3-DOC-PLAN-001..014` | Existing implementation plans | Implemented or Historical |
 | `ICE3-DOC-PLAN-015` | Documentation system implementation | Active |
 
-### `ice3-engine`
+### 13.2 `ice3-engine`
 
 | ID | 文档 | Status 目标 |
 |---|---|---|
@@ -335,7 +335,7 @@ Placeholder 不得暗示功能已经存在。
 | `ICE3-ENG-POL-001` | Repository policy | Active |
 | Existing specifications and plans | M0, M1, and equipment selection | Implemented or Historical |
 
-### `ice3-toolchain`
+### 13.3 `ice3-toolchain`
 
 | ID | 文档 | Status 目标 |
 |---|---|---|
@@ -354,7 +354,7 @@ Placeholder 不得暗示功能已经存在。
 | `ICE3-TOOL-REF-002` | OGC fixture source | Active |
 | Existing specifications and plans | GLB pipeline | Implemented or Historical |
 
-### `ice3-agent-console`
+### 13.4 `ice3-agent-console`
 
 | ID | 文档 | Status 目标 |
 |---|---|---|
@@ -371,7 +371,7 @@ Placeholder 不得暗示功能已经存在。
 | `ICE3-AGENT-POL-001` | Repository policy | Active |
 | Existing specification and plan | Console design and delivery | Implemented or Historical |
 
-### `ice3-industrial`
+### 13.5 `ice3-industrial`
 
 | ID | 文档 | Status 目标 |
 |---|---|---|
@@ -385,19 +385,19 @@ Placeholder 不得暗示功能已经存在。
 | `ICE3-IND-ADR-002` | Static manifest and runtime state separation | Active |
 | `ICE3-IND-ADR-003` | Stable identity model | Active |
 
-### `ice3-studio`
+### 13.6 `ice3-studio`
 
 | ID | 文档 | Status 目标 |
 |---|---|---|
 | `ICE3-STUDIO-RM-001` | Placeholder README | Placeholder |
 
-### `ice3-water-demo`
+### 13.7 `ice3-water-demo`
 
 | ID | 文档 | Status 目标 |
 |---|---|---|
 | `ICE3-WATER-RM-001` | Placeholder README | Placeholder |
 
-## Document Reference 模型
+## 14. Document Reference 模型
 
 每份实质性文档以关联文档章节结束，至少列出以下内容的稳定 ID 和标题：
 
@@ -407,7 +407,7 @@ Placeholder 不得暗示功能已经存在。
 - 存在时对应的 implementation plan。
 - 读者下一步应使用的 API、guide 或 reference。
 
-### 同仓库链接
+### 14.1 同仓库链接
 
 使用当前文档出发的相对 Markdown 链接：
 
@@ -417,7 +417,7 @@ Placeholder 不得暗示功能已经存在。
 
 链接目标必须是 tracked file，anchor 必须匹配 GitHub 生成的 heading slug。
 
-### 跨仓库链接
+### 14.2 跨仓库链接
 
 使用已发布的 GitHub URL：
 
@@ -435,12 +435,12 @@ https://github.com/ice-3d/ice3-engine/blob/main/docs/api/m1.md
 公开文档不得使用 `../ice3-engine` 这类 sibling-directory link，因为 GitHub
 repository 相互独立。
 
-### Identity Reference
+### 14.3 Identity Reference
 
 目标尚未公开时，使用 Document Identifier 作为文本，并明确说明发布后建立链接。不得
 输出已知失效 URL。
 
-### Reference 完整性
+### 14.4 Reference 完整性
 
 - 一份文档可以链接多个关联文档。
 - 文档不得声明拥有已委派给其他权威文档的权力。
@@ -448,7 +448,7 @@ repository 相互独立。
 - 被替代文档必须链接其替代文档。
 - Index 必须包含仓库拥有的每份产品 Markdown，除 `LICENSE`、根 `AGENTS.md` 和生成临时文件。
 
-## 文件布局
+## 15. 文件布局
 
 公开文档使用以下布局：
 
@@ -478,7 +478,7 @@ docs/
 原内部 workflow directory 移至 `docs/specs` 和 `docs/plans`，内部链接同步更新。所有
 reference 迁移完成后移除旧目录。
 
-## 语言政策
+## 16. 语言政策
 
 - 标题、正文、步骤、表格说明和验收条件使用简体中文。
 - 产品名、标准名、缩写、API、类型、字段、命令、路径和 Diagnostic ID 保留英文原样。
@@ -489,7 +489,7 @@ reference 迁移完成后移除旧目录。
 - `THIRD_PARTY_NOTICES.md`、测试夹具中的 `SOURCE.md` 和 `scripts/fixtures/**/*.md` 保留原文。
 - 自动语言检查在迁移完成后默认启用。
 
-## 写作规则
+## 17. 写作规则
 
 - 使用具体动词和短段落。
 - 将术语作为 requirement 使用前先定义。
@@ -502,7 +502,7 @@ reference 迁移完成后移除旧目录。
 - 不包含 local user path、credential、真实客户数据或未批准 vendor name。
 - 不把 repository-specific implementation 当作 shared contract 定义。
 
-## 自动验证
+## 18. 自动验证
 
 Documentation gate 检查所有 tracked product Markdown。根 `AGENTS.md` 是 repository
 governance input，不进入扫描：
@@ -523,7 +523,7 @@ governance input，不进入扫描：
 Validation command 必须可从每个 repository 运行，并在迁移后纳入其 verification
 workflow。
 
-## Migration Plan
+## 19. Migration Plan
 
 1. 添加本 Spec 并批准其 Status。
 2. 添加 family 和 repository documentation index。
@@ -534,7 +534,7 @@ workflow。
 7. 运行 documentation validation、content check 和每个 repository 的既有 verification command。
 8. 从每个 README 经 index 到详细文档，再经关联文档链接返回，审查完整导航。
 
-## 验收标准
+## 20. 验收标准
 
 满足以下条件时文档系统完成：
 
@@ -549,7 +549,7 @@ workflow。
 - 空 repository 只包含真实 placeholder documentation。
 - 既有 repository test 和 build verification 保持通过。
 
-## 关联文档
+## 21. 关联文档
 
 - `ICE3-DOC-RM-001` — ICE3 文档 README。
 - `ICE3-DOC-IDX-001` — ICE3 文档索引。

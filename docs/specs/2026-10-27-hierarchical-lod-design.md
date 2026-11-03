@@ -550,7 +550,7 @@ export interface ICELodStats {
 - 不使用竞品名称描述设计。
 - API 和代码沿用 ICE 家族命名。
 
-## Related Documents
+## 18. Related Documents
 
 - `ICE3-DOC-IDX-001` — [Documentation index](../README.md)
 - `ICE3-DOC-PLAN-005` — [Hierarchical LOD asset implementation](../plans/2026-10-27-hierarchical-lod-assets.md)

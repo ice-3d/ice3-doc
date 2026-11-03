@@ -16,7 +16,7 @@
 
 **规范：** `../specs/2026-10-27-hierarchical-lod-design.md`
 
-## 全局约束
+## 1. 全局约束
 
 - 使用 `.nvmrc` 指定的 Node.js 24.22.1 LTS。
 - 在 `feature/hierarchical-lod` 分支上开发；仅在完整门禁通过后合入 `main`。
@@ -31,7 +31,7 @@
 - 不要暴露 AI 专用行为；API 仍是通用引擎能力。
 - 不要将真实客户 Asset 或派生文件放入 Git、fixture、截图、日志或包中。
 
-## 审查重点
+## 2. 审查重点
 
 - 父节点可能部分可见；替换它时不得在可见区域产生空洞。
 - 细化过程中发生相机变化时，必须保留旧覆盖并丢弃过期子节点。
@@ -41,7 +41,7 @@
 
 ---
 
-### 任务 1：读取完整的层级 Tileset
+### 2.1 任务 1：读取完整的层级 Tileset
 
 **文件：**
 - 修改：`ice3-engine/packages/assets/src/ICETileset.ts`
@@ -149,7 +149,7 @@ git commit -m "feat(assets): read hierarchical tilesets"
 
 ---
 
-### 任务 2：纯屏幕空间 LOD 选择器
+### 2.2 任务 2：纯屏幕空间 LOD 选择器
 
 **文件：**
 - 新建：`ice3-engine/packages/runtime/src/asset/ICELodSelector.ts`
@@ -310,7 +310,7 @@ git commit -m "feat(runtime): select hierarchical lod cuts"
 
 ---
 
-### 任务 3：添加 LOD 选项、统计和事件
+### 2.3 任务 3：添加 LOD 选项、统计和事件
 
 **文件：**
 - 修改：`ice3-engine/packages/runtime/src/asset/ICETilesetLoader.ts`
@@ -401,7 +401,7 @@ git commit -m "feat(runtime): expose lod selection state"
 
 ---
 
-### 任务 4：在 LOD 过渡期间维持覆盖
+### 2.4 任务 4：在 LOD 过渡期间维持覆盖
 
 **文件：**
 - 修改：`ice3-engine/packages/runtime/src/asset/ICETilesetLoader.ts`
@@ -505,7 +505,7 @@ git commit -m "feat(runtime): preserve coverage across lod transitions"
 
 ---
 
-### 任务 5：保留 Selection 并执行预算
+### 2.5 任务 5：保留 Selection 并执行预算
 
 **文件：**
 - 修改：`ice3-engine/packages/runtime/src/asset/ICETilesetLoader.ts`
@@ -592,7 +592,7 @@ git commit -m "feat(runtime): preserve lod selection and budgets"
 
 ---
 
-### 任务 6：层级浏览器示例
+### 2.6 任务 6：层级浏览器示例
 
 **文件：**
 - 新建：`ice3-engine/tests/fixtures/hierarchical-demo/tileset.json`
@@ -691,7 +691,7 @@ git commit -m "feat(example): demonstrate hierarchical lod"
 
 ---
 
-### 任务 7：文档、真实 Asset 验证和合并
+### 2.7 任务 7：文档、真实 Asset 验证和合并
 
 **文件：**
 - 修改：`ice3-engine/README.md`
@@ -800,11 +800,11 @@ git branch -d feature/hierarchical-lod
 
 在 `main` 上再次运行引擎和工具链完整门禁。除上述产品列表外，还使用项目批准的术语列表确认命名审查。
 
-## 执行建议
+## 3. 执行建议
 
 Asset 计划完成后使用原生执行。LOD 切面计算、保覆盖过渡、Selection 身份和调度器共享紧密的生命周期不变量；连续实施会话可减少接口不匹配。
 
-## 相关文档
+## 4. 相关文档
 
 - `ICE3-DOC-IDX-001` — [文档索引](../README.md)
 - `ICE3-DOC-SPEC-003` — [层级 LOD 规范](../specs/2026-10-27-hierarchical-lod-design.md)

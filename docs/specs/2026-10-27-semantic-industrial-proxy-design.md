@@ -413,7 +413,7 @@ failedRequests
 - 凸包、人工覆盖和部件拆分留给后续规格。
 - 远景簇代理仍作为第三阶段，不混入本阶段。
 
-## Related Documents
+## 18. Related Documents
 
 - `ICE3-DOC-IDX-001` — [Documentation index](../README.md)
 - `ICE3-DOC-PLAN-009` — [Semantic proxy implementation](../plans/2026-10-27-semantic-industrial-proxies.md)

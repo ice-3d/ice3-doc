@@ -11,7 +11,10 @@ import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import test from 'node:test';
-import { checkRepository } from './check-docs.mjs';
+import {
+  checkRepository,
+  findHeadingNumberingViolations,
+} from './check-docs.mjs';
 import { findLanguageViolations } from './chinese-language.mjs';
 
 const scriptsDirectory = dirname(fileURLToPath(import.meta.url));
@@ -134,6 +137,160 @@ test('rejects local absolute paths', async () => {
   } finally {
     await rm(root, { recursive: true, force: true });
   }
+});
+
+test('rejects unnumbered content headings', async () => {
+  const root = await mkdtemp(join(tmpdir(), 'ice3-docs-'));
+  try {
+    await mkdir(join(root, 'docs'));
+    await writeFile(join(root, 'README.md'), [
+      '# 仓库',
+      '',
+      '> Document ID: ICE3-DOC-RM-001',
+      '>',
+      '> Status: Active',
+      '>',
+      '> Owner: Documentation tests',
+      '',
+      '[索引](docs/README.md)',
+      '',
+      '## 概述',
+      '',
+      '本节缺少章节编号。',
+      '',
+    ].join('\n'));
+    await writeFile(join(root, 'docs', 'README.md'), [
+      '# 文档索引',
+      '',
+      '> Document ID: ICE3-DOC-IDX-001',
+      '>',
+      '> Status: Active',
+      '>',
+      '> Owner: Documentation tests',
+      '',
+      '- [README](../README.md)',
+      '',
+    ].join('\n'));
+
+    const report = await checkRepository(root, {
+      expectedArea: 'DOC',
+      language: false,
+    });
+    assert.match(
+      report.errors.join('\n'),
+      /README\.md:11: ICE3_DOC_UNNUMBERED_HEADING/,
+    );
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
+test('accepts hierarchical heading numbers outside code fences', async () => {
+  const root = await mkdtemp(join(tmpdir(), 'ice3-docs-'));
+  try {
+    await mkdir(join(root, 'docs'));
+    await writeFile(join(root, 'README.md'), [
+      '# 仓库',
+      '',
+      '> Document ID: ICE3-DOC-RM-001',
+      '>',
+      '> Status: Active',
+      '>',
+      '> Owner: Documentation tests',
+      '',
+      '[索引](docs/README.md)',
+      '',
+      '## 1. 概述',
+      '',
+      '### 1.1 范围',
+      '',
+      '```md',
+      '## Example heading inside code',
+      '```',
+      '',
+      '## 2. 使用方式',
+      '',
+      '### 2.1 命令',
+      '',
+    ].join('\n'));
+    await writeFile(join(root, 'docs', 'README.md'), [
+      '# 文档索引',
+      '',
+      '> Document ID: ICE3-DOC-IDX-001',
+      '>',
+      '> Status: Active',
+      '>',
+      '> Owner: Documentation tests',
+      '',
+      '- [README](../README.md)',
+      '',
+    ].join('\n'));
+
+    const report = await checkRepository(root, {
+      expectedArea: 'DOC',
+      language: false,
+    });
+    assert.deepEqual(report.errors, []);
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
+test('rejects skipped or out-of-order heading numbers', async () => {
+  const root = await mkdtemp(join(tmpdir(), 'ice3-docs-'));
+  try {
+    await mkdir(join(root, 'docs'));
+    await writeFile(join(root, 'README.md'), [
+      '# 仓库',
+      '',
+      '> Document ID: ICE3-DOC-RM-001',
+      '>',
+      '> Status: Active',
+      '>',
+      '> Owner: Documentation tests',
+      '',
+      '[索引](docs/README.md)',
+      '',
+      '## 1. 概述',
+      '',
+      '### 1.2 范围',
+      '',
+      '## 3. 使用方式',
+      '',
+    ].join('\n'));
+    await writeFile(join(root, 'docs', 'README.md'), [
+      '# 文档索引',
+      '',
+      '> Document ID: ICE3-DOC-IDX-001',
+      '>',
+      '> Status: Active',
+      '>',
+      '> Owner: Documentation tests',
+      '',
+      '- [README](../README.md)',
+      '',
+    ].join('\n'));
+
+    const report = await checkRepository(root, {
+      expectedArea: 'DOC',
+      language: false,
+    });
+    const errors = report.errors.join('\n');
+    assert.match(errors, /README\.md:13: ICE3_DOC_HEADING_SEQUENCE/);
+    assert.match(errors, /README\.md:15: ICE3_DOC_HEADING_SEQUENCE/);
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
+test('rejects a level-two heading without a trailing period', () => {
+  const violations = findHeadingNumberingViolations(
+    '# 仓库\n\n## 1 概述\n',
+    'README.md',
+  );
+
+  assert.equal(violations[0]?.code, 'ICE3_DOC_HEADING_SEQUENCE');
+  assert.equal(violations[0]?.line, 3);
 });
 
 test('accepts a Chinese specification without an English summary', async () => {
@@ -467,7 +624,7 @@ test('excludes invalid validator fixtures from product documentation', async () 
       '>',
       '> Owner: Documentation tests',
       '',
-      '[Index](docs/README.md#documents)',
+      '[Index](docs/README.md#1-documents)',
       '',
     ].join('\n'));
     await writeFile(join(root, 'docs', 'README.md'), [
@@ -479,7 +636,7 @@ test('excludes invalid validator fixtures from product documentation', async () 
       '>',
       '> Owner: Documentation tests',
       '',
-      '## Documents',
+      '## 1. Documents',
       '',
       '- [README](../README.md)',
       '',
@@ -531,7 +688,7 @@ test('discovers repository worktrees in workspace mode', async () => {
       '>',
       '> Owner: Documentation tests',
       '',
-      '[Index](docs/README.md#documents)',
+      '[Index](docs/README.md#1-documents)',
       '',
     ].join('\n'));
     await writeFile(join(repository, 'docs', 'README.md'), [
@@ -543,7 +700,7 @@ test('discovers repository worktrees in workspace mode', async () => {
       '>',
       '> Owner: Documentation tests',
       '',
-      '## Documents',
+      '## 1. Documents',
       '',
       '- [README](../README.md)',
       '',

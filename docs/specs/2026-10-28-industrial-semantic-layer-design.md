@@ -675,7 +675,7 @@ Studio、标准连接器和行业规则属于后续独立计划。
 9. Chromium 和 WebKit 交互测试通过。
 10. 所有核心代码、文档和包产物不含客户资产或敏感业务数据。
 
-## Related Documents
+## 17. Related Documents
 
 - `ICE3-DOC-IDX-001` — [Documentation index](../README.md)
 - `ICE3-DOC-PLAN-013` — [Industrial semantic core implementation](../plans/2026-10-28-industrial-semantic-core.md)

@@ -16,7 +16,7 @@
 
 **规范：** `../specs/2026-10-27-semantic-industrial-proxy-design.md`
 
-## 全局约束
+## 1. 全局约束
 
 - 使用 `.nvmrc` 指定的 Node.js 24.22.1 LTS；不得使用 Node 25 进行验证。
 - 在功能分支上开发，仅在完整验证通过后合入 `main`。
@@ -35,7 +35,7 @@
 - 严禁将受控客户 asset 或派生文件写入 Git、测试、截图、日志、软件包或文档。
 - 在所有 artifacts 中避免出现竞品名称以及被禁止的通用 3D-library 品牌词。
 
-## 审查重点
+## 2. 审查重点
 
 - 细薄、平坦或体积为零的源边界可能导致体积和偏差比率除以零；这类情况必须产生确定性的拒绝结果，不得产生 `NaN` 或超大代理。
 - 一个 mesh 可能被多个 nodes 实例化；代理几何体必须保持 mesh-local 坐标，而 world error 使用最大 node 缩放比例。
@@ -43,7 +43,7 @@
 - 选定的代理和 QEM 样本可以在同一个 Tile 中共存；mesh 替换必须仅对其源 mesh 优先，且不得重复保留剩余的 primitive 几何体。
 - 候选拟合或代理 GLB 重建可能因退化三角形而失败；单设备代理失败时必须回退到 QEM，除非选定的代理在后续输出构建期间变为无效。
 
-## 文件结构
+## 3. 文件结构
 
 - `packages/toolchain-core/src/lod/semanticProxy/types.ts` 负责代理候选、拟合样本、质量指标和拒绝原因。
 - `packages/toolchain-core/src/lod/semanticProxy/collectFitSamples.ts` 负责确定性的顶点、质心、面积和边界收集。
@@ -57,7 +57,7 @@
 
 ---
 
-### 任务 1：收集确定性拟合样本
+### 3.1 任务 1：收集确定性拟合样本
 
 **文件：**
 - 创建：`ice3-toolchain/packages/toolchain-core/src/lod/semanticProxy/types.ts`
@@ -251,7 +251,7 @@ git commit -m "feat(toolchain): collect semantic proxy samples"
 
 ---
 
-### 任务 2：拟合确定性 OBB 和 Cylinder 几何体
+### 3.2 任务 2：拟合确定性 OBB 和 Cylinder 几何体
 
 **文件：**
 - 创建：`ice3-toolchain/packages/toolchain-core/src/lod/semanticProxy/fitProxyGeometry.ts`
@@ -472,7 +472,7 @@ git commit -m "feat(toolchain): fit obb and cylinder proxies"
 
 ---
 
-### 任务 3：评估代理质量、Material 和颜色
+### 3.3 任务 3：评估代理质量、Material 和颜色
 
 **文件：**
 - 创建：`ice3-toolchain/packages/toolchain-core/src/lod/semanticProxy/evaluateProxy.ts`
@@ -858,7 +858,7 @@ git commit -m "feat(toolchain): qualify semantic proxies"
 
 ---
 
-### 任务 4：在 Prepared GLB 中替换源 Mesh 几何体
+### 3.4 任务 4：在 Prepared GLB 中替换源 Mesh 几何体
 
 **文件：**
 - 修改：`ice3-toolchain/packages/toolchain-core/src/output/buildPreparedGLB.ts`
@@ -989,7 +989,7 @@ git commit -m "feat(toolchain): replace prepared mesh geometry"
 
 ---
 
-### 任务 5：将代理样本添加到 Adaptive LOD
+### 3.5 任务 5：将代理样本添加到 Adaptive LOD
 
 **文件：**
 - 修改：`ice3-toolchain/packages/toolchain-core/src/lod/types.ts`
@@ -1228,7 +1228,7 @@ git commit -m "feat(toolchain): allocate semantic proxies in lod"
 
 ---
 
-### 任务 6：添加 CLI 控制和代理报告
+### 3.6 任务 6：添加 CLI 控制和代理报告
 
 **文件：**
 - 修改：`ice3-toolchain/packages/toolchain-core/src/partition/partitionAsset.ts`
@@ -1359,7 +1359,7 @@ git commit -m "feat(cli): expose semantic proxy generation"
 
 ---
 
-### 任务 7：真实 Asset 验证和最终集成
+### 3.7 任务 7：真实 Asset 验证和最终集成
 
 **文件：**
 - 修改：`ice3-doc/docs/contracts/asset-preparation-contract-v1.md`
@@ -1491,7 +1491,7 @@ git add README.md
 git commit -m "docs: finalize semantic proxy guidance"
 ```
 
-## 相关文档
+## 4. 相关文档
 
 - `ICE3-DOC-IDX-001` — [文档索引](../README.md)
 - `ICE3-DOC-SPEC-006` — [语义工业代理规范](../specs/2026-10-27-semantic-industrial-proxy-design.md)

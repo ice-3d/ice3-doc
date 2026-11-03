@@ -464,7 +464,7 @@ focus(
 8. 查询与交互 API 不包含 Agent 专用语义。
 9. 客户模型及派生文件不进入仓库或发布包。
 
-## Related Documents
+## 15. Related Documents
 
 - `ICE3-DOC-IDX-001` — [Documentation index](../README.md)
 - `ICE3-DOC-PLAN-007` — [LOD refinement implementation](../plans/2026-10-27-lod-refinement.md)

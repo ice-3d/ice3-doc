@@ -16,7 +16,7 @@
 
 **规范：** `../specs/2026-10-27-adaptive-industrial-lod-design.md`
 
-## 全局约束
+## 1. 全局约束
 
 - 使用 `.nvmrc` 指定的 Node.js 24.22.1 LTS；不要使用 Node 25 进行验证。
 - 在功能分支上开发，仅在完整验证通过后合入 `main`。
@@ -31,7 +31,7 @@
 - 避免在代码、注释、测试、提交和文档中出现竞品名称以及被禁止的通用 3D 库品牌术语。
 - 对于相同输入、选项和工具版本，所有采样和分配必须具有确定性。
 
-## 审查重点
+## 2. 审查重点
 
 - 设备最低三角形数可能超过自适应 Tile 预算；构建必须明确失败，而不是返回超出预算的粗模 Tile。
 - 溢出的采样几何可能静默丢失顶点颜色；测试必须通过内存和磁盘两条路径往返验证颜色。
@@ -39,7 +39,7 @@
 - 同一语义单元会出现在多个祖先 Tile 中；其曲线必须只计算一次，并以相同的 selection 标识复用。
 - 从采样的工作区几何重建粗模 GLB 可能丢失 Selection ID；测试必须断言每个自适应粗模 Node 仍暴露其源设备标识。
 
-## 文件结构
+## 3. 文件结构
 
 - `packages/toolchain-core/src/partition/types.ts` 负责公共 LOD 配置。
 - `packages/toolchain-core/src/lod/types.ts` 负责曲线、样本、primitive 和分配类型。
@@ -53,7 +53,7 @@
 
 ---
 
-### 任务 1：添加 LOD 配置和确定性采样目标
+### 3.1 任务 1：添加 LOD 配置和确定性采样目标
 
 **文件：**
 - 修改：`ice3-toolchain/packages/toolchain-core/src/partition/types.ts`
@@ -229,7 +229,7 @@ git commit -m "feat(toolchain): define deterministic lod samples"
 
 ---
 
-### 任务 2：实现自适应预算分配器
+### 3.2 任务 2：实现自适应预算分配器
 
 **文件：**
 - 新建：`ice3-toolchain/packages/toolchain-core/src/lod/types.ts`
@@ -535,7 +535,7 @@ git commit -m "feat(toolchain): allocate lod by marginal error"
 
 ---
 
-### 任务 3：在几何工作区中保留顶点颜色
+### 3.3 任务 3：在几何工作区中保留顶点颜色
 
 **文件：**
 - 修改：`ice3-toolchain/packages/toolchain-core/src/lod/createGeometryWorkspace.ts`
@@ -628,7 +628,7 @@ git commit -m "feat(toolchain): retain colors in lod workspace"
 
 ---
 
-### 任务 4：构建逐单元简化曲线
+### 3.4 任务 4：构建逐单元简化曲线
 
 **文件：**
 - 新建：`ice3-toolchain/packages/toolchain-core/src/lod/createLodUnitCurve.ts`
@@ -848,7 +848,7 @@ git commit -m "feat(toolchain): build per-unit lod curves"
 
 ---
 
-### 任务 5：将自适应分配集成到粗模构建
+### 3.5 任务 5：将自适应分配集成到粗模构建
 
 **文件：**
 - 修改：`ice3-toolchain/packages/toolchain-core/src/partition/partitionAsset.ts`
@@ -1249,7 +1249,7 @@ git commit -m "feat(toolchain): integrate adaptive coarse allocation"
 
 ---
 
-### 任务 6：添加 CLI 控制项并验证报告
+### 3.6 任务 6：添加 CLI 控制项并验证报告
 
 **文件：**
 - 修改：`ice3-toolchain/packages/cli/src/commands.ts`
@@ -1397,7 +1397,7 @@ git commit -m "feat(cli): expose adaptive lod allocation"
 
 ---
 
-### 任务 7：运行真实 Asset 比较并完成集成
+### 3.7 任务 7：运行真实 Asset 比较并完成集成
 
 **文件：**
 - 修改：`ice3-doc/docs/contracts/asset-preparation-contract-v1.md`
@@ -1537,7 +1537,7 @@ git add README.md
 git commit -m "docs: describe adaptive lod generation"
 ```
 
-## 相关文档
+## 4. 相关文档
 
 - `ICE3-DOC-IDX-001` — [文档索引](../README.md)
 - `ICE3-DOC-SPEC-001` — [自适应工业 LOD 规范](../specs/2026-10-27-adaptive-industrial-lod-design.md)

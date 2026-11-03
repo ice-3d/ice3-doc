@@ -503,7 +503,7 @@ CPU 驻留、视锥可见性和 GPU 驻留是独立状态。Tile 一旦成功驻
 渲染诊断增加累计 `gpuUploads` 与 `gpuEvictions`。稳定旋转测试要求已驻留
 内容重新进入视野时不增加上传或淘汰计数，并保持完整可见覆盖。
 
-## Related Documents
+## 18. Related Documents
 
 - `ICE3-DOC-IDX-001` — [Documentation index](../README.md)
 - `ICE3-DOC-PLAN-011` — [Static render batching implementation](../plans/2026-10-27-static-render-batching.md)

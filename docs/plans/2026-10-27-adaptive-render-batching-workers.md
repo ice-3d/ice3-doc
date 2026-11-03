@@ -21,7 +21,7 @@ ArrayBuffer、WebGL2、Node.js built-in test runner、`expect`、`tsx`、Playwri
 
 **规格：** `../specs/2026-10-27-industrial-render-batching-design.md`
 
-## 全局约束
+## 1. 全局约束
 
 - 先完成 static batching；本计划消费该 batch model。
 - 在功能分支工作，完整验证后才合入 `main`。
@@ -35,7 +35,7 @@ ArrayBuffer、WebGL2、Node.js built-in test runner、`expect`、`tsx`、Playwri
 - 永不提交受控客户 Asset、派生文件、screenshot、log 或 path。
 - 所有 artifact 中避免竞品名称和禁止的通用 3D library 品牌词。
 
-## 审查重点
+## 2. 审查重点
 
 - Worker 生成 candidate 时 camera 开始移动；结果必须拒绝，不能应用到新 view。
 - Worker transfer 将 ownership 从发送方移走；后续 code 不得读取或修改已转移 buffer。
@@ -45,7 +45,7 @@ ArrayBuffer、WebGL2、Node.js built-in test runner、`expect`、`tsx`、Playwri
 
 ---
 
-### Task 1：定义 Batch Plan 和 Cost Model
+### 2.1 Task 1：定义 Batch Plan 和 Cost Model
 
 **文件：**
 - 新建：`ice3-engine/packages/runtime/src/batching/ICERenderBatchPlanner.ts`
@@ -146,7 +146,7 @@ git commit -m "feat(runtime): plan adaptive render batches"
 
 ---
 
-### Task 2：定义 Worker Protocol 和有界 Pool
+### 2.2 Task 2：定义 Worker Protocol 和有界 Pool
 
 **文件：**
 - Create: `ice3-engine/packages/runtime/src/batching/ICEBatchWorkerProtocol.ts`
@@ -255,7 +255,7 @@ git commit -m "feat(runtime): add bounded batch worker pool"
 
 ---
 
-### Task 3：在 Worker 内合并 Geometry
+### 2.3 Task 3：在 Worker 内合并 Geometry
 
 **文件：**
 - 新建：`ice3-engine/packages/runtime/src/workers/renderBatchWorker.ts`
@@ -334,7 +334,7 @@ git commit -m "feat(runtime): merge render buffers in workers"
 
 ---
 
-### Task 4：在 Frame Budget 内上传 Candidate Generation
+### 2.4 Task 4：在 Frame Budget 内上传 Candidate Generation
 
 **文件：**
 - 新建：`ice3-engine/packages/renderer/src/ICEWebGL2BatchGenerationUploader.ts`
@@ -404,7 +404,7 @@ git commit -m "feat(renderer): swap uploaded batch generations"
 
 ---
 
-### Task 5：接入 Idle Planning、Cancellation 和 Metric
+### 2.5 Task 5：接入 Idle Planning、Cancellation 和 Metric
 
 **文件：**
 - Create: `ice3-engine/packages/runtime/src/batching/ICEAdaptiveRenderBatchController.ts`
@@ -515,7 +515,7 @@ git add packages/runtime/src/batching/ICEAdaptiveRenderBatchController.ts \
 git commit -m "feat(runtime): add adaptive worker batching"
 ```
 
-## 关联文档
+## 3. 关联文档
 
 - `ICE3-DOC-IDX-001` — [文档索引](../README.md)
 - `ICE3-DOC-SPEC-004` — [工业渲染 Batch Spec](../specs/2026-10-27-industrial-render-batching-design.md)

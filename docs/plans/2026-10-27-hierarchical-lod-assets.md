@@ -16,7 +16,7 @@
 
 **规格：** `../specs/2026-10-27-hierarchical-lod-design.md`
 
-## 全局约束
+## 1. 全局约束
 
 - 各仓库使用 `.nvmrc` 指定的 Node.js 24.22.1 LTS。
 - 在 `feature/hierarchical-lod` 开发，完整门禁通过后才合入 `main`。
@@ -31,7 +31,7 @@
 - 最终 Asset 目录原子发布。
 - 不向普通 GLB 或应用层增加 LOD 支持。
 
-## 审查重点
+## 2. 审查重点
 
 - Triangle 数量很少的 device 必须保留在 coarse generation 中，不能变得不可选。
 - Per-device minimum 总和可能超过 `lodMaxTriangles`；所有 device 仍须保留。
@@ -41,7 +41,7 @@
 
 ---
 
-### Task 1：跨 LOD Content 保持稳定 Selection Identity
+### 2.1 Task 1：跨 LOD Content 保持稳定 Selection Identity
 
 **文件：**
 - 修改：`ice3-toolchain/packages/toolchain-core/src/output/buildPreparedGLB.ts`
@@ -232,7 +232,7 @@ git commit -m "feat(assets): carry lod selection identity"
 
 ---
 
-### Task 2：Primitive Geometry 简化
+### 2.2 Task 2：Primitive Geometry 简化
 
 **文件：**
 - 修改：`ice3-toolchain/packages/toolchain-core/package.json`
@@ -409,7 +409,7 @@ git commit -m "feat(toolchain): simplify partition geometry"
 
 ---
 
-### Task 3：有界 Geometry Workspace
+### 2.3 Task 3：有界 Geometry Workspace
 
 **Files:**
 - Create: `ice3-toolchain/packages/toolchain-core/src/lod/createGeometryWorkspace.ts`
@@ -508,7 +508,7 @@ git commit -m "feat(toolchain): bound lod geometry workspace"
 
 ---
 
-### Task 4：集成 Fine 与 Coarse Build
+### 2.4 Task 4：集成 Fine 与 Coarse Build
 
 **文件：**
 - 修改：`ice3-toolchain/packages/toolchain-core/src/partition/types.ts`
@@ -683,7 +683,7 @@ git commit -m "feat(toolchain): generate hierarchical lod partitions"
 
 ---
 
-### Task 5：Geometric Error 与 Hierarchical Tileset
+### 2.5 Task 5：Geometric Error 与 Hierarchical Tileset
 
 **Files:**
 - Modify: `ice3-toolchain/packages/toolchain-core/src/partition/tileset.ts`
@@ -782,7 +782,7 @@ git commit -m "feat(toolchain): write hierarchical geometric error"
 
 ---
 
-### Task 6：CLI Option、Report 和 Atomic Publication
+### 2.6 Task 6：CLI Option、Report 和 Atomic Publication
 
 **Files:**
 - Modify: `ice3-toolchain/packages/cli/src/commands.ts`
@@ -877,7 +877,7 @@ git commit -m "docs: define hierarchical lod asset contract"
 
 ---
 
-### Task 7：Asset Pipeline 验证
+### 2.7 Task 7：Asset Pipeline 验证
 
 **Files:**
 - Modify: `ice3-toolchain/README.md`
@@ -934,13 +934,13 @@ git add docs/api/m1.md
 git commit -m "docs: describe hierarchical lod assets"
 ```
 
-## 执行建议
+## 3. 执行建议
 
 使用 Native execution。Identity extension、simplification adapter、workspace、
 partition pipeline 和 Tileset error 共享准确的 ID 和 Geometry contract；连续实施可减少
 interface drift。完成本 Plan 后再开始 Runtime Plan。
 
-## 关联文档
+## 4. 关联文档
 
 - `ICE3-DOC-IDX-001` — [Documentation index](../README.md)
 - `ICE3-DOC-SPEC-003` — [Hierarchical LOD specification](../specs/2026-10-27-hierarchical-lod-design.md)

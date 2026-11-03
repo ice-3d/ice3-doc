@@ -436,7 +436,7 @@ ice3-tool partition <source> \
 
 只有开放标准确实无法表达经确认的工业需求时，才讨论 ICE3 专有扩展。
 
-## Related Documents
+## 14. Related Documents
 
 - `ICE3-DOC-IDX-001` — [Documentation index](../README.md)
 - `ICE3-DOC-PLAN-010` — [Spatial Tileset pipeline implementation](../plans/2026-10-27-spatial-tileset-pipeline.md)

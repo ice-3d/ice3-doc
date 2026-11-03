@@ -330,7 +330,7 @@ wallClockMs
 - 后续语义代理可作为新的采样来源接入同一预算分配器。
 - 后续簇代理可以复用误差汇总和预算报告，但不在本阶段实现。
 
-## Related Documents
+## 13. Related Documents
 
 - `ICE3-DOC-IDX-001` — [Documentation index](../README.md)
 - `ICE3-DOC-PLAN-001` — [Adaptive Industrial LOD implementation](../plans/2026-10-27-adaptive-industrial-lod.md)

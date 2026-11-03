@@ -16,7 +16,7 @@
 
 **规范：** [ICE3-DOC-SPEC-011](../specs/2026-10-29-documentation-system-design.md)
 
-## 全局约束
+## 1. 全局约束
 
 - 从包含全部七个同级 `ice3-*` 仓库的 workspace 目录中运行本计划中的命令。
 - Public API 名称、命令名称、标识符和代码保持其实现语言及大小写。
@@ -30,7 +30,7 @@
 - 不得为未实现的仓库添加产品声明或用法说明。
 - `LICENSE` 文件保持未经修改的 MIT 文本。
 
-## 审查重点
+## 2. 审查重点
 
 - 移动 `docs/superpowers/*` 不得留下失效的相对链接或过时索引。
 - 跨仓库链接必须使用 `ice-3d`，且不得使用本地同级路径。
@@ -38,7 +38,7 @@
 - 占位仓库不得暗示不存在的 APIs、命令或架构。
 - 重写的 READMEs 必须保持精确的命令、ports、prerequisites 和验证行为不变。
 
-## 初始状态
+## 3. 初始状态
 
 本计划批准后，在开始任务 1 之前，将已审查的规范与计划合并到
 `ice3-doc/main`：
@@ -52,9 +52,9 @@ git switch -c docs/foundation
 
 ---
 
-## 文件结构映射
+## 4. 文件结构映射
 
-### 共享文档校验器
+### 4.1 共享文档校验器
 
 - `ice3-doc/scripts/check-docs.mjs`：解析已跟踪的 Markdown，验证 metadata、
   indexes、links、anchors、local paths 和 cross-repository URLs。
@@ -65,7 +65,7 @@ git switch -c docs/foundation
 - 每个已实现的仓库都会收到一份相同的
   `scripts/check-docs.mjs` 副本和一个 `docs:check` package script。
 
-### `ice3-doc`
+### 4.2 `ice3-doc`
 
 - `README.md`
 - `docs/README.md`
@@ -79,7 +79,7 @@ git switch -c docs/foundation
 - `docs/specs/*.md`
 - `docs/plans/*.md`
 
-### `ice3-engine`
+### 4.3 `ice3-engine`
 
 - `README.md`
 - `docs/README.md`
@@ -97,7 +97,7 @@ git switch -c docs/foundation
 - `docs/specs/*.md`
 - `docs/plans/*.md`
 
-### `ice3-toolchain`
+### 4.4 `ice3-toolchain`
 
 - `README.md`
 - `docs/README.md`
@@ -113,7 +113,7 @@ git switch -c docs/foundation
 - `THIRD_PARTY_NOTICES.md`
 - `docs/plans/*.md`
 
-### `ice3-industrial`
+### 4.5 `ice3-industrial`
 
 - `README.md`
 - `docs/README.md`
@@ -125,7 +125,7 @@ git switch -c docs/foundation
 - `docs/decisions/0002-manifest-state-separation.md`
 - `docs/decisions/0003-stable-identity-model.md`
 
-### `ice3-agent-console`
+### 4.6 `ice3-agent-console`
 
 - `README.md`
 - `docs/README.md`
@@ -140,14 +140,14 @@ git switch -c docs/foundation
 - `docs/specs/*.md`
 - `docs/plans/*.md`
 
-### 占位仓库
+### 4.7 占位仓库
 
 - `ice3-studio/README.md`
 - `ice3-water-demo/README.md`
 
 ---
 
-### 任务 1：文档校验器
+### 4.8 任务 1：文档校验器
 
 **文件：**
 - 创建：`ice3-doc/package.json`
@@ -246,7 +246,7 @@ git add package.json scripts
 git commit -m "docs: add documentation validator"
 ```
 
-### 任务 2：迁移共享文档并分配 IDs
+### 4.9 任务 2：迁移共享文档并分配 IDs
 
 **文件：**
 - 移动：`ice3-doc/docs/superpowers/specs/*.md` 到 `ice3-doc/docs/specs/*.md`
@@ -359,7 +359,7 @@ git add README.md docs
 git commit -m "docs: assign shared document identifiers"
 ```
 
-### 任务 3：共享导航、架构和决策
+### 4.10 任务 3：共享导航、架构和决策
 
 **文件：**
 - 修改：`ice3-doc/README.md`
@@ -429,7 +429,7 @@ git add README.md docs package.json scripts
 git commit -m "docs: add ICE3 documentation portal"
 ```
 
-### 任务 4：迁移 Engine 文档
+### 4.11 任务 4：迁移 Engine 文档
 
 **文件：**
 - 移动：`ice3-engine/docs/superpowers/specs/*.md` 到 `ice3-engine/docs/specs/*.md`
@@ -501,7 +501,7 @@ git add AGENTS.md README.md docs
 git commit -m "docs: assign engine document identifiers"
 ```
 
-### 任务 5：Engine README、架构、指南和决策
+### 4.12 任务 5：Engine README、架构、指南和决策
 
 **文件：**
 - 修改：`ice3-engine/README.md`
@@ -575,7 +575,7 @@ git add README.md docs package.json scripts/check-docs.mjs
 git commit -m "docs: complete engine developer documentation"
 ```
 
-### 任务 6：Toolchain 文档迁移
+### 4.13 任务 6：Toolchain 文档迁移
 
 **文件：**
 - 移动：`ice3-toolchain/docs/superpowers/plans/*.md` 到
@@ -640,7 +640,7 @@ git add AGENTS.md README.md THIRD_PARTY_NOTICES.md docs tests/fixtures
 git commit -m "docs: assign toolchain document identifiers"
 ```
 
-### 任务 7：Toolchain README、架构、指南和决策
+### 4.14 任务 7：Toolchain README、架构、指南和决策
 
 **文件：**
 - 修改：`ice3-toolchain/README.md`
@@ -710,7 +710,7 @@ git add package.json scripts/check-docs.mjs
 git commit -m "docs: complete toolchain developer documentation"
 ```
 
-### 任务 8：工业语义文档
+### 4.15 任务 8：工业语义文档
 
 **文件：**
 - 修改：`ice3-industrial/README.md`
@@ -779,7 +779,7 @@ git add README.md docs package.json scripts/check-docs.mjs
 git commit -m "docs: complete industrial developer documentation"
 ```
 
-### 任务 9：Agent Console 文档迁移
+### 4.16 任务 9：Agent Console 文档迁移
 
 **文件：**
 - 移动：`ice3-agent-console/docs/superpowers/specs/*.md` 到
@@ -842,7 +842,7 @@ git add AGENTS.md README.md docs
 git commit -m "docs: assign agent console document identifiers"
 ```
 
-### 任务 10：Agent Console README、架构、指南和决策
+### 4.17 任务 10：Agent Console README、架构、指南和决策
 
 **文件：**
 - 修改：`ice3-agent-console/README.md`
@@ -905,7 +905,7 @@ git add README.md docs package.json scripts/check-docs.mjs
 git commit -m "docs: complete agent console developer documentation"
 ```
 
-### 任务 11：占位仓库
+### 4.18 任务 11：占位仓库
 
 **文件：**
 - 修改：`ice3-studio/README.md`
@@ -950,7 +950,7 @@ git add README.md
 git commit -m "docs: add water demo placeholder"
 ```
 
-### 任务 12：跨仓库导航和发布门禁
+### 4.19 任务 12：跨仓库导航和发布门禁
 
 **文件：**
 - 如果跨仓库 target IDs 发生变化，则修改 `ice3-doc/docs/README.md`
@@ -1074,7 +1074,7 @@ git switch main
 git merge --no-ff --no-edit docs/placeholder
 ```
 
-## 相关文档
+## 5. 相关文档
 
 - `ICE3-DOC-IDX-001` — [文档索引](../README.md)
 - `ICE3-DOC-SPEC-011` — [文档系统规范](../specs/2026-10-29-documentation-system-design.md)

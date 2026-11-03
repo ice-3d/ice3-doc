@@ -368,7 +368,7 @@ ICE3_WWTP_ARTIFACT_INVALID
 - 读取或转换客户模型。
 - 浏览器内实时建模或格式转换。
 
-## Related Documents
+## 14. Related Documents
 
 - `ICE3-DOC-IDX-001` — [Documentation index](../README.md)
 - `ICE3-DOC-PLAN-014` — [Synthetic wastewater plant implementation](../plans/2026-10-28-synthetic-wastewater-plant-asset.md)

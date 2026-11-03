@@ -43,7 +43,22 @@ ICE3-<AREA>-<TYPE>-<NNN>
 `copy`、日期重复后缀或无法表达主题的名称。翻译标题时保留既有文件名，除非迁移计划
 同时更新所有内部与跨仓库链接。
 
-## 4. 元数据
+## 4. 章节编号
+
+产品文档的标题层级与章节编号必须保持稳定、可预测：
+
+- 一级标题使用文档标题，不添加章节编号。
+- 二级标题使用 `1.`、`2.`、`3.` 的连续编号。
+- 三级及更深标题使用父级编号加下一级序号，例如 `1.1`、`1.1.1`。
+- 每一级从 `1` 开始连续递增，不得跳号、乱序或重复。
+- 编号后的标题文本保留原有语义；仅调整标题编号时不得改写章节结论。
+- GitHub heading anchor 包含章节编号，修改标题后必须同步更新引用它的链接。
+
+章节编号适用于 README、索引、架构、ADR、Guide、API、Reference、Contract、Spec 和
+Plan，包括 Historical 与 Deprecated 文档。根目录 `AGENTS.md`、
+`THIRD_PARTY_NOTICES.md` 和测试夹具不属于产品文档编号范围。
+
+## 5. 元数据
 
 除 `LICENSE`、README 和明确法律例外外，产品文档必须包含：
 
@@ -63,7 +78,7 @@ Status 只能使用文档校验器支持的稳定集合。实现完成但性能�
 索引用途必须可检索，正文顶部必须说明退役原因或替代方案。该例外不适用于 README、
 Architecture、Guide、API、Reference、ADR 或当前有效的 Contract。
 
-## 5. 索引
+## 6. 索引
 
 - 每个包含产品文档的仓库必须有 `docs/README.md`。
 - 索引按 Document ID 的数字序号排序，不按文件名或创建时间排序。
@@ -71,7 +86,7 @@ Architecture、Guide、API、Reference、ADR 或当前有效的 Contract。
 - Active 文档优先展示；Historical、Deprecated 和存档文档放入独立小节。
 - 标题和用途必须描述当前内容，不能继续引用已删除仓库、依赖或生产能力。
 
-## 6. 链接与状态
+## 7. 链接与状态
 
 - 内部链接使用仓库相对路径。
 - 跨仓库链接使用固定 `main` 分支的完整 GitHub URL。
@@ -79,7 +94,7 @@ Architecture、Guide、API、Reference、ADR 或当前有效的 Contract。
 - 历史文档必须在显著位置说明其替代方案或退役原因。
 - 当前架构、API、指南和参考文档不得把历史方案描述为生产依赖。
 
-## 7. 验证
+## 8. 验证
 
 ```bash
 npm run docs:check
@@ -89,7 +104,7 @@ npm test
 
 结构、语言、链接、索引和命名任一检查失败时，不得把文档标记为完成。
 
-## 8. 关联文档
+## 9. 关联文档
 
 - `ICE3-DOC-IDX-001` — [文档索引](../README.md)
 - `ICE3-DOC-SPEC-011` — [文档系统设计](https://github.com/ice-3d/ice3-doc/blob/main/docs/specs/2026-10-29-documentation-system-design.md)

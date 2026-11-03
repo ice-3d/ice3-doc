@@ -6,7 +6,7 @@
 >
 > Owner: ICE3 architecture maintainers
 
-## 目标
+## 1. 目标
 
 ICE3 是用于构建工业空间应用的一组仓库。它将可复用 3D Engine、Studio 内的离线 Asset 处理、
 industrial semantic、应用接口和行业专用演示分开。
@@ -14,7 +14,7 @@ industrial semantic、应用接口和行业专用演示分开。
 架构优先采用明确 package 边界和标准文件格式，不采用单一大型应用或私有 Asset
 交换格式。
 
-## 仓库职责
+## 2. 仓库职责
 
 | 仓库 | 职责 | 主要输出 |
 |---|---|---|
@@ -25,7 +25,7 @@ industrial semantic、应用接口和行业专用演示分开。
 | `ice3-studio` | Document 建模、ChangeSet 审批、Source import、prepare、partition、LOD、Tileset 导出和 Agent 主导的 Web 工作台 | Rust Studio Core/Server/CLI、本地 JSON-RPC API 与 React Viewer |
 | `ice3-water-demo` | 预留水务行业演示 workspace | 尚无公开实现 |
 
-## 依赖方向
+## 3. 依赖方向
 
 ```text
 外部 Agent / 用户
@@ -56,7 +56,7 @@ proxy、render batch、Tileset 导出和 artifact validation。Studio Server 负
 原子 revision、ChangeSet 和预览。独立 `ice3-toolchain` 仓库和 Toolchain Sidecar 已
 退役，不是当前生产依赖。
 
-## Authoring 与审阅
+## 4. Authoring 与审阅
 
 Studio 的主要入口是 Agent intent。外部 Agent 通过公开 JSON-RPC 查询有界上下文、
 搜索 source/derived object、评估局部变更影响并提交受类型约束的 Operation 提案。
@@ -73,7 +73,7 @@ AI 提案和人工表单修改都必须经过 ChangeSet。候选 digest、验证
 
 详见 [Agent 主导的 Studio 工作台](decisions/0006-agent-led-studio-workbench.md)。
 
-## Asset 生命周期
+## 5. Asset 生命周期
 
 1. 受支持的 source model 进入 `ice3-studio`；浏览器 Runtime 不解析通用 source format。
 2. Studio 校验 source，并生成带 ICE3 Prepared GLB Profile metadata 的标准 GLB。
@@ -84,7 +84,7 @@ AI 提案和人工表单修改都必须经过 ChangeSet。候选 digest、验证
 6. Engine 只读取 Prepared GLB，并根据 camera、Bounds、error threshold 和 residency
    budget 请求 tiled content。
 
-## Runtime 组合
+## 6. Runtime 组合
 
 Engine 拥有一个 Scene graph 和一套 input-routing model。Renderer backends 消费 Scene；
 2D layer 与 3D content 共享 pointer、wheel、focus 和 lifecycle routing。公开
@@ -93,7 +93,7 @@ Selection 与 query result 使用稳定 semantic ID，不使用 GPU handle 或�
 Runtime 可以展示和查询 industrial meaning，但业务规则、审批 workflow、alarm policy
 和 Agent reasoning 留在 Engine 之外。
 
-## 失败边界
+## 7. 失败边界
 
 - 无效 source Asset 在 preprocessing 阶段失败。
 - Runtime profile violation 在 Scene publication 前失败。
@@ -102,7 +102,7 @@ Runtime 可以展示和查询 industrial meaning，但业务规则、审批 work
 - semantic update 失败时原子拒绝整批更新。
 - 已配置 Agent 失败时必须报告，不得静默切换为确定性脚本运行。
 
-## 关联文档
+## 8. 关联文档
 
 - `ICE3-DOC-IDX-001` — [文档索引](README.md)
 - `ICE3-DOC-CTR-001` — [Asset Preparation Contract v1](contracts/asset-preparation-contract-v1.md)

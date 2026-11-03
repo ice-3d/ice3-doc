@@ -16,7 +16,7 @@
 
 **规范：** `../specs/2026-10-27-industrial-render-batching-design.md`
 
-## 全局约束
+## 1. 全局约束
 
 - 在功能分支上开发，并仅在全量验证通过后合入 `main`。
 - 使用 `.nvmrc` 指定的 Node.js 24.22.1 LTS；不得使用其他运行时进行验证。
@@ -31,7 +31,7 @@
 - 在代码、文档、测试、日志和提交消息中避免竞品名称以及被禁止的通用 3D 库品牌术语。
 - 验收目标：受控工业 Asset 的可见 Draw Call 数量必须至少下降 50%。
 
-## 审查重点
+## 2. 审查重点
 
 - 一个材质同时使用索引和非索引 primitive；两者必须产生相同的可见表面，且不得被错误混合。
 - 一个语义节点具有多个使用不同材质的 primitive；选择仍须保持为一个设备，同时批次仍须与材质正确对应。
@@ -41,7 +41,7 @@
 
 ---
 
-### 任务 1：定义并验证批处理元数据
+### 2.1 任务 1：定义并验证批处理元数据
 
 **文件：**
 - 修改：`ice3-engine/packages/assets/src/ICEPreparedGLB.ts`
@@ -158,7 +158,7 @@ git commit -m "feat(assets): define prepared render batches"
 
 ---
 
-### 任务 2：构建确定性的工具链批次
+### 2.2 任务 2：构建确定性的工具链批次
 
 **文件：**
 - 创建：`ice3-toolchain/packages/toolchain-core/src/output/buildRenderBatches.ts`
@@ -289,7 +289,7 @@ git commit -m "feat(toolchain): generate static render batches"
 
 ---
 
-### 任务 3：公开批次生成与报告
+### 2.3 任务 3：公开批次生成与报告
 
 **文件：**
 - 修改：`ice3-toolchain/packages/toolchain-core/src/partition/types.ts`
@@ -379,7 +379,7 @@ git commit -m "feat(cli): expose static render batching"
 
 ---
 
-### 任务 4：构建仅用于查询的语义和运行时批次对象
+### 2.4 任务 4：构建仅用于查询的语义和运行时批次对象
 
 **文件：**
 - 创建：`ice3-engine/packages/runtime/src/asset/ICERenderBatch.ts`
@@ -477,7 +477,7 @@ git commit -m "feat(runtime): represent render batches and semantic nodes"
 
 ---
 
-### 任务 5：通过 WebGL2 提交静态批次
+### 2.5 任务 5：通过 WebGL2 提交静态批次
 
 **文件：**
 - 创建：`ice3-engine/packages/renderer/src/WebGL2RenderBatch.ts`
@@ -555,7 +555,7 @@ git commit -m "feat(renderer): submit static render batches"
 
 ---
 
-### 任务 6：保留拾取和选择高亮
+### 2.6 任务 6：保留拾取和选择高亮
 
 **文件：**
 - 修改：`ice3-engine/packages/renderer/src/WebGL2Program.ts`
@@ -638,7 +638,7 @@ git commit -m "feat(renderer): pick and highlight batched devices"
 
 ---
 
-### 任务 7：添加批次拾取和实例化兼容性
+### 2.7 任务 7：添加批次拾取和实例化兼容性
 
 **文件：**
 - 创建：`ice3-engine/packages/renderer/src/WebGL2InstanceBatch.ts`
@@ -706,7 +706,7 @@ git commit -m "feat(renderer): instance repeated industrial geometry"
 
 ---
 
-### 任务 8：验证真实 Asset 的绘制数量降低并最终确定静态批处理
+### 2.8 任务 8：验证真实 Asset 的绘制数量降低并最终确定静态批处理
 
 **文件：**
 - 修改：`ice3-doc/docs/contracts/asset-preparation-contract-v1.md`
@@ -789,7 +789,7 @@ git add docs
 git commit -m "docs: record static render batching"
 ```
 
-## 相关文档
+## 3. 相关文档
 
 - `ICE3-DOC-IDX-001` — [文档索引](../README.md)
 - `ICE3-DOC-SPEC-004` — [工业渲染批处理规范](../specs/2026-10-27-industrial-render-batching-design.md)

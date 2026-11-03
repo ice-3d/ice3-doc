@@ -6,7 +6,7 @@
 >
 > Owner: ICE3 architecture maintainers
 
-## 决策
+## 1. 决策
 
 | ID | 决策 | Status | 用途 |
 |---|---|---|---|
@@ -17,7 +17,7 @@
 | `ICE3-DOC-ADR-005` | [npm 公开发布拓扑](0005-npm-public-release-topology.md) | Historical | 记录 Toolchain 退役前的公开 package 发布决策 |
 | `ICE3-DOC-ADR-006` | [Agent 主导的 Studio 工作台](0006-agent-led-studio-workbench.md) | Active | AI 负责建模动作，人类负责意图、审阅和批准 |
 
-## 关联文档
+## 2. 关联文档
 
 - `ICE3-DOC-IDX-001` — [文档索引](../README.md)
 - `ICE3-DOC-ARC-001` — [ICE3 家族架构](../architecture.md)

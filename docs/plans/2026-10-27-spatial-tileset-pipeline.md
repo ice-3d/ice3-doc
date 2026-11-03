@@ -16,7 +16,7 @@
 
 **规范：** `../specs/2026-10-27-spatial-tileset-pipeline-design.md`
 
-## 全局约束
+## 1. 全局约束
 
 - 使用各仓库 `.nvmrc` 指定的 Node.js 24.22.1 LTS。
 - 在功能分支上开发；仅在完整仓库验证通过后合入 `main`。
@@ -34,7 +34,7 @@
 - 未经单独的设计决策，不得添加 runtime 依赖；test-only 依赖必须在提交中声明并说明理由。
 - 除非命令以 `git -C` 开头，否则应从任务文件路径所指定的仓库根目录运行。
 
-## 审查重点
+## 2. 审查重点
 
 - 被多个 nodes 引用的 mesh 必须保留在同一个原子组中，否则其几何体可能重复，或其设备标识可能变得不明确。
 - 如果边界在所选分割轴上的中心相同或范围为零，必须以确定性方式终止，不得无限递归。
@@ -44,7 +44,7 @@
 
 ---
 
-### 执行设置
+### 2.1 执行设置
 
 - [ ] 创建 `feature/spatial-tileset-pipeline` 于 `ice3-toolchain` 和
   `ice3-engine` 中；本计划文档已位于 `ice3-doc` 的该分支上。
@@ -66,7 +66,7 @@ git -C ../ice3-engine status --short
 
 预期：提交本计划后，没有已跟踪或未跟踪且未被忽略的文件。
 
-### 任务 1：Contract 和确定性 Partition Analyzer
+### 2.2 任务 1：Contract 和确定性 Partition Analyzer
 
 **文件：**
 - 修改：`ice3-doc/docs/contracts/asset-preparation-contract-v1.md`
@@ -368,7 +368,7 @@ git commit -m "feat(toolchain): analyze spatial partition units"
 
 ---
 
-### 任务 2：确定性最长轴 Partition Planner
+### 2.3 任务 2：确定性最长轴 Partition Planner
 
 **文件：**
 - 创建：`ice3-toolchain/packages/toolchain-core/src/partition/createPartitionPlan.ts`
@@ -481,7 +481,7 @@ git commit -m "feat(toolchain): plan deterministic spatial partitions"
 
 ---
 
-### 任务 3：构建独立的 Prepared GLB Fragments
+### 2.4 任务 3：构建独立的 Prepared GLB Fragments
 
 **文件：**
 - 创建：`ice3-toolchain/packages/toolchain-core/src/scene/nodeMatrices.ts`
@@ -616,7 +616,7 @@ git commit -m "feat(toolchain): build prepared GLB fragments"
 
 ---
 
-### 任务 4：写入并验证 3D Tiles 1.1 Tree
+### 2.5 任务 4：写入并验证 3D Tiles 1.1 Tree
 
 **文件：**
 - 创建：`ice3-toolchain/packages/toolchain-core/src/partition/tileset.ts`
@@ -802,7 +802,7 @@ git commit -m "feat(toolchain): emit standard 3D Tiles trees"
 
 ---
 
-### 任务 5：编排 Partition 构建和字节限制
+### 2.6 任务 5：编排 Partition 构建和字节限制
 
 **文件：**
 - 创建：`ice3-toolchain/packages/toolchain-core/src/partition/partitionAsset.ts`
@@ -953,7 +953,7 @@ git commit -m "feat(toolchain): partition assets into tiled GLBs"
 
 ---
 
-### 任务 6：添加原子 Partition CLI
+### 2.7 任务 6：添加原子 Partition CLI
 
 **文件：**
 - 修改：`ice3-toolchain/packages/cli/src/commands.ts`
@@ -1091,7 +1091,7 @@ git commit -m "feat(cli): add atomic partition command"
 
 ---
 
-### 任务 7：解析支持的 3D Tiles 子集
+### 2.8 任务 7：解析支持的 3D Tiles 子集
 
 **文件：**
 - 创建：`ice3-engine/packages/assets/src/ICETileset.ts`
@@ -1224,7 +1224,7 @@ git commit -m "feat(assets): parse supported 3D Tiles"
 
 ---
 
-### 任务 8：使用 Public Runtime API 增量加载 Tiles
+### 2.9 任务 8：使用 Public Runtime API 增量加载 Tiles
 
 **文件：**
 - 创建：`ice3-engine/packages/runtime/src/asset/ICETilesetLoader.ts`
@@ -1521,7 +1521,7 @@ git commit -m "feat(runtime): load tiled assets incrementally"
 
 ---
 
-### 任务 9：将现有示例切换为增量 Tileset 加载
+### 2.10 任务 9：将现有示例切换为增量 Tileset 加载
 
 **文件：**
 - 修改：`ice3-engine/examples/m1/main.ts`
@@ -1622,7 +1622,7 @@ git commit -m "feat(example): demonstrate incremental tiled loading"
 
 ---
 
-### 任务 10：完成文档、完整验证和受控 Asset Smoke Test
+### 2.11 任务 10：完成文档、完整验证和受控 Asset Smoke Test
 
 **文件：**
 - 修改：`ice3-toolchain/README.md`
@@ -1776,14 +1776,14 @@ git branch -d feature/spatial-tileset-pipeline
 在合并后的分支上再次运行该仓库的 `npm run verify`。如果验证未通过，
 不得删除分支或声称完成。
 
-## 执行建议
+## 3. 执行建议
 
 本计划更适合采用 native execution 作为默认方式。Toolchain output
 schema、engine parser、runtime fixture 和 browser demonstration 共享精确的
 field names 和 dependency ordering；在同一连续会话中保留这些接口决策
 可减少跨仓库不一致。完整验证门禁仍提供独立的最终检查。
 
-## 相关文档
+## 4. 相关文档
 
 - `ICE3-DOC-IDX-001` — [文档索引](../README.md)
 - `ICE3-DOC-SPEC-007` — [空间 Tileset Pipeline 规范](../specs/2026-10-27-spatial-tileset-pipeline-design.md)

@@ -16,7 +16,7 @@
 
 **规范：** `../specs/2026-10-27-adaptive-tileset-scheduler-design.md`
 
-## 全局约束
+## 1. 全局约束
 
 - 使用 `.nvmrc` 指定的 Node.js 24.22.1 LTS。
 - 在 `feature/adaptive-tileset-scheduler` 分支上开发；仅在完整门禁通过后合入 `main`。
@@ -33,7 +33,7 @@
 - LOD、隐式 tiling、父内容细化、外部 tilesets 和 `region` 仍不受支持。
 - 不要添加运行时依赖。
 
-## 审查重点
+## 2. 审查重点
 
 - 大于 `maxResidentTiles` 的可见集必须继续完整加载；预算压力可以发出警告，但绝不能导致可见设备无法显示。
 - 在 Tile 正在加载或等待提交时发生相机变化，必须丢弃过期排队工作，且不得创建孤立 Node 或保留旧缓存条目。
@@ -43,7 +43,7 @@
 
 ---
 
-### 任务 1：核心视锥边界测试
+### 2.1 任务 1：核心视锥边界测试
 
 **文件：**
 - 新建：`ice3-engine/packages/core/src/culling/ICEFrustum.ts`
@@ -162,7 +162,7 @@ git commit -m "feat(core): add frustum bounds testing"
 
 ---
 
-### 任务 2：纯 Tileset 工作集规划器
+### 2.2 任务 2：纯 Tileset 工作集规划器
 
 **文件：**
 - 新建：`ice3-engine/packages/runtime/src/asset/ICETilesetScheduler.ts`
@@ -348,7 +348,7 @@ git commit -m "feat(runtime): plan camera-driven tile work sets"
 
 ---
 
-### 任务 3：按 URL 释放 Asset 缓存
+### 2.3 任务 3：按 URL 释放 Asset 缓存
 
 **文件：**
 - 修改：`ice3-engine/packages/runtime/src/asset/ICEAssetLoader.ts`
@@ -415,7 +415,7 @@ git commit -m "feat(runtime): release individual asset cache entries"
 
 ---
 
-### 任务 4：相机驱动的 Tileset 状态和驻留容器
+### 2.4 任务 4：相机驱动的 Tileset 状态和驻留容器
 
 **文件：**
 - 修改：`ice3-engine/packages/runtime/src/asset/ICETilesetLoader.ts`
@@ -524,7 +524,7 @@ git commit -m "feat(runtime): track resident tileset containers"
 
 ---
 
-### 任务 5：相机更新、有界队列和动态卸载
+### 2.5 任务 5：相机更新、有界队列和动态卸载
 
 **文件：**
 - 修改：`ice3-engine/packages/runtime/src/asset/ICETilesetLoader.ts`
@@ -770,7 +770,7 @@ git commit -m "feat(runtime): schedule and unload visible tiles"
 
 ---
 
-### 任务 6：工作集 UI 和端到端行为
+### 2.6 任务 6：工作集 UI 和端到端行为
 
 **文件：**
 - 修改：`ice3-engine/examples/m1/main.ts`
@@ -862,7 +862,7 @@ git commit -m "feat(example): visualize camera-driven tile work sets"
 
 ---
 
-### 任务 7：完整验证和真实 Asset 量化
+### 2.7 任务 7：完整验证和真实 Asset 量化
 
 **文件：**
 - 修改：`ice3-engine/README.md`
@@ -976,11 +976,11 @@ git branch -d feature/adaptive-tileset-scheduler
 
 合并后再次运行 `npm run verify`。
 
-## 执行建议
+## 3. 执行建议
 
 建议使用原生执行。视锥、调度器决策对象和加载器状态机在许多测试中共享精确 ID 和生命周期条件；连续实施会话可减少接口不匹配。最终完整门禁仍提供独立的回归覆盖。
 
-## 相关文档
+## 4. 相关文档
 
 - `ICE3-DOC-IDX-001` — [文档索引](../README.md)
 - `ICE3-DOC-SPEC-002` — [自适应 Tileset 调度器规范](../specs/2026-10-27-adaptive-tileset-scheduler-design.md)

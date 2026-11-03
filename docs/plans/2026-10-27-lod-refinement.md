@@ -16,7 +16,7 @@
 
 **规范：** `../specs/2026-10-27-lod-refinement-and-scene-api-design.md`
 
-## 全局约束
+## 1. 全局约束
 
 - 使用 `.nvmrc` 指定的 Node.js 24.22.1 LTS。
 - 在 `feature/lod-refinement` 分支开发；仅当完整验证门禁通过后才可合入 `main`。
@@ -30,7 +30,7 @@
 - 预取不得阻塞当前可见切面的 `whenIdle()`。
 - 不得将客户 Asset 或其派生物放入 Git、测试、截图、日志或软件包。
 
-## 审查重点
+## 2. 审查重点
 
 - 包含多个分片的逻辑 Tile 只能在所有必需分片成功后才提交。
 - 单个超大设备必须保持完整并予以报告，不得被静默丢弃。
@@ -40,7 +40,7 @@
 
 ---
 
-### 任务 1：解析单内容与多内容 Tile
+### 2.1 任务 1：解析单内容与多内容 Tile
 
 **文件：**
 - 修改：`ice3-engine/packages/assets/src/ICETileset.ts`
@@ -175,7 +175,7 @@ git commit -m "feat(toolchain): write multi-content tiles"
 
 ---
 
-### 任务 2：确定性的粗模分片规划
+### 2.2 任务 2：确定性的粗模分片规划
 
 **文件：**
 - 创建：`ice3-toolchain/packages/toolchain-core/src/lod/createCoarseChunkPlan.ts`
@@ -275,7 +275,7 @@ git commit -m "feat(toolchain): plan stable coarse chunks"
 
 ---
 
-### 任务 3：生成并测量粗模分片
+### 2.3 任务 3：生成并测量粗模分片
 
 **文件：**
 - 修改：`ice3-toolchain/packages/toolchain-core/src/partition/partitionAsset.ts`
@@ -390,7 +390,7 @@ git commit -m "feat(toolchain): split coarse lod content"
 
 ---
 
-### 任务 4：逻辑多内容 Tile 生命周期
+### 2.4 任务 4：逻辑多内容 Tile 生命周期
 
 **文件：**
 - 修改：`ice3-engine/packages/runtime/src/asset/ICETilesetLoader.ts`
@@ -476,7 +476,7 @@ git commit -m "feat(runtime): load multi-content tiles atomically"
 
 ---
 
-### 任务 5：非阻塞预取
+### 2.5 任务 5：非阻塞预取
 
 **文件：**
 - 修改：`ice3-engine/packages/runtime/src/asset/ICETilesetLoader.ts`
@@ -551,7 +551,7 @@ git commit -m "feat(runtime): prefetch adjacent lod content"
 
 ---
 
-### 任务 6：测量并选择 SSE 默认值
+### 2.6 任务 6：测量并选择 SSE 默认值
 
 **文件：**
 - 修改：`ice3-engine/packages/runtime/src/asset/ICETilesetLoader.ts`
@@ -615,7 +615,7 @@ git commit -m "feat(runtime): calibrate lod screen-space error"
 
 ---
 
-### 任务 7：LOD 精炼验证
+### 2.7 任务 7：LOD 精炼验证
 
 **文件：**
 - 修改：`ice3-toolchain/README.md`
@@ -693,12 +693,12 @@ git commit -m "docs: define chunked coarse lod contract"
 
 在干净且完整的验证通过后，将所有仓库分支合入 `main`。
 
-## 执行建议
+## 3. 执行建议
 
 使用 Native 执行。多内容解析、分片规划、逻辑 Tile 加载、预取和 SSE 行为
 共享精确的 Tile ID 与就绪语义；在一个连续实施会话中完成可减少生命周期漂移。
 
-## 相关文档
+## 4. 相关文档
 
 - `ICE3-DOC-IDX-001` — [文档索引](../README.md)
 - `ICE3-DOC-SPEC-005` — [LOD 精炼与场景 API 规范](../specs/2026-10-27-lod-refinement-and-scene-api-design.md)

@@ -8,9 +8,9 @@
 
 This is the repository entry point.
 
-## Details
+## 1. Details
 
-See the [documentation index](docs/README.md#documents).
+See the [documentation index](docs/README.md#1-documents).
 
 ```bash
 # Example headings and links are ignored:

@@ -16,7 +16,7 @@
 
 **规格：** `../specs/2026-10-28-industrial-semantic-layer-design.md`
 
-## 全局约束
+## 1. 全局约束
 
 - 使用 `.nvmrc` 指定的 Node.js 24.22.1 LTS；并使用同一版本运行验证。
 - 使用 TypeScript 严格模式和 ESM。
@@ -29,7 +29,7 @@
 - 浏览器集成、2D/3D 适配器、Studio、协议连接器和 Agent 工具属于独立的后续计划。
 - 所有行为变更均遵循 RED-GREEN-REFACTOR。
 
-## 审查重点
+## 2. 审查重点
 
 - 当清单中存在悬空父级或关系端点时，必须在任何注册表可用之前失败。
 - 即使不同实体的显示名称不同，只要外部身份重复，也必须拒绝。
@@ -39,7 +39,7 @@
 
 ---
 
-### 任务 1：搭建工业核心脚手架并验证清单
+### 2.1 任务 1：搭建工业核心脚手架并验证清单
 
 **文件：**
 - 创建：`ice3-industrial/.gitignore`
@@ -304,7 +304,7 @@ git commit -m "feat(core): scaffold industrial semantic manifests"
 
 ---
 
-### 任务 2：构建实体、类型和外部身份注册表
+### 2.2 任务 2：构建实体、类型和外部身份注册表
 
 **文件：**
 - 创建：`ice3-industrial/packages/industrial-core/src/registry/ICEIndustrialTypeRegistry.ts`
@@ -400,7 +400,7 @@ git commit -m "feat(core): index industrial entities and identities"
 
 ---
 
-### 任务 3：添加关系遍历和实体查询
+### 2.3 任务 3：添加关系遍历和实体查询
 
 **文件：**
 - 创建：`ice3-industrial/packages/industrial-core/src/relation/ICEIndustrialRelationGraph.ts`
@@ -531,7 +531,7 @@ git commit -m "feat(core): traverse relations and query entities"
 
 ---
 
-### 任务 4：实现事务性状态更新和合并通知
+### 2.4 任务 4：实现事务性状态更新和合并通知
 
 **文件：**
 - 创建：`ice3-industrial/packages/industrial-core/src/state/ICEIndustrialStateStore.ts`
@@ -690,7 +690,7 @@ git commit -m "feat(core): batch industrial state updates"
 
 ---
 
-### 任务 5：添加事件排序和操作注册
+### 2.5 任务 5：添加事件排序和操作注册
 
 **文件：**
 - 创建：`ice3-industrial/packages/industrial-core/src/event/ICEIndustrialEventStore.ts`
@@ -812,7 +812,7 @@ git commit -m "feat(core): order events and register operations"
 
 ---
 
-### 任务 6：构建工作区上下文、门面和序列化
+### 2.6 任务 6：构建工作区上下文、门面和序列化
 
 **文件：**
 - 创建：`ice3-industrial/packages/industrial-core/src/workspace/ICEIndustrialWorkspaceContext.ts`
@@ -950,7 +950,7 @@ git commit -m "feat(core): expose industrial workspace context"
 
 ---
 
-### 任务 7：添加原生 ICE JSON 适配器并完成核心验证
+### 2.7 任务 7：添加原生 ICE JSON 适配器并完成核心验证
 
 **文件：**
 - 创建：`ice3-industrial/packages/industrial-core/src/adapter/ICEIndustrialAssetAdapter.ts`
@@ -1063,7 +1063,7 @@ git add README.md packages/industrial-core/src/adapter packages/industrial-core/
 git commit -m "feat(core): add native industrial json adapters"
 ```
 
-## 相关文档
+## 3. 相关文档
 
 - `ICE3-DOC-IDX-001` — [文档索引](../README.md)
 - `ICE3-DOC-SPEC-009` — [工业语义层规格](../specs/2026-10-28-industrial-semantic-layer-design.md)

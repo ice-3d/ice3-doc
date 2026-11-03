@@ -6,7 +6,7 @@
 >
 > Owner: ICE3 documentation maintainers
 
-## 从这里开始
+## 1. 从这里开始
 
 | ID | 标题 | Status | 用途 |
 |---|---|---|---|
@@ -15,15 +15,15 @@
 | `ICE3-DOC-IDX-002` | [架构决策](decisions/README.md) | Active | 共享决策索引 |
 | `ICE3-DOC-CTR-001` | [Asset Preparation Contract v1](contracts/asset-preparation-contract-v1.md) | Active | 权威共享 Asset contract |
 
-## 参考资料
+## 2. 参考资料
 
 | ID | 标题 | Status | 用途 |
 |---|---|---|---|
 | `ICE3-DOC-REF-001` | [ICE3 技术词表](reference/terminology.md) | Active | 固定技术词汇写法并提供中文解释 |
-| `ICE3-DOC-REF-002` | [文档命名与编号规范](reference/documentation-conventions.md) | Active | 统一文件名、Document ID、状态、索引顺序和链接规则 |
+| `ICE3-DOC-REF-002` | [文档命名与编号规范](reference/documentation-conventions.md) | Active | 统一文件名、Document ID、章节编号、状态、索引顺序和链接规则 |
 | `ICE3-DOC-REF-003` | [公开发布状态](reference/releases.md) | Active | 记录当前 npm 包、版本和发布验证边界 |
 
-## 共享决策
+## 3. 共享决策
 
 | ID | 标题 | Status | 用途 |
 |---|---|---|---|
@@ -34,7 +34,7 @@
 | `ICE3-DOC-ADR-005` | [npm 公开发布拓扑](decisions/0005-npm-public-release-topology.md) | Historical | 记录 Toolchain 退役前的公开 package 发布决策 |
 | `ICE3-DOC-ADR-006` | [Agent 主导的 Studio 工作台](decisions/0006-agent-led-studio-workbench.md) | Active | 定义 AI 主导、人类审阅与按需精细操作的产品分工 |
 
-## Spec
+## 4. Spec
 
 | ID | 标题 | Status | 用途 |
 |---|---|---|---|
@@ -51,7 +51,7 @@
 | `ICE3-DOC-SPEC-011` | [文档系统](specs/2026-10-29-documentation-system-design.md) | Implemented | 定义公开文档 contract |
 | `ICE3-DOC-SPEC-012` | [全中文文档改版](specs/2026-10-29-chinese-documentation-policy-design.md) | Implemented | 定义中文叙述边界、迁移顺序与自动校验 |
 
-## 实施计划
+## 5. 实施计划
 
 | ID | 标题 | Status | 用途 |
 |---|---|---|---|
@@ -73,13 +73,13 @@
 | `ICE3-DOC-PLAN-016` | [全中文文档改版](plans/2026-10-29-chinese-documentation-policy.md) | Implemented | 迁移全部产品文档并启用中文叙述门禁 |
 | `ICE3-DOC-PLAN-017` | [npm 公开发布](plans/2026-10-29-npm-public-release.md) | Implemented | 实现三个公开 package 的构建、验证与发布 |
 
-## 历史文档
+## 6. 历史文档
 
 | ID | 标题 | Status | 用途 |
 |---|---|---|---|
 | `ICE3-DOC-CTR-002` | [Toolchain Sidecar Contract v1](contracts/toolchain-sidecar-contract-v1.md) | Deprecated | 已退役 Sidecar 的历史契约；当前 Studio 原生 Asset pipeline 不启动该进程 |
 
-## 关联文档
+## 7. 关联文档
 
 - `ICE3-STUDIO-REF-005` — [Studio 资产流水线](https://github.com/ice-3d/ice3-studio/blob/main/docs/reference/asset-pipeline.md)
 - `ICE3-AGENT-REF-002` — [Agent Console Runtime Asset 交付](https://github.com/ice-3d/ice3-agent-console/blob/main/docs/reference/asset-delivery.md)

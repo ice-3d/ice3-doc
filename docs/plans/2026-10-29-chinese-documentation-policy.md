@@ -16,7 +16,7 @@
 
 **规格：** [ICE3 全中文文档改版设计规格](../specs/2026-10-29-chinese-documentation-policy-design.md)
 
-## 全局约束
+## 1. 全局约束
 
 - 只修改 Markdown 叙述，不修改代码行为、API、schema、Document ID、文件名或公开 URL。
 - 技术词保留英文原词和大小写，不强制添加中文括注。
@@ -27,7 +27,7 @@
 - 禁止机械翻译后直接提交；每份文档都要按工程语境人工改写。
 - 翻译标题时必须同步修复内部和跨仓库 anchor。
 
-## 重点审查
+## 2. 重点审查
 
 - `Scene and Selection` 这类纯英文标题会被误当作合法技术词，检查器必须识别并报错。
 - 技术字段表可能整表使用英文但仍是有效内容，检查器不能误报表格中的纯技术值。
@@ -37,7 +37,7 @@
 
 ---
 
-## Task 1：实现中文叙述分析器
+## 3. Task 1：实现中文叙述分析器
 
 **文件：**
 
@@ -278,7 +278,7 @@ git commit -m "feat: add Chinese documentation language checks"
 
 ---
 
-## Task 2：建立技术词表并更新语言政策
+## 4. Task 2：建立技术词表并更新语言政策
 
 **文件：**
 
@@ -435,7 +435,7 @@ git commit -m "docs: establish Chinese terminology and policy"
 
 ---
 
-## Task 3：迁移各仓库入口文档
+## 5. Task 3：迁移各仓库入口文档
 
 **文件：**
 
@@ -524,7 +524,7 @@ git -C ice3-engine commit -m "docs: localize repository entry points"
 
 ---
 
-## Task 4：迁移 `ice3-doc` 当前实现文档
+## 6. Task 4：迁移 `ice3-doc` 当前实现文档
 
 **文件：**
 
@@ -575,7 +575,7 @@ git commit -m "docs: localize shared architecture and contracts"
 
 ---
 
-## Task 5：迁移 `Agent Console`、`Engine`、`Industrial`、`Toolchain` 当前实现文档
+## 7. Task 5：迁移 `Agent Console`、`Engine`、`Industrial`、`Toolchain` 当前实现文档
 
 **文件：**
 
@@ -684,7 +684,7 @@ git -C ice3-toolchain commit -m "docs: localize toolchain guidance"
 
 ---
 
-## Task 6：迁移全部历史 Spec 与 Plan
+## 8. Task 6：迁移全部历史 Spec 与 Plan
 
 **文件：**
 
@@ -790,7 +790,7 @@ git -C ice3-toolchain commit -m "docs: localize toolchain design history"
 
 ---
 
-## Task 7：默认启用语言门禁
+## 9. Task 7：默认启用语言门禁
 
 **文件：**
 
@@ -862,7 +862,7 @@ git commit -m "docs: enforce Chinese narrative by default"
 
 ---
 
-## Task 8：全仓链接与语义终审
+## 10. Task 8：全仓链接与语义终审
 
 **文件：**
 
@@ -953,7 +953,7 @@ git -C ice3-doc commit -m "docs: repair localized document navigation"
 
 ---
 
-## Task 9：执行各工程完整验证并合入
+## 11. Task 9：执行各工程完整验证并合入
 
 **文件：**
 
@@ -1051,7 +1051,7 @@ done
 
 ---
 
-## 完成定义
+## 12. 完成定义
 
 - [ ] 除例外文件外，全部 Markdown 使用中文叙述。
 - [ ] 技术词汇、缩写、API、命令和标识保持原样。

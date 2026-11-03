@@ -207,7 +207,7 @@ TypeScript 场景规格
 - 不引入真实工程模型、厂商受保护图纸或第三方模型资产。
 - 不实现 Agent、Prompt 或 AI 专用接口。
 
-## Related Documents
+## 12. Related Documents
 
 - `ICE3-DOC-IDX-001` — [Documentation index](../README.md)
 - `ICE3-DOC-PLAN-012` — [Wastewater Blender pipeline implementation](../plans/2026-10-28-credible-wastewater-blender-pipeline.md)

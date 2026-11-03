@@ -16,7 +16,7 @@
 
 **规范：** `../specs/2026-10-27-lod-refinement-and-scene-api-design.md`
 
-## 全局约束
+## 1. 全局约束
 
 - 使用 `.nvmrc` 指定的 Node.js 24.22.1 LTS。
 - 在 `feature/lod-refinement` 分支开发。
@@ -29,7 +29,7 @@
 - 所有世界坐标均为 Y 轴向上的米制单位，与 Prepared GLB contract 一致。
 - 客户 Asset 及其派生物绝不进入受跟踪的制品。
 
-## 审查重点
+## 2. 审查重点
 
 - 转换期间，同一设备的粗模和精细表示会同时存在，但不得在查询结果中出现两次。
 - 祖先节点可见的隐藏子节点必须保持隐藏。
@@ -39,7 +39,7 @@
 
 ---
 
-### 任务 1：纯场景项收集器
+### 2.1 任务 1：纯场景项收集器
 
 **文件：**
 - 创建：`ice3-engine/packages/runtime/src/query/ICESceneQuery.ts`
@@ -158,7 +158,7 @@ git commit -m "feat(runtime): collect semantic scene items"
 
 ---
 
-### 任务 2：公共引擎查询 API
+### 2.2 任务 2：公共引擎查询 API
 
 **文件：**
 - 修改：`ice3-engine/packages/runtime/src/ICE3.ts`
@@ -241,7 +241,7 @@ git commit -m "feat(runtime): expose semantic scene queries"
 
 ---
 
-### 任务 3：带语义项的屏幕拾取结果
+### 2.3 任务 3：带语义项的屏幕拾取结果
 
 **文件：**
 - 修改：`ice3-engine/packages/runtime/src/ICE3.ts`
@@ -314,7 +314,7 @@ git commit -m "feat(runtime): expose semantic pick results"
 
 ---
 
-### 任务 4：世界空间射线投射
+### 2.4 任务 4：世界空间射线投射
 
 **文件：**
 - 创建：`ice3-engine/packages/runtime/src/query/ICESceneRaycaster.ts`
@@ -399,7 +399,7 @@ git commit -m "feat(runtime): raycast semantic scene items"
 
 ---
 
-### 任务 5：通用相机聚焦
+### 2.5 任务 5：通用相机聚焦
 
 **文件：**
 - 修改：`ice3-engine/packages/runtime/src/input/ICEOrbitController.ts`
@@ -486,7 +486,7 @@ git commit -m "feat(runtime): focus scene items"
 
 ---
 
-### 任务 6：API 文档与最终验证
+### 2.6 任务 6：API 文档与最终验证
 
 **文件：**
 - 修改：`ice3-engine/README.md`
@@ -533,12 +533,12 @@ git commit -m "docs: define semantic scene query capabilities"
 
 完整验证通过后，将两个功能分支合入 `main`。
 
-## 执行建议
+## 3. 执行建议
 
 在 LOD 精炼计划之后使用 Native 执行。查询、拾取、射线投射和聚焦共享
 同一语义代表节点规则；在一个集中会话中实现它们，可避免设备身份不一致。
 
-## 相关文档
+## 4. 相关文档
 
 - `ICE3-DOC-IDX-001` — [文档索引](../README.md)
 - `ICE3-DOC-SPEC-005` — [LOD 精炼与场景 API 规范](../specs/2026-10-27-lod-refinement-and-scene-api-design.md)

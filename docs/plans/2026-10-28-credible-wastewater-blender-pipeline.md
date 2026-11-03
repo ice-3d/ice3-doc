@@ -20,7 +20,7 @@
 
 **规格：** `../specs/2026-10-28-credible-wastewater-blender-pipeline-design.md`
 
-## 全局约束
+## 1. 全局约束
 
 - Blender 固定版本为 `5.2.3`；其他版本必须明确失败。
 - Blender 仅用于构建期资产生成，不得进入浏览器运行时。
@@ -34,7 +34,7 @@
 - 不实现 Agent、Prompt 或 AI 专用接口。
 - 只在特性分支开发，测试通过后合入 `main`。
 
-## 审查重点
+## 2. 审查重点
 
 - Blender 缺失或版本不符时必须停止生成并保留旧资产，不能回退到旧几何生成器。
 - GLB 导出必须保留每个设备的 `extras.ice3` 语义对象，分区后仍能选择设备。
@@ -44,16 +44,16 @@
 
 ---
 
-## 文件结构
+## 3. 文件结构
 
-### 文档仓库
+### 3.1 文档仓库
 
 - `docs/specs/2026-10-28-credible-wastewater-blender-pipeline-design.md`
   - 已批准的设计规格。
 - `docs/plans/2026-10-28-credible-wastewater-blender-pipeline.md`
   - 本实施计划。
 
-### 工具链仓库
+### 3.2 工具链仓库
 
 - `tools/wastewater-plant/blender-runtime.ts`
   - 定位 Blender、读取版本并验证受支持版本。
@@ -82,7 +82,7 @@
 - `tests/wastewater/blender-source.test.ts`
   - Blender 导出的 GLB 结构、几何、语义和确定性。
 
-### 引擎仓库
+### 3.3 引擎仓库
 
 - `examples/m1/assets/wastewater-plant/**`
   - 新的 source、prepared、fine、coarse 和 Tileset 资产。
@@ -91,7 +91,7 @@
 
 ---
 
-### 任务 1：安装并固定 Blender 版本
+### 3.4 任务 1：安装并固定 Blender 版本
 
 **文件：**
 - 创建：`tools/wastewater-plant/blender-runtime.ts`
@@ -211,7 +211,7 @@ git commit -m "build(toolchain): pin the wastewater model generator"
 
 ---
 
-### 任务 2：导出稳定的场景规格
+### 3.5 任务 2：导出稳定的场景规格
 
 **文件：**
 - 创建：`tools/wastewater-plant/scene-spec.ts`
@@ -390,7 +390,7 @@ git commit -m "feat(toolchain): export wastewater build specification"
 
 ---
 
-### 任务 3：引导 Blender source 生成器
+### 3.6 任务 3：引导 Blender source 生成器
 
 **文件：**
 - 创建：`tools/wastewater-plant/blender/generate.py`
@@ -624,7 +624,7 @@ git commit -m "feat(toolchain): bootstrap authored wastewater source"
 
 ---
 
-### 任务 4：添加可复用几何和场地构建
+### 3.7 任务 4：添加可复用几何和场地构建
 
 **文件：**
 - 创建：`tools/wastewater-plant/blender/geometry.py`
@@ -769,7 +769,7 @@ git commit -m "feat(toolchain): model wastewater site infrastructure"
 
 ---
 
-### 任务 5：构建详细的水处理设备
+### 3.8 任务 5：构建详细的水处理设备
 
 **文件：**
 - 创建：`tools/wastewater-plant/blender/equipment.py`
@@ -874,7 +874,7 @@ git commit -m "feat(toolchain): model detailed water-treatment equipment"
 
 ---
 
-### 任务 6：构建深度处理、污泥和 UV 设备
+### 3.9 任务 6：构建深度处理、污泥和 UV 设备
 
 **文件：**
 - 修改：`tools/wastewater-plant/blender/equipment.py`
@@ -971,7 +971,7 @@ git commit -m "feat(toolchain): model advanced and sludge treatment equipment"
 
 ---
 
-### 任务 7：替换 source 生成器并保留资产流水线
+### 3.10 任务 7：替换 source 生成器并保留资产流水线
 
 **文件：**
 - 修改：`tools/wastewater-plant/build-example.mjs`
@@ -1088,7 +1088,7 @@ git commit -m "feat(toolchain): switch wastewater assets to authored pipeline"
 
 ---
 
-### 任务 8：验证视觉质量和运行时集成
+### 3.11 任务 8：验证视觉质量和运行时集成
 
 **文件：**
 - 如果元素位置发生变化，修改：`ice3-engine/tests/e2e/wastewater-plant.spec.ts`
@@ -1192,7 +1192,7 @@ git merge --no-ff feat/blender-wastewater-model
 git merge --no-ff feat/blender-wastewater-demo
 ```
 
-## 相关文档
+## 4. 相关文档
 
 - `ICE3-DOC-IDX-001` — [文档索引](../README.md)
 - `ICE3-DOC-SPEC-008` — [污水处理 Blender 流水线规格](../specs/2026-10-28-credible-wastewater-blender-pipeline-design.md)
