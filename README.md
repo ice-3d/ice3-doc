@@ -36,7 +36,17 @@ command 前先运行该检查。
 
 ## 3. 从这里开始
 
-- [文档索引](docs/README.md)
+先按"你想解决什么"选入口：
+
+| 你想要的 | 读这个 |
+|---|---|
+| 判断某个仓库该不该做这件事 | [ICE3 家族架构](docs/architecture.md) + [架构决策](docs/decisions/README.md) |
+| 让模型资产能被 Engine 正确加载 | [Asset Preparation Contract v1](docs/contracts/asset-preparation-contract-v1.md) |
+| 搞清楚 Agent 与人的权责边界 | [Agent 主导的 Studio 工作台](docs/decisions/0006-agent-led-studio-workbench.md) |
+| 写新文档、编号或引用的规矩 | [文档命名与编号规范](docs/reference/documentation-conventions.md) |
+| 现在到底发布了什么 | [公开发布状态](docs/reference/releases.md) |
+
+完整清单：[文档索引](docs/README.md)
 - [ICE3 家族架构](docs/architecture.md)
 - [架构决策](docs/decisions/README.md)
 - [Asset Preparation Contract v1](docs/contracts/asset-preparation-contract-v1.md)
@@ -55,9 +65,20 @@ npm run docs:check:workspace
 第一条命令测试 validator，第二条验证本仓库，第三条验证与 `ice3-doc` 并列 checkout 的
 所有 ICE3 仓库。
 
-## 5. AI 辅助开发
+## 5. 给 AI Agent 的约定
 
-本项目在设计和实现过程中大量使用了 AI 辅助开发。
+本仓库是**契约权威**：当某个仓库的实现与这里的 contract 冲突时，以 contract 为准，
+或在改动 contract 之后才改实现——反过来做等于制造兼容性事故。
+
+**必须遵守**
+
+1. 跨仓库事实（格式、命名、Diagnostic ID、指标定义）只写在这里，其它 README 只做指针，
+   不要复制一份再各自漂移。
+2. 每个文档必须有 front-matter：`Document ID` / `Status` / `Owner`。`npm run docs:check`
+   会拦。
+3. 跨仓库链接必须指到具体文件（`.../blob/main/README.md`），指向仓库根会被判为无效。
+4. 改 contract 是版本化变更：同步更新受影响仓库的 README、spec 与测试，再统一提交。
+5. 改完跑 `npm run docs:check`；并列 checkout 时再加 `docs:check:workspace`。
 
 ## 6. 许可证
 
