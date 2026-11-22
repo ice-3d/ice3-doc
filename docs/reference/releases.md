@@ -10,13 +10,13 @@
 
 | Package | 当前版本 | 状态 | 用途 |
 |---|---:|---|---|
-| `ice3` | `0.2.1` | Active | Engine 唯一公开 Runtime API |
+| `ice3` | `0.2.4` | Active | Engine 唯一公开 Runtime API |
 | `@ice3/industrial-core` | `0.1.0` | Active | 浏览器独立的 industrial semantic core |
 | `@ice3/toolchain` | 已停止发布 | Retired | 历史离线 Toolchain；不纳入新部署 |
 
-`ice3@0.2.1` 包含 Studio Prepared Asset 消费、共享业务 Selection、Tileset
-Node identity、逻辑 Selection 保留和 WebGL2/WebGPU 当前修复。Agent Console 必须锁定
-这一版本或经兼容验证的更新 minor。
+`ice3@0.2.4` 包含 Studio Prepared Asset 消费、共享业务 Selection、Tileset Node
+identity、材质表面采样、实例上传复用、阴影/环境遮蔽改进和 orbit controller 交互修正。
+Agent Console 必须锁定这一版本或经兼容验证的更新 minor。
 
 ## 2. 发布边界
 

@@ -12,27 +12,34 @@ import { fileURLToPath } from 'node:url';
 
 const root = dirname(dirname(fileURLToPath(import.meta.url)));
 const workspace = dirname(root);
+const ice3Version = JSON.parse(await readFile(
+  resolve(workspace, 'ice3-engine', 'packages', 'ice3', 'package.json'),
+  'utf8',
+)).version;
+const industrialVersion = JSON.parse(await readFile(
+  resolve(
+    workspace,
+    'ice3-industrial',
+    'packages',
+    'industrial-core',
+    'package.json',
+  ),
+  'utf8',
+)).version;
 const tarballs = {
   ice3: resolve(
     workspace,
     'ice3-engine',
     'release',
     'artifacts',
-    'ice3-0.1.0.tgz',
+    `ice3-${ice3Version}.tgz`,
   ),
   industrial: resolve(
     workspace,
     'ice3-industrial',
     'release',
     'artifacts',
-    'ice3-industrial-core-0.1.0.tgz',
-  ),
-  toolchain: resolve(
-    workspace,
-    'ice3-toolchain',
-    'release',
-    'artifacts',
-    'ice3-toolchain-0.1.0.tgz',
+    `ice3-industrial-core-${industrialVersion}.tgz`,
   ),
 };
 
@@ -73,7 +80,6 @@ try {
       '--no-fund',
       tarballs.ice3,
       tarballs.industrial,
-      tarballs.toolchain,
     ],
     consumer,
   );
@@ -83,33 +89,20 @@ try {
     [
       "import { ICE3 } from 'ice3';",
       "import { ICEIndustrialWorkspace } from '@ice3/industrial-core';",
-      "import { runCli } from '@ice3/toolchain';",
       "if (typeof ICE3 !== 'function') process.exit(1);",
       "if (typeof ICEIndustrialWorkspace !== 'function') process.exit(2);",
-      "if (typeof runCli !== 'function') process.exit(3);",
     ].join('\n'),
   ], consumer);
-  const cli = run(
-    join(consumer, 'node_modules', '.bin', 'ice3-tool'),
-    [],
-    consumer,
-    1,
-  );
-  if (!`${cli.stdout}${cli.stderr}`.includes('ICE3_TOOL_INVALID_COMMAND')) {
-    throw new Error('ICE3_RELEASE_CLI_INVALID');
-  }
 
   await writeFile(
     join(consumer, 'index.ts'),
     [
       "import { ICE3, ICEScene } from 'ice3';",
       "import { ICEIndustrialWorkspace } from '@ice3/industrial-core';",
-      "import { runCli } from '@ice3/toolchain';",
       'const engine: typeof ICE3 = ICE3;',
       'const scene: ICEScene | undefined = undefined;',
       'const industrial: typeof ICEIndustrialWorkspace = ICEIndustrialWorkspace;',
-      'const cli: typeof runCli = runCli;',
-      'void engine; void scene; void industrial; void cli;',
+      'void engine; void scene; void industrial;',
     ].join('\n'),
   );
   await writeFile(
@@ -134,7 +127,6 @@ try {
   for (const [name, path] of [
     ['ice3', ['ice3', 'package.json']],
     ['industrial', ['@ice3', 'industrial-core', 'package.json']],
-    ['toolchain', ['@ice3', 'toolchain', 'package.json']],
   ]) {
     const manifest = JSON.parse(await readFile(
       join(consumer, 'node_modules', ...path),
@@ -148,7 +140,7 @@ try {
       throw new Error(`ICE3_RELEASE_MANIFEST_INVALID: ${name}`);
     }
   }
-  console.info('ICE3_NPM_TARBALLS_OK: ice3, @ice3/industrial-core, @ice3/toolchain');
+  console.info(`ICE3_NPM_TARBALLS_OK: ice3@${ice3Version}, @ice3/industrial-core@${industrialVersion}`);
 } finally {
   await rm(consumer, { recursive: true, force: true });
 }
